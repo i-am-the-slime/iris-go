@@ -1,3 +1,3 @@
 package Snapshot_ReaderTEffect01_ffi
 
-var Seed int = 41
+var Seed int32 = 41

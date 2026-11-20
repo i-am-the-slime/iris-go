@@ -5,27 +5,23 @@ package Test_Assert_ffi
 
 import "github.com/i-am-the-slime/iris-go/exception"
 
-func AssertImpl(message string, success bool) func() {
-	return func() {
-		if !success {
-			panic(exception.NewError(message))
-		}
+func AssertImpl(message string, success bool) {
+	if !success {
+		panic(exception.NewError(message))
 	}
 }
 
 // CheckThrows reports whether applying the function to unit throws an Error. Anything else it
 // throws (a Go runtime fault) propagates, as a non-Error throw does in JS.
-func CheckThrows[A any](action func(struct{}) A) func() bool {
-	return func() (threw bool) {
-		defer func() {
-			if recovered := recover(); recovered != nil {
-				if _, isError := exception.AsError(recovered); !isError {
-					panic(recovered)
-				}
-				threw = true
+func CheckThrows[A any](action func(struct{}) A) (threw bool) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			if _, isError := exception.AsError(recovered); !isError {
+				panic(recovered)
 			}
-		}()
-		action(struct{}{})
-		return false
-	}
+			threw = true
+		}
+	}()
+	action(struct{}{})
+	return false
 }

@@ -5,4 +5,4 @@
 package Snapshot_RecordSynParam01_ffi
 
 // Seed implements `foreign import seed :: Int`.
-var Seed int = 100
+var Seed int32 = 100
