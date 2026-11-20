@@ -1,0 +1,10 @@
+package:
+  name: example-effectpure01
+  dependencies:
+    - prelude
+    - effect
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

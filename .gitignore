@@ -1,0 +1,4 @@
+.spago/
+output/
+output-*/
+node_modules/

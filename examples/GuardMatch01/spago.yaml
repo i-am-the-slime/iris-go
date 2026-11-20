@@ -1,0 +1,10 @@
+package:
+  name: example-guardmatch01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - maybe
+workspace:
+  packageSet:
+    registry: 75.9.1

@@ -1,0 +1,15 @@
+package:
+  name: example-seqeffect01
+  dependencies:
+    - prelude
+    - foldable-traversable
+    - maybe
+    - arrays
+    - effect
+    - foldable-traversable
+    - console
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

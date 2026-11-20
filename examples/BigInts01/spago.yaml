@@ -1,0 +1,15 @@
+package:
+  name: example-bigints01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - bigints
+    - maybe
+    - foldable-traversable
+    - arrays
+    - exceptions
+    - either
+workspace:
+  packageSet:
+    registry: 73.2.0

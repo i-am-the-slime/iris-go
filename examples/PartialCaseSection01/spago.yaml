@@ -1,0 +1,15 @@
+package:
+  name: example-partialcasesection01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - exceptions
+    - either
+    - foldable-traversable
+    - maybe
+    - partial
+    - arrays
+workspace:
+  packageSet:
+    registry: 75.9.1

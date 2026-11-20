@@ -1,0 +1,12 @@
+package:
+  name: example-uncaughtexception01
+  dependencies:
+    - console
+    - effect
+    - exceptions
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

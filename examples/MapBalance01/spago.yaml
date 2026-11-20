@@ -1,0 +1,11 @@
+package:
+  name: example-mapbalance01
+  dependencies:
+    - prelude
+    - arrays
+    - maybe
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

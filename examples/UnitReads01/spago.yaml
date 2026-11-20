@@ -1,0 +1,16 @@
+package:
+  name: example-unitreads01
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - ordered-collections
+    - prelude
+    - refs
+    - tuples
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

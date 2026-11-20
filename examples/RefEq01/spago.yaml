@@ -1,0 +1,19 @@
+package:
+  name: example-refeq01
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - foreign-object
+    - maybe
+    - numbers
+    - prelude
+    - refs
+    - tuples
+    - unsafe-reference
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

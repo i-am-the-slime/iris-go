@@ -1,0 +1,15 @@
+package:
+  name: example-synonymprismresult01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - arrays
+    - maybe
+    - tuples
+    - profunctor-lenses
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

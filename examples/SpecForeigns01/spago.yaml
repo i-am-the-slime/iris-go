@@ -1,0 +1,14 @@
+package:
+  name: example-specforeigns01
+  dependencies:
+    - prelude
+    - effect
+    - aff
+    - spec
+    - exceptions
+    - either
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

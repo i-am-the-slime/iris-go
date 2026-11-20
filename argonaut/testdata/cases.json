@@ -1,0 +1,7162 @@
+{
+ "parse": [
+  {
+   "input": "",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "{",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "}",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "[",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "]",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "[1,]",
+   "message": "JSON Parse error: Unexpected comma at the end of array expression"
+  },
+  {
+   "input": "[,1]",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "{\"a\":1,}",
+   "message": "JSON Parse error: Property name must be a string literal"
+  },
+  {
+   "input": "{\"a\" 1}",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "{a:1}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "{'a':1}",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\"abc",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\"a\\x\"",
+   "message": "JSON Parse error: Invalid escape character x"
+  },
+  {
+   "input": "\"a\\u12\"",
+   "message": "JSON Parse error: \\u must be followed by 4 hex digits"
+  },
+  {
+   "input": "\"a\nb\"",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\"\t\"",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "tru",
+   "message": "JSON Parse error: Unexpected identifier \"tru\""
+  },
+  {
+   "input": "true ",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "truex",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "nul",
+   "message": "JSON Parse error: Unexpected identifier \"nul\""
+  },
+  {
+   "input": "nulll",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "falsey",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "01",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "-",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "-0",
+   "compact": "0",
+   "indented": [
+    "0",
+    "0",
+    "0",
+    "0"
+   ]
+  },
+  {
+   "input": "1.",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": ".5",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "1e",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "1e+",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "1E5",
+   "compact": "100000",
+   "indented": [
+    "100000",
+    "100000",
+    "100000",
+    "100000"
+   ]
+  },
+  {
+   "input": "+1",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "0x10",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "NaN",
+   "message": "JSON Parse error: Unexpected identifier \"NaN\""
+  },
+  {
+   "input": "Infinity",
+   "message": "JSON Parse error: Unexpected identifier \"Infinity\""
+  },
+  {
+   "input": "[1 2]",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": "{\"a\":1 \"b\":2}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "1 2",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "  1",
+   "message": "JSON Parse error: Unrecognized token ' '"
+  },
+  {
+   "input": "﻿1",
+   "message": "JSON Parse error: Unrecognized token '﻿'"
+  },
+  {
+   "input": "[1]x",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "{\"a\":}",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "{\"a\"",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "{\"a\":1",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "[1",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": "[\"a\"",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": "\"\\uD83D\\uDE00\"",
+   "compact": "\"😀\"",
+   "indented": [
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\""
+   ]
+  },
+  {
+   "input": "1e400",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "-1e400",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "1e-400",
+   "compact": "0",
+   "indented": [
+    "0",
+    "0",
+    "0",
+    "0"
+   ]
+  },
+  {
+   "input": "123456789012345678901234567890",
+   "compact": "1.2345678901234568e+29",
+   "indented": [
+    "1.2345678901234568e+29",
+    "1.2345678901234568e+29",
+    "1.2345678901234568e+29",
+    "1.2345678901234568e+29"
+   ]
+  },
+  {
+   "input": "{\"__proto__\":1}",
+   "compact": "{\"__proto__\":1}",
+   "indented": [
+    "{\"__proto__\":1}",
+    "{\n \"__proto__\": 1\n}",
+    "{\n  \"__proto__\": 1\n}",
+    "{\n          \"__proto__\": 1\n}"
+   ]
+  },
+  {
+   "input": "{\"b\":1,\"a\":2,\"b\":3}",
+   "compact": "{\"b\":3,\"a\":2}",
+   "indented": [
+    "{\"b\":3,\"a\":2}",
+    "{\n \"b\": 3,\n \"a\": 2\n}",
+    "{\n  \"b\": 3,\n  \"a\": 2\n}",
+    "{\n          \"b\": 3,\n          \"a\": 2\n}"
+   ]
+  },
+  {
+   "input": "{\"2\":1,\"1\":2,\"x\":3,\"01\":4,\"4294967295\":5,\"4294967294\":6,\"-1\":7,\"1.5\":8}",
+   "compact": "{\"1\":2,\"2\":1,\"4294967294\":6,\"x\":3,\"01\":4,\"4294967295\":5,\"-1\":7,\"1.5\":8}",
+   "indented": [
+    "{\"1\":2,\"2\":1,\"4294967294\":6,\"x\":3,\"01\":4,\"4294967295\":5,\"-1\":7,\"1.5\":8}",
+    "{\n \"1\": 2,\n \"2\": 1,\n \"4294967294\": 6,\n \"x\": 3,\n \"01\": 4,\n \"4294967295\": 5,\n \"-1\": 7,\n \"1.5\": 8\n}",
+    "{\n  \"1\": 2,\n  \"2\": 1,\n  \"4294967294\": 6,\n  \"x\": 3,\n  \"01\": 4,\n  \"4294967295\": 5,\n  \"-1\": 7,\n  \"1.5\": 8\n}",
+    "{\n          \"1\": 2,\n          \"2\": 1,\n          \"4294967294\": 6,\n          \"x\": 3,\n          \"01\": 4,\n          \"4294967295\": 5,\n          \"-1\": 7,\n          \"1.5\": 8\n}"
+   ]
+  },
+  {
+   "input": "\"\\/\"",
+   "compact": "\"/\"",
+   "indented": [
+    "\"/\"",
+    "\"/\"",
+    "\"/\"",
+    "\"/\""
+   ]
+  },
+  {
+   "input": "[\n1\r\n,\t2]",
+   "compact": "[1,2]",
+   "indented": [
+    "[1,2]",
+    "[\n 1,\n 2\n]",
+    "[\n  1,\n  2\n]",
+    "[\n          1,\n          2\n]"
+   ]
+  },
+  {
+   "input": "\u000b1",
+   "message": "JSON Parse error: Unrecognized token '\u000b'"
+  },
+  {
+   "input": "/*c*/1",
+   "message": "JSON Parse error: Unrecognized token '/'"
+  },
+  {
+   "input": "[-]",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "-a",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "1.5e-7",
+   "compact": "1.5e-7",
+   "indented": [
+    "1.5e-7",
+    "1.5e-7",
+    "1.5e-7",
+    "1.5e-7"
+   ]
+  },
+  {
+   "input": "5e-324",
+   "compact": "5e-324",
+   "indented": [
+    "5e-324",
+    "5e-324",
+    "5e-324",
+    "5e-324"
+   ]
+  },
+  {
+   "input": "1e21",
+   "compact": "1e+21",
+   "indented": [
+    "1e+21",
+    "1e+21",
+    "1e+21",
+    "1e+21"
+   ]
+  },
+  {
+   "input": "1e20",
+   "compact": "100000000000000000000",
+   "indented": [
+    "100000000000000000000",
+    "100000000000000000000",
+    "100000000000000000000",
+    "100000000000000000000"
+   ]
+  },
+  {
+   "input": "0.1e1",
+   "compact": "1",
+   "indented": [
+    "1",
+    "1",
+    "1",
+    "1"
+   ]
+  },
+  {
+   "input": "-0.0",
+   "compact": "0",
+   "indented": [
+    "0",
+    "0",
+    "0",
+    "0"
+   ]
+  },
+  {
+   "input": "\"\\u0000\"",
+   "compact": "\"\\u0000\"",
+   "indented": [
+    "\"\\u0000\"",
+    "\"\\u0000\"",
+    "\"\\u0000\"",
+    "\"\\u0000\""
+   ]
+  },
+  {
+   "input": "\"\u0001\"",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "{\"\":1}",
+   "compact": "{\"\":1}",
+   "indented": [
+    "{\"\":1}",
+    "{\n \"\": 1\n}",
+    "{\n  \"\": 1\n}",
+    "{\n          \"\": 1\n}"
+   ]
+  },
+  {
+   "input": "[[[[]]]]",
+   "compact": "[[[[]]]]",
+   "indented": [
+    "[[[[]]]]",
+    "[\n [\n  [\n   []\n  ]\n ]\n]",
+    "[\n  [\n    [\n      []\n    ]\n  ]\n]",
+    "[\n          [\n                    [\n                              []\n                    ]\n          ]\n]"
+   ]
+  },
+  {
+   "input": "@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "\"\\",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "[true,false,null]",
+   "compact": "[true,false,null]",
+   "indented": [
+    "[true,false,null]",
+    "[\n true,\n false,\n null\n]",
+    "[\n  true,\n  false,\n  null\n]",
+    "[\n          true,\n          false,\n          null\n]"
+   ]
+  },
+  {
+   "input": "{\"a\":[1,{\"b\":null}]}",
+   "compact": "{\"a\":[1,{\"b\":null}]}",
+   "indented": [
+    "{\"a\":[1,{\"b\":null}]}",
+    "{\n \"a\": [\n  1,\n  {\n   \"b\": null\n  }\n ]\n}",
+    "{\n  \"a\": [\n    1,\n    {\n      \"b\": null\n    }\n  ]\n}",
+    "{\n          \"a\": [\n                    1,\n                    {\n                              \"b\": null\n                    }\n          ]\n}"
+   ]
+  },
+  {
+   "input": "[1 @",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "(",
+   "message": "JSON Parse error: Unexpected token '('"
+  },
+  {
+   "input": ")",
+   "message": "JSON Parse error: Unexpected token ')'"
+  },
+  {
+   "input": ";",
+   "message": "JSON Parse error: Unexpected token ';'"
+  },
+  {
+   "input": "=",
+   "message": "JSON Parse error: Unexpected token '='"
+  },
+  {
+   "input": ":",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "{\"a\":1 @",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "\"\\é\"",
+   "message": "JSON Parse error: Invalid escape character é"
+  },
+  {
+   "input": "\"\\\u0001\"",
+   "message": "JSON Parse error: Invalid escape character \u0001"
+  },
+  {
+   "input": "é",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "_x",
+   "message": "JSON Parse error: Unexpected identifier \"_x\""
+  },
+  {
+   "input": "$",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": "[1,@]",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "{\"a\":1,\"b\"}",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "{\"a\":1,",
+   "message": "JSON Parse error: Property name must be a string literal"
+  },
+  {
+   "input": "[1,",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "{\"a\":",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "{,}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "[\"\\u00zz\"]",
+   "message": "JSON Parse error: \"\\u00zz\" is not a valid unicode escape"
+  },
+  {
+   "input": "{1:2}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "-01",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "-.5",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "1.5.5",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e5e5",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "[]]",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "{}}",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "{} ",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "\"\\u",
+   "message": "JSON Parse error: \\u must be followed by 4 hex digits"
+  },
+  {
+   "input": "\"\\u1",
+   "message": "JSON Parse error: \\u must be followed by 4 hex digits"
+  },
+  {
+   "input": "  true\n",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "[1,2,3,]",
+   "message": "JSON Parse error: Unexpected comma at the end of array expression"
+  },
+  {
+   "input": "{\"a\":1}x",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "t",
+   "message": "JSON Parse error: Unexpected identifier \"t\""
+  },
+  {
+   "input": "f",
+   "message": "JSON Parse error: Unexpected identifier \"f\""
+  },
+  {
+   "input": "n",
+   "message": "JSON Parse error: Unexpected identifier \"n\""
+  },
+  {
+   "input": "fals",
+   "message": "JSON Parse error: Unexpected identifier \"fals\""
+  },
+  {
+   "input": "nulx",
+   "message": "JSON Parse error: Unexpected identifier \"nulx\""
+  },
+  {
+   "input": "trux",
+   "message": "JSON Parse error: Unexpected identifier \"trux\""
+  },
+  {
+   "input": "tRUE",
+   "message": "JSON Parse error: Unexpected identifier \"tRUE\""
+  },
+  {
+   "input": "{\"a\"x",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "{\"a\":1:",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "[1:2]",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": "\"a b\"",
+   "compact": "\"a b\"",
+   "indented": [
+    "\"a b\"",
+    "\"a b\"",
+    "\"a b\"",
+    "\"a b\""
+   ]
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unrecognized token ' '"
+  },
+  {
+   "input": "123.456e+2",
+   "compact": "12345.6",
+   "indented": [
+    "12345.6",
+    "12345.6",
+    "12345.6",
+    "12345.6"
+   ]
+  },
+  {
+   "input": "0.30000000000000004",
+   "compact": "0.30000000000000004",
+   "indented": [
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004"
+   ]
+  },
+  {
+   "input": "9007199254740993",
+   "compact": "9007199254740992",
+   "indented": [
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992"
+   ]
+  },
+  {
+   "input": "-0e0",
+   "compact": "0",
+   "indented": [
+    "0",
+    "0",
+    "0",
+    "0"
+   ]
+  },
+  {
+   "input": "1E-2",
+   "compact": "0.01",
+   "indented": [
+    "0.01",
+    "0.01",
+    "0.01",
+    "0.01"
+   ]
+  },
+  {
+   "input": "\"\\u00e9\\u00E9\"",
+   "compact": "\"éé\"",
+   "indented": [
+    "\"éé\"",
+    "\"éé\"",
+    "\"éé\"",
+    "\"éé\""
+   ]
+  },
+  {
+   "input": "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\"",
+   "compact": "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\"",
+   "indented": [
+    "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\"",
+    "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\"",
+    "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\"",
+    "\"tab\\there \\\"quoted\\\" back\\\\slash \\b\\f\\n\\r\""
+   ]
+  },
+  {
+   "input": "\"\\u001f\\u007f\\u2028\"",
+   "compact": "\"\\u001f \"",
+   "indented": [
+    "\"\\u001f \"",
+    "\"\\u001f \"",
+    "\"\\u001f \"",
+    "\"\\u001f \""
+   ]
+  },
+  {
+   "input": "{\"nested\":{\"deeper\":{\"deepest\":[1,[2,[3,{}]],[]]}},\"empty\":{},\"list\":[]}",
+   "compact": "{\"nested\":{\"deeper\":{\"deepest\":[1,[2,[3,{}]],[]]}},\"empty\":{},\"list\":[]}",
+   "indented": [
+    "{\"nested\":{\"deeper\":{\"deepest\":[1,[2,[3,{}]],[]]}},\"empty\":{},\"list\":[]}",
+    "{\n \"nested\": {\n  \"deeper\": {\n   \"deepest\": [\n    1,\n    [\n     2,\n     [\n      3,\n      {}\n     ]\n    ],\n    []\n   ]\n  }\n },\n \"empty\": {},\n \"list\": []\n}",
+    "{\n  \"nested\": {\n    \"deeper\": {\n      \"deepest\": [\n        1,\n        [\n          2,\n          [\n            3,\n            {}\n          ]\n        ],\n        []\n      ]\n    }\n  },\n  \"empty\": {},\n  \"list\": []\n}",
+    "{\n          \"nested\": {\n                    \"deeper\": {\n                              \"deepest\": [\n                                        1,\n                                        [\n                                                  2,\n                                                  [\n                                                            3,\n                                                            {}\n                                                  ]\n                                        ],\n                                        []\n                              ]\n                    }\n          },\n          \"empty\": {},\n          \"list\": []\n}"
+   ]
+  },
+  {
+   "input": "[0.000001,0.0000001,1e-7,123e-20,1e300,4.35,0.1,100,1e100,-5e-324]",
+   "compact": "[0.000001,1e-7,1e-7,1.23e-18,1e+300,4.35,0.1,100,1e+100,-5e-324]",
+   "indented": [
+    "[0.000001,1e-7,1e-7,1.23e-18,1e+300,4.35,0.1,100,1e+100,-5e-324]",
+    "[\n 0.000001,\n 1e-7,\n 1e-7,\n 1.23e-18,\n 1e+300,\n 4.35,\n 0.1,\n 100,\n 1e+100,\n -5e-324\n]",
+    "[\n  0.000001,\n  1e-7,\n  1e-7,\n  1.23e-18,\n  1e+300,\n  4.35,\n  0.1,\n  100,\n  1e+100,\n  -5e-324\n]",
+    "[\n          0.000001,\n          1e-7,\n          1e-7,\n          1.23e-18,\n          1e+300,\n          4.35,\n          0.1,\n          100,\n          1e+100,\n          -5e-324\n]"
+   ]
+  },
+  {
+   "input": "\"\\uD83D\"",
+   "compact": "\"\\ud83d\"",
+   "indented": [
+    "\"\\ud83d\"",
+    "\"\\ud83d\"",
+    "\"\\ud83d\"",
+    "\"\\ud83d\""
+   ]
+  },
+  {
+   "input": "\"\\uDE00\\uD83D\"",
+   "compact": "\"\\ude00\\ud83d\"",
+   "indented": [
+    "\"\\ude00\\ud83d\"",
+    "\"\\ude00\\ud83d\"",
+    "\"\\ude00\\ud83d\"",
+    "\"\\ude00\\ud83d\""
+   ]
+  },
+  {
+   "input": "\"x\\uD83Dy\"",
+   "compact": "\"x\\ud83dy\"",
+   "indented": [
+    "\"x\\ud83dy\"",
+    "\"x\\ud83dy\"",
+    "\"x\\ud83dy\"",
+    "\"x\\ud83dy\""
+   ]
+  },
+  {
+   "input": "\"\\uD83D\\u0041\"",
+   "compact": "\"\\ud83dA\"",
+   "indented": [
+    "\"\\ud83dA\"",
+    "\"\\ud83dA\"",
+    "\"\\ud83dA\"",
+    "\"\\ud83dA\""
+   ]
+  },
+  {
+   "input": "\"😀\"",
+   "compact": "\"😀\"",
+   "indented": [
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\""
+   ]
+  },
+  {
+   "input": "{\"😀\":1,\"é\":2,\"\":3}",
+   "compact": "{\"😀\":1,\"é\":2,\"\":3}",
+   "indented": [
+    "{\"😀\":1,\"é\":2,\"\":3}",
+    "{\n \"😀\": 1,\n \"é\": 2,\n \"\": 3\n}",
+    "{\n  \"😀\": 1,\n  \"é\": 2,\n  \"\": 3\n}",
+    "{\n          \"😀\": 1,\n          \"é\": 2,\n          \"\": 3\n}"
+   ]
+  },
+  {
+   "input": "3.5}]",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "]0\\é",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "00\n9",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "e\t00",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\\uD83D$11e3\"",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "{-3.5\"\\u",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "\\u\\u3.5\"b\":[true",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "true0\\n ",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ".\\u",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": " 9null$é\t",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "@.\n.'truetrue\\",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "11[",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1{\"a\"\"b\":]\t}",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "+tr",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "9-é",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\n\\u\\u12 ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\unull\"a\"",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "@ é",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "'\"b\":03.5E+",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\t@\"100e",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "3.5-}\\uD83D",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "'}xtr00@",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "]é",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "é@\n.:",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "1e3true\\null\\n\"b\":}9",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\0xtrefalse",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "@-\t]12null",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "\n\\u[3.5\t\\uD83D0",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "1e3:@\\n+\\uD83D\\u\\",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "3.50'$\\uD83D{\\uD83D",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\nxx\\-",
+   "message": "JSON Parse error: Unexpected identifier \"xx\""
+  },
+  {
+   "input": "\"tr,-null",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "}",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "true0019xe00tr",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\"true\"a\"12",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "3.5 Eétrue\"b\":",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\utrue12{\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "@1true étr ",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": ".00x0",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "[",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": ":\\uD83D\"b\":\\n",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "{\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\ttr:@",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "\n00.x19\\u1",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": "x\n",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": ".\\$",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "e\\né",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "é$false\"\"a\"@-.",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "1e3\\$1e301e3[{",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "e",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\"12",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "x",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "@\\n@\ttrue':\"",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "':00\\0@9",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\t12\\\"b\":+@}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[]\"a\"\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "$0],\n",
+   "message": "JSON Parse error: Unexpected identifier \"$0\""
+  },
+  {
+   "input": "[",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "00\n\"a\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "}]\\uD83D.[0}12",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "\\:\\uD83D\n\"a\"01",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\n-[\\uD83Dx1e3tr",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "@'",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "\\né{@00:$e",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "$\\unull'\\u",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": "[@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": ":é\"b\":\n",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "'{{\"a\"}\\uD83D[\\",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "x3.5012]'",
+   "message": "JSON Parse error: Unexpected identifier \"x3\""
+  },
+  {
+   "input": "\n\\uD83D\"b\":",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "]true''@3.5",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "nullé\\uD83D:$:",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "+$}3.51e3\\u ,",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "\\u",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "e",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\"b\":\"b\":-[]",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "+",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "900",
+   "compact": "900",
+   "indented": [
+    "900",
+    "900",
+    "900",
+    "900"
+   ]
+  },
+  {
+   "input": "''001+\"'.",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "12\\ ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "false{\\u@\\nfalse9",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "é}\\uD83Dé]",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "'",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "false\\nfalse[",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "@xnull00.\\uD83D\"a\"1e3",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "]1e3Eétrue",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "\n1e3é",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "falsex\t\\u@\"x",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "tr\\nE--\nfalse",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "x:E",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "\\uD83D0",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\"b\":@9",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\n@'x\ttrue0$",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "1e3\\utr",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "{",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "null\\né,00",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0\\n:}\\",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\n912E\"null$é",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "1\\n@0true1e3}'",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\n{9 -\\uE",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "\\nE3.500tr",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "00nullx9+1\\uD83D+",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "false000é",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "]",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "\t$1e3-\n\\0",
+   "message": "JSON Parse error: Unexpected identifier \"$1e3\""
+  },
+  {
+   "input": "]\\n$nullx.$",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "e.é[0:",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": ".\\utruee\\u1",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "]\té@1e3.\"b\":",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "12\\uD83D3.5",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\\n]E1 ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "true9\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\uD83D0",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0Enull\"null",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "9étr1$true",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "x\té\\uD83D129]@",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "false\t:-",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "e",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "1@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "]\\uE1e3900",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "@\n",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "\\u-e} false-",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\tx",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "]+null[{+:",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "\n\\n$false0\"a\"tr",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "1 xtrue3.5E9",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "00null:]12é",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0true'E",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "E  x",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "null1e3\"b\":+@@",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "}\n'1e3tr\t\\u",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "'}",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "x:-\\uD83D",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "..trx}9",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "@+x",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "0ee$",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "-",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\\n ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\n3.5eE]\\n",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": ",3.5x",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "\\u}-:e\\n,\"a\"",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "12\t'\\n00trE",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "éE00'true1e312\"a\"",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "{\"a\"",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "1e3:",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "tr]+}0false",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "\\$\\utrue",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "é@E9",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": ":{.\n$",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "false$",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "12\"b\":{null'\\n\\né",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "false0\\ué3.51e3",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "12false\"b\":",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\:\\u",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "e{\"a\"]",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\\u",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0.00false:true,",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": " \\u",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "3.5'{e\\u",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "00false{]@]\"b\":",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0false9\n00\\u",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "@0,.[]\n12",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "false@e0000",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "3.5-3.5]",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\t:3.5",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": " +\n\\u}tr",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": " 3.5\\ 1e3",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "-\\",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "1\"\\n\"a\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\"3.5]9\t12x{",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "e:",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\ntrue\\[[+true",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": ",énulltrue0,.1",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "false00nullE00",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "00$3.5+",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ".0é\\uD83D1e3",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "$9@}9\\uD83D\t",
+   "message": "JSON Parse error: Unexpected identifier \"$9\""
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "\\ue\\u[$",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\trueE\"b\":\\n001",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "-: ]{$1e3",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\\u{[\"]12\"b\":",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": ".{",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "11e31e3,",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "12tr\"é",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "$'.'}99\"",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": "[",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "\"-} \n\\",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "[",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": ".é{,,",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "3.5$\\uD83D\"1,",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "é}\t\t",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "12'\né9",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "1e3.ée'",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e3[{\\nfalse3.5",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "12:",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "9[\\u\"b\":\t\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0+1.\"",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "\" ",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "E]\"\\",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "x\\uD83D\"b\":null12\\\\unull",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "912\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[trueE 1200",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": ".x",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "{12false{,e",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "ee'\"é",
+   "message": "JSON Parse error: Unexpected identifier \"ee\""
+  },
+  {
+   "input": "tr\\n00",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "\\uD83De\\uD83D-E\\uD83D",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "\"b\":@1e\"a\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1\\ux\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\"b\":,-@",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ":{$\"a\"+\n",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "0tr.\\00E\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "9+",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": " null  0\\",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "- [E,false\\n",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "}9x[}",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "'",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "[\"a\"9",
+   "message": "JSON Parse error: Expected ']'"
+  },
+  {
+   "input": "}@.9.etr@",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "-'}true ",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "falsefalseé,e",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0,true",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\truex",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\"{\\uD83Dtr:.",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "009tr12é",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "tr-..é$\\uD83D1e3",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "1}1e3\\u\\u",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "+\".\\",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "}\"b\":étrue",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": " ]+@E",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "1e3\"\"b\":}",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\uD83Dé\"tr129.",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0\\\\n \n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0{3.5}}tr\"a\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e312'trtr ",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "9\\uD83D\"a\"",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": ".\t:11e3",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "\\ntr00é- ' ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": ".\\",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "\"3.5false'100\n9",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\t+",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "00é",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "tr",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "${\\n\\uD83D",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": "\"a\"",
+   "compact": "\"a\"",
+   "indented": [
+    "\"a\"",
+    "\"a\"",
+    "\"a\"",
+    "\"a\""
+   ]
+  },
+  {
+   "input": ",]",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": ":null\"b\":\\uD83D$\\u",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "3.5\t]false]93.5\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "é",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "\n+1",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "12",
+   "compact": "12",
+   "indented": [
+    "12",
+    "12",
+    "12",
+    "12"
+   ]
+  },
+  {
+   "input": "'{\"'\"-",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "EefalsetrEe$}",
+   "message": "JSON Parse error: Unexpected identifier \"EefalsetrEe$\""
+  },
+  {
+   "input": "x[",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "false'.:{",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\"a\",",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\t",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "9,@$0,",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "+.9tr0\n",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "tr-",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "100\\uD83D:\tfalse\"b\": ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "1\\u1e3112e",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "3.5[99 +\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ".tr@3.5+@",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "-",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": ":",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "E$\"a\" ",
+   "message": "JSON Parse error: Unexpected identifier \"E$\""
+  },
+  {
+   "input": "1e3''. ",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "\t\\$:,3.5",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "3.5[truenull:true",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\n\\u\"a\"\\uD83De[00\"b\":",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "true\\utr+e\"b\":",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "+9true$",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "'@\"\\]",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "+@,1e3\\u",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "tr\\",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": ".0.9",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "[\"",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\n\\n1e390\t12\\uD83D",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "+null\"",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "}0\"[+\"a\"-\\uD83D",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": ".[\t",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": ",.''\\n$9",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "{tr\"a\"E\"b\":null",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "\\uD83D'tr1e3@",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "]\\u$\"b\":{\n",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "\\[\\ux@1e3null}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\n{[}12'}\\",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "null$.true{\n{",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "12null00false@:\t",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "efalseé",
+   "message": "JSON Parse error: Unexpected identifier \"efalse\""
+  },
+  {
+   "input": "E':",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "\n1é.null",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": ":,\n\\unull0",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "e:[\n00[",
+   "message": "JSON Parse error: Unexpected identifier \"e\""
+  },
+  {
+   "input": "\n",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "0@{{x+12",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "{-1e3",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "9:",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "false{12",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\\\\\éeE",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\n0false1",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "90$\\uD83D9\\",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "-e},+",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "'001e3\"'ex,",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": ":00$$false:}",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "true:falsefalse",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0.\\\"b\":",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": "]\\uD83D\t",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "\t].true",
+   "message": "JSON Parse error: Unexpected token ']'"
+  },
+  {
+   "input": "12false\"a\"\"b\":9@-",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "-3.5\"a\",\ntr\\",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\né@[1e31e39{",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "}+",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "@truenull",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": " :x1false}",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "+\\u",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "-\t.\\uD83D\\uD83Dtrx",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "{ééé,9E",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "}x",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "\"-+12}]\\ne",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\"tr\n'\\u",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "null-\\n",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\"b\":'\"a\"001e3false+",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\n-'\\n,false$:",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\n\".é",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "E\"a\"@\"",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "0e\n,é",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "E\\n@null.true00'",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "-tr+[",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": " ",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": " +x\"b\":",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "\\uD83D+",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "00\\99\\n+",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e3",
+   "compact": "1000",
+   "indented": [
+    "1000",
+    "1000",
+    "1000",
+    "1000"
+   ]
+  },
+  {
+   "input": "1\"-+",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": ",\\uD83D",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "\\u00\"a\" [1",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\u,99, ",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "false@",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "null\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\\",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "91é",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": ":nullx\\u-.-}",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "\\",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "falsetrueE12",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "'",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": "true00xE\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ".\\n}3.5:e+1",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "E$$",
+   "message": "JSON Parse error: Unexpected identifier \"E$$\""
+  },
+  {
+   "input": ",$x\\{ 1e31",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "\\u01e3\t\t+",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "éfalse3.5\ttruenull\\uD83D",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": ",,1212[1E",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": ":00+false",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "é",
+   "message": "JSON Parse error: Unrecognized token 'é'"
+  },
+  {
+   "input": "\":é",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "'$@-\\uD83D",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": ":\\uD83D\\uD83D.,9",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "3.5$x:3.500",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ",{\n",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": ".@.@.",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "@  :",
+   "message": "JSON Parse error: Unrecognized token '@'"
+  },
+  {
+   "input": "x\"b\":-1",
+   "message": "JSON Parse error: Unexpected identifier \"x\""
+  },
+  {
+   "input": "x9\t00etr0",
+   "message": "JSON Parse error: Unexpected identifier \"x9\""
+  },
+  {
+   "input": "\t\"@{e",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "\\12é9e{@",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "{,0:",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "+étr{",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "\n",
+   "message": "JSON Parse error: Unexpected EOF"
+  },
+  {
+   "input": "1e3false\t.\ntrue9@",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1E:}\\uD83D+\"b\":",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "\"a\":''é00",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ":[",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "\\null,\\:",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "120-",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "$1@\"b\":é'",
+   "message": "JSON Parse error: Unexpected identifier \"$1\""
+  },
+  {
+   "input": "9\\uEé@:00.",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "E",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "12E",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "\"$\"a\" trE\\n",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e3+1e31e3:\"b\":@0",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "12'false9\\uD83D@3.5@",
+   "message": "JSON Parse error: Single quotes (') are not allowed in JSON"
+  },
+  {
+   "input": ".\"\"a\"",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "truefalseE",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": ":'0",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "\\uD83D\\n\\u9false",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "0.30000000000000004",
+   "compact": "0.30000000000000004",
+   "indented": [
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004"
+   ]
+  },
+  {
+   "input": "{\"10\":null}",
+   "compact": "{\"10\":null}",
+   "indented": [
+    "{\"10\":null}",
+    "{\n \"10\": null\n}",
+    "{\n  \"10\": null\n}",
+    "{\n          \"10\": null\n}"
+   ]
+  },
+  {
+   "input": "${}",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": ":-1",
+   "message": "JSON Parse error: Unexpected token ':'"
+  },
+  {
+   "input": "true}",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "tr,ue",
+   "message": "JSON Parse error: Unexpected identifier \"tr\""
+  },
+  {
+   "input": "{\"01\":null,\"b\":null}",
+   "compact": "{\"01\":null,\"b\":null}",
+   "indented": [
+    "{\"01\":null,\"b\":null}",
+    "{\n \"01\": null,\n \"b\": null\n}",
+    "{\n  \"01\": null,\n  \"b\": null\n}",
+    "{\n          \"01\": null,\n          \"b\": null\n}"
+   ]
+  },
+  {
+   "input": "1e9-7",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "{\"01\":[true,true],\"b\":{\"10\":{}}}",
+   "compact": "{\"01\":[true,true],\"b\":{\"10\":{}}}",
+   "indented": [
+    "{\"01\":[true,true],\"b\":{\"10\":{}}}",
+    "{\n \"01\": [\n  true,\n  true\n ],\n \"b\": {\n  \"10\": {}\n }\n}",
+    "{\n  \"01\": [\n    true,\n    true\n  ],\n  \"b\": {\n    \"10\": {}\n  }\n}",
+    "{\n          \"01\": [\n                    true,\n                    true\n          ],\n          \"b\": {\n                    \"10\": {}\n          }\n}"
+   ]
+  },
+  {
+   "input": "1e-7",
+   "compact": "1e-7",
+   "indented": [
+    "1e-7",
+    "1e-7",
+    "1e-7",
+    "1e-7"
+   ]
+  },
+  {
+   "input": "{\"1\":0.30000000000000004,\"z\":true,\"\":{\"b \":\"x y\"}}",
+   "compact": "{\"1\":0.30000000000000004,\"z\":true,\"\":{\"b \":\"x y\"}}",
+   "indented": [
+    "{\"1\":0.30000000000000004,\"z\":true,\"\":{\"b \":\"x y\"}}",
+    "{\n \"1\": 0.30000000000000004,\n \"z\": true,\n \"\": {\n  \"b \": \"x y\"\n }\n}",
+    "{\n  \"1\": 0.30000000000000004,\n  \"z\": true,\n  \"\": {\n    \"b \": \"x y\"\n  }\n}",
+    "{\n          \"1\": 0.30000000000000004,\n          \"z\": true,\n          \"\": {\n                    \"b \": \"x y\"\n          }\n}"
+   ]
+  },
+  {
+   "input": "[{}]",
+   "compact": "[{}]",
+   "indented": [
+    "[{}]",
+    "[\n {}\n]",
+    "[\n  {}\n]",
+    "[\n          {}\n]"
+   ]
+  },
+  {
+   "input": "-0.25",
+   "compact": "-0.25",
+   "indented": [
+    "-0.25",
+    "-0.25",
+    "-0.25",
+    "-0.25"
+   ]
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "[null,\"\\u0001[\"]",
+   "compact": "[null,\"\\u0001[\"]",
+   "indented": [
+    "[null,\"\\u0001[\"]",
+    "[\n null,\n \"\\u0001[\"\n]",
+    "[\n  null,\n  \"\\u0001[\"\n]",
+    "[\n          null,\n          \"\\u0001[\"\n]"
+   ]
+  },
+  {
+   "input": "\"a\"",
+   "compact": "\"a\"",
+   "indented": [
+    "\"a\"",
+    "\"a\"",
+    "\"a\"",
+    "\"a\""
+   ]
+  },
+  {
+   "input": "{.\"0\":[],\"1\":false,\"10\":false}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "\"é\"",
+   "compact": "\"é\"",
+   "indented": [
+    "\"é\"",
+    "\"é\"",
+    "\"é\"",
+    "\"é\""
+   ]
+  },
+  {
+   "input": "\tnull",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "0.3000000000000[0004",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\"\\\"\\n\"",
+   "compact": "\"\\\"\\n\"",
+   "indented": [
+    "\"\\\"\\n\"",
+    "\"\\\"\\n\"",
+    "\"\\\"\\n\"",
+    "\"\\\"\\n\""
+   ]
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "t\nrue",
+   "message": "JSON Parse error: Unexpected identifier \"t\""
+  },
+  {
+   "input": "[}true]",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "\"\\\\\"",
+   "compact": "\"\\\\\"",
+   "indented": [
+    "\"\\\\\"",
+    "\"\\\\\"",
+    "\"\\\\\"",
+    "\"\\\\\""
+   ]
+  },
+  {
+   "input": "\"\\@\\\"",
+   "message": "JSON Parse error: Invalid escape character @"
+  },
+  {
+   "input": ".false",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "00\"\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "\"null\"",
+   "compact": "\"null\"",
+   "indented": [
+    "\"null\"",
+    "\"null\"",
+    "\"null\"",
+    "\"null\""
+   ]
+  },
+  {
+   "input": "1e+21",
+   "compact": "1e+21",
+   "indented": [
+    "1e+21",
+    "1e+21",
+    "1e+21",
+    "1e+21"
+   ]
+  },
+  {
+   "input": "nul\"l",
+   "message": "JSON Parse error: Unexpected identifier \"nul\""
+  },
+  {
+   "input": ",0",
+   "message": "JSON Parse error: Unexpected token ','"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "nfalseull",
+   "message": "JSON Parse error: Unexpected identifier \"nfalseull\""
+  },
+  {
+   "input": "-0.]25",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": "[{\"1\":true,\"é\":[null,{\"0\":null,\"é\":null}]},\"a\"]",
+   "compact": "[{\"1\":true,\"é\":[null,{\"0\":null,\"é\":null}]},\"a\"]",
+   "indented": [
+    "[{\"1\":true,\"é\":[null,{\"0\":null,\"é\":null}]},\"a\"]",
+    "[\n {\n  \"1\": true,\n  \"é\": [\n   null,\n   {\n    \"0\": null,\n    \"é\": null\n   }\n  ]\n },\n \"a\"\n]",
+    "[\n  {\n    \"1\": true,\n    \"é\": [\n      null,\n      {\n        \"0\": null,\n        \"é\": null\n      }\n    ]\n  },\n  \"a\"\n]",
+    "[\n          {\n                    \"1\": true,\n                    \"é\": [\n                              null,\n                              {\n                                        \"0\": null,\n                                        \"é\": null\n                              }\n                    ]\n          },\n          \"a\"\n]"
+   ]
+  },
+  {
+   "input": "9007199254740992",
+   "compact": "9007199254740992",
+   "indented": [
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992"
+   ]
+  },
+  {
+   "input": "-1",
+   "compact": "-1",
+   "indented": [
+    "-1",
+    "-1",
+    "-1",
+    "-1"
+   ]
+  },
+  {
+   "input": "nu,ll",
+   "message": "JSON Parse error: Unexpected identifier \"nu\""
+  },
+  {
+   "input": "1e+21",
+   "compact": "1e+21",
+   "indented": [
+    "1e+21",
+    "1e+21",
+    "1e+21",
+    "1e+21"
+   ]
+  },
+  {
+   "input": "[null,null,{\"10\":{},\"01\":1.5,\"z\"\":0.30000000000000004}]",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "[\"😀\",\"x y\"]",
+   "compact": "[\"😀\",\"x y\"]",
+   "indented": [
+    "[\"😀\",\"x y\"]",
+    "[\n \"😀\",\n \"x y\"\n]",
+    "[\n  \"😀\",\n  \"x y\"\n]",
+    "[\n          \"😀\",\n          \"x y\"\n]"
+   ]
+  },
+  {
+   "input": "{\"z\":1.\\n5,\"b\":{}}",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "E[]",
+   "message": "JSON Parse error: Unexpected identifier \"E\""
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "\tfalse",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "\"\\n\"",
+   "compact": "\"\\n\"",
+   "indented": [
+    "\"\\n\"",
+    "\"\\n\"",
+    "\"\\n\"",
+    "\"\\n\""
+   ]
+  },
+  {
+   "input": "fals\te",
+   "message": "JSON Parse error: Unexpected identifier \"fals\""
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "${}",
+   "message": "JSON Parse error: Unexpected identifier \"$\""
+  },
+  {
+   "input": "\"1\"",
+   "compact": "\"1\"",
+   "indented": [
+    "\"1\"",
+    "\"1\"",
+    "\"1\"",
+    "\"1\""
+   ]
+  },
+  {
+   "input": "9007199254740992",
+   "compact": "9007199254740992",
+   "indented": [
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "{\"a\":null}",
+   "compact": "{\"a\":null}",
+   "indented": [
+    "{\"a\":null}",
+    "{\n \"a\": null\n}",
+    "{\n  \"a\": null\n}",
+    "{\n          \"a\": null\n}"
+   ]
+  },
+  {
+   "input": "{\"0010\":\"\\\"\",\"z\":[]}",
+   "compact": "{\"0010\":\"\\\"\",\"z\":[]}",
+   "indented": [
+    "{\"0010\":\"\\\"\",\"z\":[]}",
+    "{\n \"0010\": \"\\\"\",\n \"z\": []\n}",
+    "{\n  \"0010\": \"\\\"\",\n  \"z\": []\n}",
+    "{\n          \"0010\": \"\\\"\",\n          \"z\": []\n}"
+   ]
+  },
+  {
+   "input": ".true",
+   "message": "JSON Parse error: Unexpected token '.'"
+  },
+  {
+   "input": "n00ull",
+   "message": "JSON Parse error: Unexpected identifier \"n00ull\""
+  },
+  {
+   "input": "{},",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "nul\\l",
+   "message": "JSON Parse error: Unexpected identifier \"nul\""
+  },
+  {
+   "input": "\"\\u0001\"",
+   "compact": "\"\\u0001\"",
+   "indented": [
+    "\"\\u0001\"",
+    "\"\\u0001\"",
+    "\"\\u0001\"",
+    "\"\\u0001\""
+   ]
+  },
+  {
+   "input": "nu@ll",
+   "message": "JSON Parse error: Unexpected identifier \"nu\""
+  },
+  {
+   "input": "1e-7",
+   "compact": "1e-7",
+   "indented": [
+    "1e-7",
+    "1e-7",
+    "1e-7",
+    "1e-7"
+   ]
+  },
+  {
+   "input": "{\"1\":{\"b\":0.30000000000000004,\"a\":true}}",
+   "compact": "{\"1\":{\"b\":0.30000000000000004,\"a\":true}}",
+   "indented": [
+    "{\"1\":{\"b\":0.30000000000000004,\"a\":true}}",
+    "{\n \"1\": {\n  \"b\": 0.30000000000000004,\n  \"a\": true\n }\n}",
+    "{\n  \"1\": {\n    \"b\": 0.30000000000000004,\n    \"a\": true\n  }\n}",
+    "{\n          \"1\": {\n                    \"b\": 0.30000000000000004,\n                    \"a\": true\n          }\n}"
+   ]
+  },
+  {
+   "input": "[123456789,null,null]",
+   "compact": "[123456789,null,null]",
+   "indented": [
+    "[123456789,null,null]",
+    "[\n 123456789,\n null,\n null\n]",
+    "[\n  123456789,\n  null,\n  null\n]",
+    "[\n          123456789,\n          null,\n          null\n]"
+   ]
+  },
+  {
+   "input": "1.5",
+   "compact": "1.5",
+   "indented": [
+    "1.5",
+    "1.5",
+    "1.5",
+    "1.5"
+   ]
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "1e-7",
+   "compact": "1e-7",
+   "indented": [
+    "1e-7",
+    "1e-7",
+    "1e-7",
+    "1e-7"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "fa{lse",
+   "message": "JSON Parse error: Unexpected identifier \"fa\""
+  },
+  {
+   "input": "true\\",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "\"x y\"",
+   "compact": "\"x y\"",
+   "indented": [
+    "\"x y\"",
+    "\"x y\"",
+    "\"x y\"",
+    "\"x y\""
+   ]
+  },
+  {
+   "input": "{\\uD83D\"b\":[true]}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "\"😀\"",
+   "compact": "\"😀\"",
+   "indented": [
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\""
+   ]
+  },
+  {
+   "input": "\"😀\"",
+   "compact": "\"😀\"",
+   "indented": [
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\"",
+    "\"😀\""
+   ]
+  },
+  {
+   "input": "tr9ue",
+   "message": "JSON Parse error: Unexpected identifier \"tr9ue\""
+  },
+  {
+   "input": "{}\"",
+   "message": "JSON Parse error: Unterminated string"
+  },
+  {
+   "input": "null1e3",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "n\"ull",
+   "message": "JSON Parse error: Unexpected identifier \"n\""
+  },
+  {
+   "input": "0.30000000000000004",
+   "compact": "0.30000000000000004",
+   "indented": [
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004"
+   ]
+  },
+  {
+   "input": "1ee+21",
+   "message": "JSON Parse error: Exponent symbols should be followed by an optional '+' or '-' and then by at least one number"
+  },
+  {
+   "input": "\\uD83Dnull",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "Enull",
+   "message": "JSON Parse error: Unexpected identifier \"Enull\""
+  },
+  {
+   "input": "9007199254740992",
+   "compact": "9007199254740992",
+   "indented": [
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992",
+    "9007199254740992"
+   ]
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "{\"é\"3.5:\"1\"}",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "\"tr\"",
+   "compact": "\"tr\"",
+   "indented": [
+    "\"tr\"",
+    "\"tr\"",
+    "\"tr\"",
+    "\"tr\""
+   ]
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "[\"a\"]",
+   "compact": "[\"a\"]",
+   "indented": [
+    "[\"a\"]",
+    "[\n \"a\"\n]",
+    "[\n  \"a\"\n]",
+    "[\n          \"a\"\n]"
+   ]
+  },
+  {
+   "input": "[\"\\u0001\"]",
+   "compact": "[\"\\u0001\"]",
+   "indented": [
+    "[\"\\u0001\"]",
+    "[\n \"\\u0001\"\n]",
+    "[\n  \"\\u0001\"\n]",
+    "[\n          \"\\u0001\"\n]"
+   ]
+  },
+  {
+   "input": "}\"\"",
+   "message": "JSON Parse error: Unexpected token '}'"
+  },
+  {
+   "input": "{\"10\"b\":\":true,\"z\":[\"\\n\",null]}",
+   "message": "JSON Parse error: Expected ':' before value in object property definition"
+  },
+  {
+   "input": "[{}]",
+   "compact": "[{}]",
+   "indented": [
+    "[{}]",
+    "[\n {}\n]",
+    "[\n  {}\n]",
+    "[\n          {}\n]"
+   ]
+  },
+  {
+   "input": "\"1e3\\\"\"",
+   "compact": "\"1e3\\\"\"",
+   "indented": [
+    "\"1e3\\\"\"",
+    "\"1e3\\\"\"",
+    "\"1e3\\\"\"",
+    "\"1e3\\\"\""
+   ]
+  },
+  {
+   "input": "-]1",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "[false,{\"0\":+[true],\"é\":null,\"01\":false}]",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "[{},{\"0\":[],\"a\"-:false},{}]",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "1.5",
+   "compact": "1.5",
+   "indented": [
+    "1.5",
+    "1.5",
+    "1.5",
+    "1.5"
+   ]
+  },
+  {
+   "input": "{\"a\":\"\\\"\"}",
+   "compact": "{\"a\":\"\\\"\"}",
+   "indented": [
+    "{\"a\":\"\\\"\"}",
+    "{\n \"a\": \"\\\"\"\n}",
+    "{\n  \"a\": \"\\\"\"\n}",
+    "{\n          \"a\": \"\\\"\"\n}"
+   ]
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "\"é\"",
+   "compact": "\"é\"",
+   "indented": [
+    "\"é\"",
+    "\"é\"",
+    "\"é\"",
+    "\"é\""
+   ]
+  },
+  {
+   "input": "{\"1\":{\"1\":1e-7,\"\":\"a\"},\"z\":0\\.30000000000000004,\"b\":{}}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "null0",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1e-7",
+   "compact": "1e-7",
+   "indented": [
+    "1e-7",
+    "1e-7",
+    "1e-7",
+    "1e-7"
+   ]
+  },
+  {
+   "input": "n ull",
+   "message": "JSON Parse error: Unexpected identifier \"n\""
+  },
+  {
+   "input": "n ull",
+   "message": "JSON Parse error: Unexpected identifier \"n\""
+  },
+  {
+   "input": "\"\\n\"",
+   "compact": "\"\\n\"",
+   "indented": [
+    "\"\\n\"",
+    "\"\\n\"",
+    "\"\\n\"",
+    "\"\\n\""
+   ]
+  },
+  {
+   "input": "\"\\\\\"",
+   "compact": "\"\\\\\"",
+   "indented": [
+    "\"\\\\\"",
+    "\"\\\\\"",
+    "\"\\\\\"",
+    "\"\\\\\""
+   ]
+  },
+  {
+   "input": "{},",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "true-",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "{\"0\":false,\"1\":\"a\"null}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "[null,null]",
+   "compact": "[null,null]",
+   "indented": [
+    "[null,null]",
+    "[\n null,\n null\n]",
+    "[\n  null,\n  null\n]",
+    "[\n          null,\n          null\n]"
+   ]
+  },
+  {
+   "input": "[{\"1\":123456789,\"b\":null,\"a\":123456789},true]",
+   "compact": "[{\"1\":123456789,\"b\":null,\"a\":123456789},true]",
+   "indented": [
+    "[{\"1\":123456789,\"b\":null,\"a\":123456789},true]",
+    "[\n {\n  \"1\": 123456789,\n  \"b\": null,\n  \"a\": 123456789\n },\n true\n]",
+    "[\n  {\n    \"1\": 123456789,\n    \"b\": null,\n    \"a\": 123456789\n  },\n  true\n]",
+    "[\n          {\n                    \"1\": 123456789,\n                    \"b\": null,\n                    \"a\": 123456789\n          },\n          true\n]"
+   ]
+  },
+  {
+   "input": "[\t]",
+   "compact": "[]",
+   "indented": [
+    "[]",
+    "[]",
+    "[]",
+    "[]"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "[0,{\"z\":[+]},9007199254740992]",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "[null,{}]",
+   "compact": "[null,{}]",
+   "indented": [
+    "[null,{}]",
+    "[\n null,\n {}\n]",
+    "[\n  null,\n  {}\n]",
+    "[\n          null,\n          {}\n]"
+   ]
+  },
+  {
+   "input": "nul1e3l",
+   "message": "JSON Parse error: Unexpected identifier \"nul1e3l\""
+  },
+  {
+   "input": "\"\"]",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\\uD83D{}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[\"a\",null,true]",
+   "compact": "[\"a\",null,true]",
+   "indented": [
+    "[\"a\",null,true]",
+    "[\n \"a\",\n null,\n true\n]",
+    "[\n  \"a\",\n  null,\n  true\n]",
+    "[\n          \"a\",\n          null,\n          true\n]"
+   ]
+  },
+  {
+   "input": "\nnull",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "null\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "[null,\"x y\",true]",
+   "compact": "[null,\"x y\",true]",
+   "indented": [
+    "[null,\"x y\",true]",
+    "[\n null,\n \"x y\",\n true\n]",
+    "[\n  null,\n  \"x y\",\n  true\n]",
+    "[\n          null,\n          \"x y\",\n          true\n]"
+   ]
+  },
+  {
+   "input": "-0.25",
+   "compact": "-0.25",
+   "indented": [
+    "-0.25",
+    "-0.25",
+    "-0.25",
+    "-0.25"
+   ]
+  },
+  {
+   "input": "[null,{\"a\":true},{\"0\":null,\"1\":null}]",
+   "compact": "[null,{\"a\":true},{\"0\":null,\"1\":null}]",
+   "indented": [
+    "[null,{\"a\":true},{\"0\":null,\"1\":null}]",
+    "[\n null,\n {\n  \"a\": true\n },\n {\n  \"0\": null,\n  \"1\": null\n }\n]",
+    "[\n  null,\n  {\n    \"a\": true\n  },\n  {\n    \"0\": null,\n    \"1\": null\n  }\n]",
+    "[\n          null,\n          {\n                    \"a\": true\n          },\n          {\n                    \"0\": null,\n                    \"1\": null\n          }\n]"
+   ]
+  },
+  {
+   "input": "[]\\u",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[{\"01:\":\"1\"},true,1e-7]",
+   "compact": "[{\"01:\":\"1\"},true,1e-7]",
+   "indented": [
+    "[{\"01:\":\"1\"},true,1e-7]",
+    "[\n {\n  \"01:\": \"1\"\n },\n true,\n 1e-7\n]",
+    "[\n  {\n    \"01:\": \"1\"\n  },\n  true,\n  1e-7\n]",
+    "[\n          {\n                    \"01:\": \"1\"\n          },\n          true,\n          1e-7\n]"
+   ]
+  },
+  {
+   "input": "\"é\"",
+   "compact": "\"é\"",
+   "indented": [
+    "\"é\"",
+    "\"é\"",
+    "\"é\"",
+    "\"é\""
+   ]
+  },
+  {
+   "input": "truee",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "-1false",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "\"\\u0001\"",
+   "compact": "\"\\u0001\"",
+   "indented": [
+    "\"\\u0001\"",
+    "\"\\u0001\"",
+    "\"\\u0001\"",
+    "\"\\u0001\""
+   ]
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "{\"z\":{},\"a\":[null,f-alse]}",
+   "message": "JSON Parse error: Unexpected identifier \"f\""
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "-\\n1",
+   "message": "JSON Parse error: Invalid number"
+  },
+  {
+   "input": "\"a\"",
+   "compact": "\"a\"",
+   "indented": [
+    "\"a\"",
+    "\"a\"",
+    "\"a\"",
+    "\"a\""
+   ]
+  },
+  {
+   "input": "\tfalse",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "-1",
+   "compact": "-1",
+   "indented": [
+    "-1",
+    "-1",
+    "-1",
+    "-1"
+   ]
+  },
+  {
+   "input": "{\"1\":\"a\",\"10\":false,\"a\":null}",
+   "compact": "{\"1\":\"a\",\"10\":false,\"a\":null}",
+   "indented": [
+    "{\"1\":\"a\",\"10\":false,\"a\":null}",
+    "{\n \"1\": \"a\",\n \"10\": false,\n \"a\": null\n}",
+    "{\n  \"1\": \"a\",\n  \"10\": false,\n  \"a\": null\n}",
+    "{\n          \"1\": \"a\",\n          \"10\": false,\n          \"a\": null\n}"
+   ]
+  },
+  {
+   "input": "nu\"ll",
+   "message": "JSON Parse error: Unexpected identifier \"nu\""
+  },
+  {
+   "input": "{\"-1\":-0.25}",
+   "compact": "{\"-1\":-0.25}",
+   "indented": [
+    "{\"-1\":-0.25}",
+    "{\n \"-1\": -0.25\n}",
+    "{\n  \"-1\": -0.25\n}",
+    "{\n          \"-1\": -0.25\n}"
+   ]
+  },
+  {
+   "input": "{\"10\":false,\"z\":{\"0\":[],\"01\":null,\"a\":\"😀\"}\"b\":}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "3.5{}",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "[n12ull]",
+   "message": "JSON Parse error: Unexpected identifier \"n12ull\""
+  },
+  {
+   "input": "{\"10\":\"\\n\"}1e3",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "[null,{},[-1,\"1\"]]",
+   "compact": "[null,{},[-1,\"1\"]]",
+   "indented": [
+    "[null,{},[-1,\"1\"]]",
+    "[\n null,\n {},\n [\n  -1,\n  \"1\"\n ]\n]",
+    "[\n  null,\n  {},\n  [\n    -1,\n    \"1\"\n  ]\n]",
+    "[\n          null,\n          {},\n          [\n                    -1,\n                    \"1\"\n          ]\n]"
+   ]
+  },
+  {
+   "input": "\"😀,\"",
+   "compact": "\"😀,\"",
+   "indented": [
+    "\"😀,\"",
+    "\"😀,\"",
+    "\"😀,\"",
+    "\"😀,\""
+   ]
+  },
+  {
+   "input": "123456789",
+   "compact": "123456789",
+   "indented": [
+    "123456789",
+    "123456789",
+    "123456789",
+    "123456789"
+   ]
+  },
+  {
+   "input": "{\"0\":null,\"z\":[trutre],\"é\":[{\"b\":null,\"\":123456789}]}",
+   "message": "JSON Parse error: Unexpected identifier \"trutre\""
+  },
+  {
+   "input": "-1",
+   "compact": "-1",
+   "indented": [
+    "-1",
+    "-1",
+    "-1",
+    "-1"
+   ]
+  },
+  {
+   "input": "[{\"01\":[true,1e-7]},{\"1\":null,\"a\":123456789}]",
+   "compact": "[{\"01\":[true,1e-7]},{\"1\":null,\"a\":123456789}]",
+   "indented": [
+    "[{\"01\":[true,1e-7]},{\"1\":null,\"a\":123456789}]",
+    "[\n {\n  \"01\": [\n   true,\n   1e-7\n  ]\n },\n {\n  \"1\": null,\n  \"a\": 123456789\n }\n]",
+    "[\n  {\n    \"01\": [\n      true,\n      1e-7\n    ]\n  },\n  {\n    \"1\": null,\n    \"a\": 123456789\n  }\n]",
+    "[\n          {\n                    \"01\": [\n                              true,\n                              1e-7\n                    ]\n          },\n          {\n                    \"1\": null,\n                    \"a\": 123456789\n          }\n]"
+   ]
+  },
+  {
+   "input": "{\"1\":fal\\use,\"b\":-0.25}",
+   "message": "JSON Parse error: Unexpected identifier \"fal\""
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "nul$l",
+   "message": "JSON Parse error: Unexpected identifier \"nul$l\""
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "{\"1\":0\"a\".30000000000000004,\"a\":null}",
+   "message": "JSON Parse error: Expected '}'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "\"\\\"b\":u0001\"",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "0.30000000000000004",
+   "compact": "0.30000000000000004",
+   "indented": [
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004",
+    "0.30000000000000004"
+   ]
+  },
+  {
+   "input": "1.[5",
+   "message": "JSON Parse error: Invalid digits after decimal point"
+  },
+  {
+   "input": "true",
+   "compact": "true",
+   "indented": [
+    "true",
+    "true",
+    "true",
+    "true"
+   ]
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "fa:lse",
+   "message": "JSON Parse error: Unexpected identifier \"fa\""
+  },
+  {
+   "input": "\\u{\"z\":null}",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "{\"a\":1e+21}",
+   "compact": "{\"a\":1e+21}",
+   "indented": [
+    "{\"a\":1e+21}",
+    "{\n \"a\": 1e+21\n}",
+    "{\n  \"a\": 1e+21\n}",
+    "{\n          \"a\": 1e+21\n}"
+   ]
+  },
+  {
+   "input": "[0.30000000000000004,9007199254740992]",
+   "compact": "[0.30000000000000004,9007199254740992]",
+   "indented": [
+    "[0.30000000000000004,9007199254740992]",
+    "[\n 0.30000000000000004,\n 9007199254740992\n]",
+    "[\n  0.30000000000000004,\n  9007199254740992\n]",
+    "[\n          0.30000000000000004,\n          9007199254740992\n]"
+   ]
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "12345+6789",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "false",
+   "compact": "false",
+   "indented": [
+    "false",
+    "false",
+    "false",
+    "false"
+   ]
+  },
+  {
+   "input": "\"x y\".",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "1\\n.5",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "{\"0\":-0.25}",
+   "compact": "{\"0\":-0.25}",
+   "indented": [
+    "{\"0\":-0.25}",
+    "{\n \"0\": -0.25\n}",
+    "{\n  \"0\": -0.25\n}",
+    "{\n          \"0\": -0.25\n}"
+   ]
+  },
+  {
+   "input": "{}",
+   "compact": "{}",
+   "indented": [
+    "{}",
+    "{}",
+    "{}",
+    "{}"
+   ]
+  },
+  {
+   "input": "null\\n",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[]",
+   "compact": "[]",
+   "indented": [
+    "[]",
+    "[]",
+    "[]",
+    "[]"
+   ]
+  },
+  {
+   "input": "[]1",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "[[1.5,{\"1\":true,\"10\":[],\"a\":null}\\uD83D],[]]",
+   "message": "JSON Parse error: Unrecognized token '\\'"
+  },
+  {
+   "input": "[{\"1\":\"😀\",\"10\":[\"😀\",false],\"\":1e+21},123456789]",
+   "compact": "[{\"1\":\"😀\",\"10\":[\"😀\",false],\"\":1e+21},123456789]",
+   "indented": [
+    "[{\"1\":\"😀\",\"10\":[\"😀\",false],\"\":1e+21},123456789]",
+    "[\n {\n  \"1\": \"😀\",\n  \"10\": [\n   \"😀\",\n   false\n  ],\n  \"\": 1e+21\n },\n 123456789\n]",
+    "[\n  {\n    \"1\": \"😀\",\n    \"10\": [\n      \"😀\",\n      false\n    ],\n    \"\": 1e+21\n  },\n  123456789\n]",
+    "[\n          {\n                    \"1\": \"😀\",\n                    \"10\": [\n                              \"😀\",\n                              false\n                    ],\n                    \"\": 1e+21\n          },\n          123456789\n]"
+   ]
+  },
+  {
+   "input": "\"x y\"+",
+   "message": "JSON Parse error: Unrecognized token '+'"
+  },
+  {
+   "input": "null",
+   "compact": "null",
+   "indented": [
+    "null",
+    "null",
+    "null",
+    "null"
+   ]
+  },
+  {
+   "input": "false[",
+   "message": "JSON Parse error: Unable to parse JSON string"
+  },
+  {
+   "input": "\"x y\"",
+   "compact": "\"x y\"",
+   "indented": [
+    "\"x y\"",
+    "\"x y\"",
+    "\"x y\"",
+    "\"x y\""
+   ]
+  }
+ ],
+ "compare": [
+  {
+   "left": "null",
+   "right": "null",
+   "order": "EQ"
+  },
+  {
+   "left": "null",
+   "right": "true",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "false",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "0",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "-1",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "1.5",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "null",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "true",
+   "right": "true",
+   "order": "EQ"
+  },
+  {
+   "left": "true",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "true",
+   "right": "0",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "-1",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "1.5",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "true",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "false",
+   "right": "true",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "false",
+   "order": "EQ"
+  },
+  {
+   "left": "false",
+   "right": "0",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "-1",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "1.5",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "false",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "0",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "0",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "0",
+   "right": "0",
+   "order": "EQ"
+  },
+  {
+   "left": "0",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "0",
+   "right": "1.5",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "0",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "-1",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "-1",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "-1",
+   "right": "0",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "-1",
+   "order": "EQ"
+  },
+  {
+   "left": "-1",
+   "right": "1.5",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "-1",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "1.5",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "1.5",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "1.5",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "1.5",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "1.5",
+   "right": "1.5",
+   "order": "EQ"
+  },
+  {
+   "left": "1.5",
+   "right": "\"\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "1.5",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"a\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"a\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"b\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"a\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"b\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"é\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"b\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"é\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"😀\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"é\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"😀\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "\"￿\"",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"😀\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "\"￿\"",
+   "order": "EQ"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "[]",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "\"￿\"",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "[]",
+   "right": "[]",
+   "order": "EQ"
+  },
+  {
+   "left": "[]",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "[null]",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[]",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "[1]",
+   "order": "EQ"
+  },
+  {
+   "left": "[1]",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "[1]",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[1]",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "[1,2]",
+   "order": "EQ"
+  },
+  {
+   "left": "[1,2]",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[1,2]",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "[2]",
+   "order": "EQ"
+  },
+  {
+   "left": "[2]",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "[2]",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[2]",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "[null]",
+   "right": "[1]",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "[1,2]",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "[2]",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "[null]",
+   "order": "EQ"
+  },
+  {
+   "left": "[null]",
+   "right": "{}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "[null]",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{}",
+   "right": "{}",
+   "order": "EQ"
+  },
+  {
+   "left": "{}",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"b\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"a\":1}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"a\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"a\":2}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":2}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"a\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"b\":1}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"b\":1}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"a\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"a\":2}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":1,\"b\":2}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"a\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"a\":2}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"b\":2,\"a\":1}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"a\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"a\":2}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "EQ"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":null}]}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "null",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "true",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "false",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "0",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "-1",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "1.5",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"a\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"b\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"é\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"😀\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "\"￿\"",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "[]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "[1]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "[1,2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "[2]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "[null]",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"a\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"a\":2}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"b\":1}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"a\":1,\"b\":2}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"b\":2,\"a\":1}",
+   "order": "LT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"a\":[1,{\"c\":null}]}",
+   "order": "GT"
+  },
+  {
+   "left": "{\"a\":[1,{\"c\":false}]}",
+   "right": "{\"a\":[1,{\"c\":false}]}",
+   "order": "EQ"
+  },
+  {
+   "left": "NaN",
+   "right": "NaN",
+   "order": "GT"
+  },
+  {
+   "left": "NaN",
+   "right": "1",
+   "order": "GT"
+  },
+  {
+   "left": "1",
+   "right": "NaN",
+   "order": "GT"
+  }
+ ],
+ "numbers": [
+  {
+   "number": "NaN",
+   "stringified": "null"
+  },
+  {
+   "number": "Infinity",
+   "stringified": "null"
+  },
+  {
+   "number": "-Infinity",
+   "stringified": "null"
+  },
+  {
+   "number": "-0",
+   "stringified": "0"
+  },
+  {
+   "number": "0",
+   "stringified": "0"
+  },
+  {
+   "number": "1e+21",
+   "stringified": "1e+21"
+  },
+  {
+   "number": "1e-7",
+   "stringified": "1e-7"
+  },
+  {
+   "number": "5e-324",
+   "stringified": "5e-324"
+  },
+  {
+   "number": "0.1",
+   "stringified": "0.1"
+  },
+  {
+   "number": "123456789012",
+   "stringified": "123456789012"
+  }
+ ]
+}

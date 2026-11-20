@@ -1,0 +1,11 @@
+package:
+  name: example-siblingparameters01
+  dependencies:
+    - foldable-traversable
+    - integers
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

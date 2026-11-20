@@ -1,0 +1,20 @@
+package:
+  name: example-avar01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - avar
+    - aff
+    - exceptions
+    - maybe
+    - either
+    - foldable-traversable
+    - refs
+    - arrays
+    - datetime
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

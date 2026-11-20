@@ -1,0 +1,10 @@
+package:
+  name: example-intmultiply01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - foldable-traversable
+workspace:
+  packageSet:
+    registry: 75.9.1

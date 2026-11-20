@@ -1,0 +1,10 @@
+package:
+  name: example-adttuple01
+  dependencies:
+    - prelude
+    - tuples
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

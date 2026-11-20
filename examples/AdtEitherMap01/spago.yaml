@@ -1,0 +1,10 @@
+package:
+  name: example-adteithermap01
+  dependencies:
+    - prelude
+    - either
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

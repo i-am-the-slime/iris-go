@@ -1,0 +1,16 @@
+package:
+  name: example-arrayffi01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - arrays
+    - maybe
+    - parallel-array
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    parallel-array: "0.0.1"

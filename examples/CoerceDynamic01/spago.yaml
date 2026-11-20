@@ -1,0 +1,14 @@
+package:
+  name: example-coercedynamic01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - arrays
+    - foldable-traversable
+    - unsafe-coerce
+    - foreign
+    - strings
+workspace:
+  packageSet:
+    registry: 71.0.0

@@ -1,0 +1,13 @@
+package:
+  name: example-chartostring01
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - prelude
+    - strings
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

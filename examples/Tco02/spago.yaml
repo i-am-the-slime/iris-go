@@ -1,0 +1,9 @@
+package:
+  name: example-tco02
+  dependencies:
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

@@ -1,0 +1,9 @@
+package:
+  name: example-caseshape01
+  dependencies:
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

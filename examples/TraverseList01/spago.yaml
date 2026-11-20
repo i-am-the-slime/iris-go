@@ -1,0 +1,20 @@
+package:
+  name: example-traverselist01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - arrays
+    - maybe
+    - ordered-collections
+    - strings
+    - foldable-traversable
+    - refs
+    - tuples
+    - lists
+    - transformers
+    - identity
+    - newtype
+workspace:
+  packageSet:
+    registry: 71.0.0

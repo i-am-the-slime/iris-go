@@ -1,0 +1,14 @@
+package:
+  name: example-intbits01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - integers
+    - arrays
+    - foldable-traversable
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

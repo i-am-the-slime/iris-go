@@ -1,0 +1,14 @@
+package:
+  name: example-regexparity01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - either
+    - maybe
+    - arrays
+    - partial
+    - strings
+workspace:
+  packageSet:
+    registry: 75.9.1

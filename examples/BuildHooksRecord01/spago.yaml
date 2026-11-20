@@ -1,0 +1,12 @@
+package:
+  name: example-buildhooksrecord01
+  dependencies:
+    - arrays
+    - maybe
+    - ordered-collections
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

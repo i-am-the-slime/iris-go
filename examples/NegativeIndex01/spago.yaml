@@ -1,0 +1,13 @@
+package:
+  name: example-negativeindex01
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - maybe
+    - prelude
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

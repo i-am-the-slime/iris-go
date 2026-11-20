@@ -1,0 +1,10 @@
+package:
+  name: example-statestack01
+  dependencies:
+    - prelude
+    - transformers
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

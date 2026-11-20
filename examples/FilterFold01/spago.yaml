@@ -1,0 +1,11 @@
+package:
+  name: example-filterfold01
+  dependencies:
+    - prelude
+    - arrays
+    - foldable-traversable
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

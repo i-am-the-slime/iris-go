@@ -1,0 +1,15 @@
+package:
+  name: example-variantinstances01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - variant
+    - maybe
+    - arrays
+    - foldable-traversable
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 73.2.0

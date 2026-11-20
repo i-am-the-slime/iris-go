@@ -1,0 +1,12 @@
+package:
+  name: example-ranknsynonym01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - functions
+    - maybe
+    - tuples
+workspace:
+  packageSet:
+    registry: 75.9.1

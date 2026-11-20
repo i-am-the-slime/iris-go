@@ -1,0 +1,11 @@
+package:
+  name: example-arrayreverse01
+  dependencies:
+    - prelude
+    - arrays
+    - partial
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0

@@ -1,0 +1,12 @@
+package:
+  name: reader-t-effect-repro
+  dependencies:
+    - console
+    - prelude
+    - effect
+    - transformers
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0
