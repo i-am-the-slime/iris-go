@@ -30,8 +30,15 @@ this repository instead of the release.
 value, which the program prints. Programs print exactly what the JavaScript build prints, except for the
 differences listed in Iris's
 [`documentation/go-output.md`](https://github.com/i-am-the-slime/purescript-analyzer/blob/iris-go/documentation/go-output.md).
-That document also lists the programs the Go backend rejects and the conventions for writing
-Go implementations of your own foreign imports.
+That document also lists the programs the Go backend rejects.
+
+## Foreign imports
+
+Got a `src/Foo.js`? Put a `src/Foo.go` next to it. Libraries you install work the same way, and
+`ffi/` has Go versions of a few popular libraries that don't ship their own yet.
+
+[Foreign imports](https://github.com/i-am-the-slime/purescript-analyzer/blob/iris-go/documentation/go-output.md#foreign-imports)
+shows an example and how each PureScript type looks in Go.
 
 ## Testing the runtime
 
