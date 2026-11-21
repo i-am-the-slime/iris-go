@@ -18,15 +18,16 @@ git clone -b iris-go https://github.com/i-am-the-slime/purescript-analyzer iris
 cargo build --release -p iris-cli --manifest-path iris/Cargo.toml   # builds iris/target/release/iris
 
 cd my-spago-project
-mkdir -p out && (cd out && go mod init example.com/myapp)
-iris go --entry Main.main out
-cd out
-go get github.com/i-am-the-slime/iris-go@v0.1.0
-go build -o myapp . && ./myapp
+iris run --go -- some arguments
 ```
 
-`--entry` names the module and value to run. It can be an `Effect Unit`, or any value, which
-the program prints. Programs print exactly what the JavaScript build prints, except for the
+That compiles your program to Go, builds it against this module and runs it with the arguments
+after `--`. Rerun an unchanged program and it starts right away. `iris go` builds the same
+executable and prints its path. Set `IRIS_GO=/path/to/iris-go` to build against a checkout of
+this repository instead of the release.
+
+`--entry Main.main` picks the module and value to run. It can be an `Effect Unit`, or any
+value, which the program prints. Programs print exactly what the JavaScript build prints, except for the
 differences listed in Iris's
 [`documentation/go-output.md`](https://github.com/i-am-the-slime/purescript-analyzer/blob/iris-go/documentation/go-output.md).
 That document also lists the programs the Go backend rejects and the conventions for writing
