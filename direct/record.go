@@ -9,7 +9,7 @@ type foreignObject = *struct {
 	Vals  []any
 }
 
-// ForeignRecord is a record passed as Foreign: a JS object whose keys
+// ForeignRecord is a record passed as Foreign: an object whose keys
 // enumerate in the order its fields were assigned.
 func ForeignRecord(keys []string, values []any) any {
 	record := object.Empty[any]()
@@ -25,7 +25,7 @@ func ForeignField(record any, key string) any {
 }
 
 // FoldSCObject implements Foreign.Object._foldSCObject: a fold over the
-// entries in JS enumeration order that stops at the first Nothing, for which
+// entries in insertion order that stops at the first Nothing, for which
 // justValue reports nil.
 func FoldSCObject[A, Z, M any](m *struct {
 	Index map[string]int

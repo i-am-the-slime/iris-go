@@ -19,7 +19,7 @@ import (
 )
 
 // ParseJSON implements Yoga.JSON._parseJSON (`JSON.parse`): objects keep
-// their keys in JS enumeration order, numbers are float64, and malformed
+// their keys in insertion order, numbers are float64, and malformed
 // input throws a SyntaxError.
 func ParseJSON(payload string) any {
 	decoder := json.NewDecoder(strings.NewReader(payload))

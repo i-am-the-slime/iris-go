@@ -5,8 +5,7 @@
 // boolean, a number, a string, an array or an object. Here it is the sealed
 // interface Json, whose nil is null and whose other values are one of five
 // unexported cases. An object is a go-support/object table of Json (an
-// `Object Json`), so its keys keep JavaScript's enumeration order: array
-// indices ascending, then the other keys in insertion order.
+// `Object Json`), so its keys keep insertion order.
 package argonaut
 
 import (

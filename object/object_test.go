@@ -18,10 +18,10 @@ func build(entries ...string) *struct {
 	return m
 }
 
-func TestKeysEnumerateArrayIndicesFirstThenInsertionOrder(t *testing.T) {
+func TestKeysEnumerateInInsertionOrderEvenWhenIntegerLike(t *testing.T) {
 	m := build("b", "10", "a", "2", "01", "4294967295", "4294967294")
 	got := Keys(m)
-	want := []string{"2", "10", "4294967294", "b", "a", "01", "4294967295"}
+	want := []string{"b", "10", "a", "2", "01", "4294967295", "4294967294"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Keys = %v, want %v", got, want)
 	}
@@ -60,9 +60,9 @@ func TestEmptyAcceptsReadsAndWrites(t *testing.T) {
 	Poke("k", 1, CopyST(e)())()
 }
 
-func TestFromEntriesKeepsAssignmentOrderAndCountsArrayIndices(t *testing.T) {
+func TestFromEntriesKeepsAssignmentOrder(t *testing.T) {
 	m := FromEntries([]string{"zeta", "1", "alpha"}, []int{1, 2, 3})
-	if got := Keys(m); !reflect.DeepEqual(got, []string{"1", "zeta", "alpha"}) {
+	if got := Keys(m); !reflect.DeepEqual(got, []string{"zeta", "1", "alpha"}) {
 		t.Fatalf("Keys = %v", got)
 	}
 	if got := Lookup(0, func(v int) int { return v }, "alpha", m); got != 3 {

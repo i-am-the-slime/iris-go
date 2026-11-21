@@ -20,8 +20,8 @@ func FastForeachE[A any](values []A, f func(A)) {
 
 // ObjHackType is hyrule's `ObjHack a`, the JavaScript object `{ r, q, m }`: whether a push is
 // running, the pushes queued behind it, and a stack of key-to-subscriber maps, one per nesting
-// level of the running push. JavaScript iterates integer keys in ascending order, so every
-// iteration sorts them.
+// level of the running push. Subscriber ids count up, so iterating them in ascending order runs
+// subscribers in the order they subscribed.
 type ObjHackType[A any] struct{ table *subscribers[A] }
 
 type subscribers[A any] struct {

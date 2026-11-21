@@ -3,16 +3,12 @@
 // An `Object a` (and an `STObject h a`, which unsafeFreeze hands back
 // unchanged) is a pointer to a table whose fields match
 // TypeDocs.objectGoType: Index maps each key to its slot in the parallel
-// Keys/Vals slices, which hold entries in insertion order, and Ints counts the
-// array-index keys. JS enumerates array-index keys first, in ascending numeric
-// order, then the remaining keys in insertion order; every traversal here
-// reproduces that order.
+// Keys/Vals slices, which hold entries in insertion order. Every traversal
+// visits entries in that order. Ints is unused and stays zero.
 //
 // Immutable operations never mutate a table they did not allocate, so the
 // pure map functions share the key index with their source.
 package object
-
-import "sort"
 
 type table[A any] struct {
 	Index map[string]int
@@ -109,7 +105,7 @@ func FmapObject[A, B any](m *struct {
 	for i, v := range src.Vals {
 		vals[i] = f(v)
 	}
-	return out(&table[B]{Index: src.Index, Ints: src.Ints, Keys: src.Keys, Vals: vals})
+	return out(&table[B]{Index: src.Index, Keys: src.Keys, Vals: vals})
 }
 
 // MapWithKey implements Foreign.Object._mapWithKey.
@@ -129,7 +125,7 @@ func MapWithKey[A, B any](m *struct {
 	for i, v := range src.Vals {
 		vals[i] = f(src.Keys[i], v)
 	}
-	return out(&table[B]{Index: src.Index, Ints: src.Ints, Keys: src.Keys, Vals: vals})
+	return out(&table[B]{Index: src.Index, Keys: src.Keys, Vals: vals})
 }
 
 // FoldM implements Foreign.Object._foldM.
@@ -384,7 +380,6 @@ func (t *table[A]) clone() *table[A] {
 	for k, i := range t.Index {
 		c.Index[k] = i
 	}
-	c.Ints = t.Ints
 	c.Keys = append(c.Keys, t.Keys...)
 	c.Vals = append(c.Vals, t.Vals...)
 	return c
@@ -401,9 +396,6 @@ func (t *table[A]) set(k string, v A) {
 	t.Index[k] = len(t.Keys)
 	t.Keys = append(t.Keys, k)
 	t.Vals = append(t.Vals, v)
-	if isArrayIndex(k) {
-		t.Ints++
-	}
 }
 
 func (t *table[A]) remove(k string) {
@@ -421,67 +413,13 @@ func (t *table[A]) remove(k string) {
 	for j := i; j < len(t.Keys); j++ {
 		t.Index[t.Keys[j]] = j
 	}
-	if isArrayIndex(k) {
-		t.Ints--
-	}
 }
 
-// each visits the entries in JS enumeration order until yield returns false.
+// each visits the entries in insertion order until yield returns false.
 func (t *table[A]) each(yield func(string, A) bool) {
-	if t.Ints == 0 {
-		for i, k := range t.Keys {
-			if !yield(k, t.Vals[i]) {
-				return
-			}
-		}
-		return
-	}
-	for _, i := range t.enumerationOrder() {
-		if !yield(t.Keys[i], t.Vals[i]) {
+	for i, k := range t.Keys {
+		if !yield(k, t.Vals[i]) {
 			return
 		}
 	}
-}
-
-// enumerationOrder lists slots with array-index keys first (ascending), then
-// the rest in insertion order. Canonical indices have no leading zeros, so
-// numeric order is length order, then lexicographic.
-func (t *table[A]) enumerationOrder() []int {
-	order := make([]int, 0, len(t.Keys))
-	for i, k := range t.Keys {
-		if isArrayIndex(k) {
-			order = append(order, i)
-		}
-	}
-	sort.Slice(order, func(a, b int) bool {
-		ka, kb := t.Keys[order[a]], t.Keys[order[b]]
-		if len(ka) != len(kb) {
-			return len(ka) < len(kb)
-		}
-		return ka < kb
-	})
-	for i, k := range t.Keys {
-		if !isArrayIndex(k) {
-			order = append(order, i)
-		}
-	}
-	return order
-}
-
-// isArrayIndex reports whether k is a canonical JS array index: a decimal
-// integer below 2^32 - 1 without leading zeros.
-func isArrayIndex(k string) bool {
-	n := len(k)
-	if n == 0 || n > 10 || (n > 1 && k[0] == '0') {
-		return false
-	}
-	var value uint64
-	for i := 0; i < n; i++ {
-		c := k[i]
-		if c < '0' || c > '9' {
-			return false
-		}
-		value = value*10 + uint64(c-'0')
-	}
-	return value < 4294967295
 }
