@@ -2,6 +2,7 @@ package prim
 
 import (
 	"strings"
+	"unicode/utf8"
 	"testing"
 )
 
@@ -81,5 +82,26 @@ func TestCodeUnitsViewSlicesValidTextWithoutCopying(t *testing.T) {
 	})
 	if allocations != 0 {
 		t.Errorf("indexing valid text allocated %v times", allocations)
+	}
+}
+
+// A view's ASCII is its text when every byte is below 0x80, and "" otherwise;
+// each of its bytes is the code unit CharAt reads at that index.
+func TestCodeUnitsViewASCIIIsTheTextOfBytesBelow0x80(t *testing.T) {
+	for _, s := range viewSamples() {
+		view := UTF16(s)
+		want := ""
+		if strings.IndexFunc(s, func(r rune) bool { return r >= utf8.RuneSelf }) < 0 {
+			want = s
+		}
+		ascii := view.ASCII()
+		if ascii != want {
+			t.Errorf("ASCII(%q) = %q, want %q", s, ascii, want)
+		}
+		for i := 0; i < len(ascii); i++ {
+			if got, want := justChar(rune(ascii[i])), view.CharAt(justChar, nothingChar, int32(i)); got != want {
+				t.Errorf("ASCII(%q)[%d] = %v, CharAt gives %v", s, i, got, want)
+			}
+		}
 	}
 }

@@ -76,6 +76,16 @@ func scalarWideCodeUnits(text string, length int) (units []uint16, starts []int3
 	return units, starts
 }
 
+// ASCII is the viewed text when each of its code units is one of its bytes,
+// and "" otherwise. A loop that indexes the view reads a code unit below
+// len(view.ASCII()) as that byte, without a call.
+func (view *CodeUnitsView) ASCII() string {
+	if view.form == asciiForm {
+		return view.text
+	}
+	return ""
+}
+
 // Length is CodeUnitLength.
 func (view *CodeUnitsView) Length() int32 {
 	return view.length
