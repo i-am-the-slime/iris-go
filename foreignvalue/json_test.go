@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/i-am-the-slime/iris-go/exception"
+	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
 
@@ -121,11 +122,11 @@ func TestStringsWithoutEscapesShareThePayload(t *testing.T) {
 }
 
 func TestStringifyOmitsUndefinedMembersAndNullsUndefinedElements(t *testing.T) {
-	value := WriteObject([]string{"a", "gone", "b"}, []any{[]any{Undefined, 1.0, math.NaN()}, Undefined, []string{"x"}})
+	value := object.FromEntries([]string{"a", "gone", "b"}, []any{[]any{Undefined, 1.0, math.NaN()}, Undefined, []string{"x"}})
 	if got := UnsafeStringify(value); got != `{"a":[null,1,null],"b":["x"]}` {
 		t.Fatalf("got %s", got)
 	}
-	if got := UnsafePrettyStringify(2, WriteObject([]string{"gone"}, []any{Undefined})); got != "{}" {
+	if got := UnsafePrettyStringify(2, object.FromEntries([]string{"gone"}, []any{Undefined})); got != "{}" {
 		t.Fatalf("pretty empty = %q", got)
 	}
 	if got := UnsafeStringify(Undefined); got != Undefined.(string) {

@@ -169,9 +169,14 @@ func (p *jsonParser) keyword(word string) {
 	}
 }
 
-// number reads `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?` as JS does,
-// correctly rounded; out of range literals become an infinity or a zero.
+// number is numberValue as a Foreign.
 func (p *jsonParser) number() any {
+	return boxNumber(p.numberValue())
+}
+
+// numberValue reads `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?` as JS
+// does, correctly rounded; out of range literals become an infinity or a zero.
+func (p *jsonParser) numberValue() float64 {
 	start := p.position
 	negative := p.peek() == '-'
 	if negative {
@@ -217,12 +222,12 @@ func (p *jsonParser) number() any {
 		if negative {
 			number = -number
 		}
-		return boxNumber(number)
+		return number
 	}
 	return p.slowNumber(start)
 }
 
-func (p *jsonParser) slowNumber(start int) any {
+func (p *jsonParser) slowNumber(start int) float64 {
 	number, _ := strconv.ParseFloat(p.input[start:p.position], 64)
 	return number
 }
