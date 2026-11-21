@@ -4,7 +4,11 @@
 // called, so effectful callbacks are invoked directly rather than as thunks.
 package direct
 
-import "slices"
+import (
+	"slices"
+
+	"github.com/i-am-the-slime/iris-go/array"
+)
 
 // All implements Data.Array.allImpl.
 func All[A any](predicate func(A) bool, xs []A) bool {
@@ -172,5 +176,5 @@ func FromFoldable[A, F any](
 	for list := foldr(cons)(nil)(xs); list != nil; list = list.Tail {
 		elements = append(elements, list.Head)
 	}
-	return elements
+	return array.Bounded(elements)
 }

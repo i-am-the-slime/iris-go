@@ -38,7 +38,7 @@ func Range(start int, end int) []int {
 	if start > end {
 		step = -1
 	}
-	out := make([]int, 0, step*(end-start)+1)
+	out := make([]int, 0, Size(step*(end-start)+1))
 	for i := start; i != end; i += step {
 		out = append(out, i)
 	}
@@ -48,6 +48,7 @@ func Range(start int, end int) []int {
 // Snoc returns a new array with value appended, preserving PureScript array
 // immutability even when xs has spare capacity.
 func Snoc[T any](xs []T, value T) []T {
+	room(len(xs), 1)
 	out := make([]T, len(xs)+1)
 	copy(out, xs)
 	out[len(xs)] = value
@@ -125,7 +126,7 @@ func Bind[A, B any](xs []A, f func(A) []B) []B {
 	for _, x := range xs {
 		out = append(out, f(x)...)
 	}
-	return out
+	return Bounded(out)
 }
 
 // Concat implements Data.Array.concat (flatten one level).
@@ -134,12 +135,13 @@ func Concat[T any](xss [][]T) []T {
 	for _, xs := range xss {
 		out = append(out, xs...)
 	}
-	return out
+	return Bounded(out)
 }
 
 // Append implements Data.Semigroup.concatArray — the `<>` on arrays, which
 // `cons` (`[x] <> xs`) also lowers to.
 func Append[T any](xs []T, ys []T) []T {
+	room(len(xs), len(ys))
 	out := make([]T, 0, len(xs)+len(ys))
 	out = append(out, xs...)
 	out = append(out, ys...)
@@ -213,6 +215,7 @@ func InsertAt[A, R any](just func([]A) R, nothing R, index int32, value A, xs []
 	if at < 0 || at > len(xs) {
 		return nothing
 	}
+	room(len(xs), 1)
 	result := make([]A, len(xs)+1)
 	copy(result, xs[:at])
 	result[at] = value
@@ -243,6 +246,7 @@ func UnsafeFreeze[A any](arr *[]A) func() []A {
 // Push implements Data.Array.ST.pushImpl — append, yielding the new length.
 func Push[A any](x A, arr *[]A) func() int32 {
 	return func() int32 {
+		room(len(*arr), 1)
 		*arr = append(*arr, x)
 		return int32(len(*arr))
 	}
@@ -317,6 +321,7 @@ func Appender[B any]() func([]B, B) []B {
 		if len(bs) != len(last) || cap(bs) != cap(last) || (len(bs) > 0 && &bs[0] != &last[0]) {
 			bs = bs[:len(bs):len(bs)]
 		}
+		room(len(bs), 1)
 		last = append(bs, b)
 		return last
 	}
@@ -363,6 +368,7 @@ func Unfoldr[M, T, A, B any](
 			return out
 		}
 		pair := fromJust(next)
+		room(len(out), 1)
 		out = append(out, fst(pair))
 		seed = snd(pair)
 	}

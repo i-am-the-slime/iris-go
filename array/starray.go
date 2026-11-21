@@ -65,7 +65,7 @@ func Pop[A, R any](just func(A) R, nothing R, arr *[]A) func() R {
 			return nothing
 		}
 		last := (*arr)[n-1]
-		*arr = (*arr)[:n-1:n-1]
+		*arr = (*arr)[: n-1 : n-1]
 		return just(last)
 	}
 }
@@ -87,6 +87,7 @@ func Shift[A, R any](just func(A) R, nothing R, arr *[]A) func() R {
 // length.
 func PushAll[A any](values []A, arr *[]A) func() int32 {
 	return func() int32 {
+		room(len(*arr), len(values))
 		*arr = append(*arr, values...)
 		return int32(len(*arr))
 	}
@@ -96,6 +97,7 @@ func PushAll[A any](values []A, arr *[]A) func() int32 {
 // new length.
 func UnshiftAll[A any](values []A, arr *[]A) func() int32 {
 	return func() int32 {
+		room(len(*arr), len(values))
 		out := make([]A, 0, len(values)+len(*arr))
 		out = append(out, values...)
 		*arr = append(out, *arr...)
@@ -112,6 +114,7 @@ func Splice[A any](start int32, howMany int32, inserted []A, arr *[]A) func() []
 		from := clampSpliceStart(int(start), n)
 		count := min(max(int(howMany), 0), n-from)
 		removed := copyOf((*arr)[from : from+count])
+		room(n-count, len(inserted))
 		out := make([]A, 0, n-count+len(inserted))
 		out = append(out, (*arr)[:from]...)
 		out = append(out, inserted...)
