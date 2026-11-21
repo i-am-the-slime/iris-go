@@ -1,0 +1,15 @@
+package:
+  name: example-int64edges01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - int64
+    - arrays
+    - maybe
+    - integers
+    - tuples
+    - foldable-traversable
+workspace:
+  packageSet:
+    registry: 73.2.0
