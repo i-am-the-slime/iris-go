@@ -169,7 +169,7 @@ func FromValue_Int64(value any, _ bool) int64 { return fromValue(value, FromNumb
 func FromValue_UInt64(value any, _ bool) uint64 { return fromValue(value, FromNumber_UInt64) }
 
 func bitsField(value any, field string) int32 {
-	return foreignvalue.UnsafeReadPropImpl(0, func(bits any) int32 {
+	return foreignvalue.UnsafeReadPropImpl(func() int32 { return 0 }, func(bits any) int32 {
 		switch bits := bits.(type) {
 		case float64:
 			return toInt32(bits)

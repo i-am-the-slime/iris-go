@@ -96,10 +96,11 @@ func IsArray(value any) bool {
 // UnsafeReadPropImpl implements Foreign.Index.unsafeReadPropImpl:
 // `value == null ? failure : success(value[key])`, a missing property being
 // undefined. The key is a String (an object property) or an Int (an array
-// index).
-func UnsafeReadPropImpl[R, K any](failure R, success func(any) R, key K, value any) R {
+// index). The failure value is built only when the read fails: a successful
+// read does not pay for the error it would have reported.
+func UnsafeReadPropImpl[R, K any](failure func() R, success func(any) R, key K, value any) R {
 	if value == nil || isUndefined(value) {
-		return failure
+		return failure()
 	}
 	return success(property(value, key))
 }
