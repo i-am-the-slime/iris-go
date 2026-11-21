@@ -1,9 +1,7 @@
 package syntax
 
 import (
-	"fmt"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 	"unicode"
@@ -19,7 +17,6 @@ const (
 	Singleline                           = 0x0010 // "s"
 	IgnorePatternWhitespace              = 0x0020 // "x"
 	RightToLeft                          = 0x0040 // "r"
-	Debug                                = 0x0080 // "d"
 	ECMAScript                           = 0x0100 // "e"
 	RE2                                  = 0x0200 // RE2 compat mode
 	Unicode                              = 0x0400 // "u"
@@ -40,8 +37,6 @@ func optionFromCode(ch rune) RegexOptions {
 		return Singleline
 	case 'x', 'X':
 		return IgnorePatternWhitespace
-	case 'd', 'D':
-		return Debug
 	case 'e', 'E':
 		return ECMAScript
 	case 'u', 'U':
@@ -56,14 +51,27 @@ func optionFromCode(ch rune) RegexOptions {
 type Error struct {
 	Code ErrorCode
 	Expr string
-	Args []interface{}
+	Args []string
 }
 
 func (e *Error) Error() string {
-	if len(e.Args) == 0 {
-		return "error parsing regexp: " + e.Code.String() + " in `" + e.Expr + "`"
+	return "error parsing regexp: " + substitute(e.Code.String(), e.Args) + " in `" + e.Expr + "`"
+}
+
+// substitute replaces the template's verbs (%v or %c) with the arguments, in
+// order.
+func substitute(template string, args []string) string {
+	text := make([]byte, 0, len(template))
+	for i := 0; i < len(template); i++ {
+		if template[i] == '%' && i+1 < len(template) && len(args) > 0 {
+			text = append(text, args[0]...)
+			args = args[1:]
+			i++
+			continue
+		}
+		text = append(text, template[i])
 	}
-	return "error parsing regexp: " + fmt.Sprintf(e.Code.String(), e.Args...) + " in `" + e.Expr + "`"
+	return string(text)
 }
 
 // An ErrorCode describes a failure to parse a regular expression.
@@ -176,10 +184,6 @@ func Parse(re string, op RegexOptions) (*RegexTree, error) {
 		options:    op,
 	}
 
-	if tree.options&Debug > 0 {
-		os.Stdout.WriteString(tree.Dump())
-	}
-
 	return tree, nil
 }
 
@@ -192,7 +196,7 @@ func (p *parser) setPattern(pattern string) {
 		p.pattern = append(p.pattern, r)
 	}
 }
-func (p *parser) getErr(code ErrorCode, args ...interface{}) error {
+func (p *parser) getErr(code ErrorCode, args ...string) error {
 	return &Error{Code: code, Expr: p.patternRaw, Args: args}
 }
 
@@ -948,7 +952,7 @@ func (p *parser) scanGroupOpen() (*regexNode, error) {
 						}
 
 						if !p.isCaptureSlot(uncapnum) {
-							return nil, p.getErr(ErrUndefinedBackRef, uncapnum)
+							return nil, p.getErr(ErrUndefinedBackRef, strconv.Itoa(uncapnum))
 						}
 
 						// check if we have bogus characters after the number
@@ -998,10 +1002,10 @@ func (p *parser) scanGroupOpen() (*regexNode, error) {
 						if p.isCaptureSlot(capnum) {
 							return newRegexNodeM(ntTestref, p.options, capnum), nil
 						}
-						return nil, p.getErr(ErrUndefinedReference, capnum)
+						return nil, p.getErr(ErrUndefinedReference, strconv.Itoa(capnum))
 					}
 
-					return nil, p.getErr(ErrMalformedReference, capnum)
+					return nil, p.getErr(ErrMalformedReference, strconv.Itoa(capnum))
 
 				} else if IsWordChar(ch) {
 					capname := p.scanCapname()
@@ -1251,7 +1255,7 @@ func (p *parser) scanBasicBackslash(scanOnly bool) (*regexNode, error) {
 			if p.isCaptureSlot(capnum) {
 				return newRegexNodeM(ntRef, p.options, capnum), nil
 			}
-			return nil, p.getErr(ErrUndefinedBackRef, capnum)
+			return nil, p.getErr(ErrUndefinedBackRef, strconv.Itoa(capnum))
 		}
 	} else if !angled && ch >= '1' && ch <= '9' { // Try to parse backreference or octal: \1
 		capnum, err := p.scanDecimal()
@@ -1267,7 +1271,7 @@ func (p *parser) scanBasicBackslash(scanOnly bool) (*regexNode, error) {
 			return newRegexNodeM(ntRef, p.options, capnum), nil
 		}
 		if capnum <= 9 && !p.useOptionE() {
-			return nil, p.getErr(ErrUndefinedBackRef, capnum)
+			return nil, p.getErr(ErrUndefinedBackRef, strconv.Itoa(capnum))
 		}
 
 	} else if angled {
@@ -1478,7 +1482,7 @@ func (p *parser) scanCharSet(caseInsensitive, scanOnly bool) (*CharSet, error) {
 			case 'D', 'd':
 				if !scanOnly {
 					if inRange {
-						return nil, p.getErr(ErrBadClassInCharRange, ch)
+						return nil, p.getErr(ErrBadClassInCharRange, strconv.Itoa(int(ch)))
 					}
 					cc.addDigit(p.useOptionE() || p.useRE2(), ch == 'D', p.patternRaw)
 				}
@@ -1487,7 +1491,7 @@ func (p *parser) scanCharSet(caseInsensitive, scanOnly bool) (*CharSet, error) {
 			case 'S', 's':
 				if !scanOnly {
 					if inRange {
-						return nil, p.getErr(ErrBadClassInCharRange, ch)
+						return nil, p.getErr(ErrBadClassInCharRange, strconv.Itoa(int(ch)))
 					}
 					cc.addSpace(p.useOptionE(), p.useRE2(), ch == 'S')
 				}
@@ -1496,7 +1500,7 @@ func (p *parser) scanCharSet(caseInsensitive, scanOnly bool) (*CharSet, error) {
 			case 'W', 'w':
 				if !scanOnly {
 					if inRange {
-						return nil, p.getErr(ErrBadClassInCharRange, ch)
+						return nil, p.getErr(ErrBadClassInCharRange, strconv.Itoa(int(ch)))
 					}
 
 					cc.addWord(p.useOptionE() || p.useRE2(), ch == 'W')
@@ -1506,7 +1510,7 @@ func (p *parser) scanCharSet(caseInsensitive, scanOnly bool) (*CharSet, error) {
 			case 'p', 'P':
 				if !scanOnly {
 					if inRange {
-						return nil, p.getErr(ErrBadClassInCharRange, ch)
+						return nil, p.getErr(ErrBadClassInCharRange, strconv.Itoa(int(ch)))
 					}
 					prop, err := p.parseProperty()
 					if err != nil {
@@ -1585,7 +1589,7 @@ func (p *parser) scanCharSet(caseInsensitive, scanOnly bool) (*CharSet, error) {
 				} else {
 					// a regular range, like a-z
 					if chPrev > ch {
-						return nil, p.getErr(ErrReversedCharRange, chPrev, ch)
+						return nil, p.getErr(ErrReversedCharRange, string(chPrev), string(ch))
 					}
 					cc.addRange(chPrev, ch)
 				}

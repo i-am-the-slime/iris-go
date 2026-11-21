@@ -2,9 +2,7 @@ package syntax
 
 import (
 	"bytes"
-	"fmt"
 	"math"
-	"strconv"
 )
 
 type RegexTree struct {
@@ -550,105 +548,4 @@ var typeStr = []string{
 	"ECMABoundary", "NonECMABoundary",
 }
 
-func (n *regexNode) description() string {
-	buf := &bytes.Buffer{}
-
-	buf.WriteString(typeStr[n.t])
-
-	if (n.options & ExplicitCapture) != 0 {
-		buf.WriteString("-C")
-	}
-	if (n.options & IgnoreCase) != 0 {
-		buf.WriteString("-I")
-	}
-	if (n.options & RightToLeft) != 0 {
-		buf.WriteString("-L")
-	}
-	if (n.options & Multiline) != 0 {
-		buf.WriteString("-M")
-	}
-	if (n.options & Singleline) != 0 {
-		buf.WriteString("-S")
-	}
-	if (n.options & IgnorePatternWhitespace) != 0 {
-		buf.WriteString("-X")
-	}
-	if (n.options & ECMAScript) != 0 {
-		buf.WriteString("-E")
-	}
-
-	switch n.t {
-	case ntOneloop, ntNotoneloop, ntOnelazy, ntNotonelazy, ntOne, ntNotone:
-		buf.WriteString("(Ch = " + CharDescription(n.ch) + ")")
-		break
-	case ntCapture:
-		buf.WriteString("(index = " + strconv.Itoa(n.m) + ", unindex = " + strconv.Itoa(n.n) + ")")
-		break
-	case ntRef, ntTestref:
-		buf.WriteString("(index = " + strconv.Itoa(n.m) + ")")
-		break
-	case ntMulti:
-		fmt.Fprintf(buf, "(String = %s)", string(n.str))
-		break
-	case ntSet, ntSetloop, ntSetlazy:
-		buf.WriteString("(Set = " + n.set.String() + ")")
-		break
-	}
-
-	switch n.t {
-	case ntOneloop, ntNotoneloop, ntOnelazy, ntNotonelazy, ntSetloop, ntSetlazy, ntLoop, ntLazyloop:
-		buf.WriteString("(Min = ")
-		buf.WriteString(strconv.Itoa(n.m))
-		buf.WriteString(", Max = ")
-		if n.n == math.MaxInt32 {
-			buf.WriteString("inf")
-		} else {
-			buf.WriteString(strconv.Itoa(n.n))
-		}
-		buf.WriteString(")")
-
-		break
-	}
-
-	return buf.String()
-}
-
 var padSpace = []byte("                                ")
-
-func (t *RegexTree) Dump() string {
-	return t.root.dump()
-}
-
-func (n *regexNode) dump() string {
-	var stack []int
-	CurNode := n
-	CurChild := 0
-
-	buf := bytes.NewBufferString(CurNode.description())
-	buf.WriteRune('\n')
-
-	for {
-		if CurNode.children != nil && CurChild < len(CurNode.children) {
-			stack = append(stack, CurChild+1)
-			CurNode = CurNode.children[CurChild]
-			CurChild = 0
-
-			Depth := len(stack)
-			if Depth > 32 {
-				Depth = 32
-			}
-			buf.Write(padSpace[:Depth])
-			buf.WriteString(CurNode.description())
-			buf.WriteRune('\n')
-		} else {
-			if len(stack) == 0 {
-				break
-			}
-
-			CurChild = stack[len(stack)-1]
-			stack = stack[:len(stack)-1]
-			CurNode = CurNode.next
-		}
-	}
-	return buf.String()
-}

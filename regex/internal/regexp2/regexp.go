@@ -140,7 +140,6 @@ const (
 	Singleline                           = 0x0010 // "s"
 	IgnorePatternWhitespace              = 0x0020 // "x"
 	RightToLeft                          = 0x0040 // "r"
-	Debug                                = 0x0080 // "d"
 	ECMAScript                           = 0x0100 // "e"
 	RE2                                  = 0x0200 // RE2 (regexp package) compatibility mode
 	Unicode                              = 0x0400 // "u"
@@ -148,10 +147,6 @@ const (
 
 func (re *Regexp) RightToLeft() bool {
 	return re.options&RightToLeft != 0
-}
-
-func (re *Regexp) Debug() bool {
-	return re.options&Debug != 0
 }
 
 // Replace searches the input string and replaces each match found with the replacement text.

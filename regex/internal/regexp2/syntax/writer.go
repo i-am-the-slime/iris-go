@@ -2,9 +2,9 @@ package syntax
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"math"
-	"os"
+	"strconv"
 )
 
 func Write(tree *RegexTree) (*Code, error) {
@@ -16,11 +16,6 @@ func Write(tree *RegexTree) (*Code, error) {
 	}
 
 	code, err := w.codeFromTree(tree)
-
-	if tree.options&Debug > 0 && code != nil {
-		os.Stdout.WriteString(code.Dump())
-		os.Stdout.WriteString("\n")
-	}
 
 	return code, err
 }
@@ -360,7 +355,7 @@ func (w *writer) emitFragment(nodetype nodeType, node *regexNode, curIndex int) 
 		w.emit(InstOp(node.t))
 
 	default:
-		return fmt.Errorf("unexpected opcode in regular expression generation: %v", nodetype)
+		return errors.New("unexpected opcode in regular expression generation: " + strconv.Itoa(int(nodetype)))
 	}
 
 	return nil

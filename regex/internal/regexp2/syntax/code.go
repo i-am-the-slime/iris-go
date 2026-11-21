@@ -1,10 +1,6 @@
 package syntax
 
-import (
-	"bytes"
-	"fmt"
-	"math"
-)
+import "strconv"
 
 // similar to prog.go in the go regex package...also with comment 'may not belong in this package'
 
@@ -133,7 +129,7 @@ func opcodeSize(op InstOp) int {
 		return 3
 
 	default:
-		panic(fmt.Errorf("Unexpected op code: %v", op))
+		panic("Unexpected op code: " + strconv.Itoa(int(op)))
 	}
 }
 
@@ -169,106 +165,4 @@ func operatorDescription(op InstOp) string {
 	}
 
 	return desc
-}
-
-// OpcodeDescription is a humman readable string of the specific offset
-func (c *Code) OpcodeDescription(offset int) string {
-	buf := &bytes.Buffer{}
-
-	op := InstOp(c.Codes[offset])
-	fmt.Fprintf(buf, "%06d ", offset)
-
-	if opcodeBacktracks(op & Mask) {
-		buf.WriteString("*")
-	} else {
-		buf.WriteString(" ")
-	}
-	buf.WriteString(operatorDescription(op))
-	buf.WriteString("(")
-	op &= Mask
-
-	switch op {
-	case One, Notone, Onerep, Notonerep, Oneloop, Notoneloop, Onelazy, Notonelazy:
-		buf.WriteString("Ch = ")
-		buf.WriteString(CharDescription(rune(c.Codes[offset+1])))
-
-	case Set, Setrep, Setloop, Setlazy:
-		buf.WriteString("Set = ")
-		buf.WriteString(c.Sets[c.Codes[offset+1]].String())
-
-	case Multi:
-		fmt.Fprintf(buf, "String = %s", string(c.Strings[c.Codes[offset+1]]))
-
-	case Ref, Testref:
-		fmt.Fprintf(buf, "Index = %d", c.Codes[offset+1])
-
-	case Capturemark:
-		fmt.Fprintf(buf, "Index = %d", c.Codes[offset+1])
-		if c.Codes[offset+2] != -1 {
-			fmt.Fprintf(buf, ", Unindex = %d", c.Codes[offset+2])
-		}
-
-	case Nullcount, Setcount:
-		fmt.Fprintf(buf, "Value = %d", c.Codes[offset+1])
-
-	case Goto, Lazybranch, Branchmark, Lazybranchmark, Branchcount, Lazybranchcount:
-		fmt.Fprintf(buf, "Addr = %d", c.Codes[offset+1])
-	}
-
-	switch op {
-	case Onerep, Notonerep, Oneloop, Notoneloop, Onelazy, Notonelazy, Setrep, Setloop, Setlazy:
-		buf.WriteString(", Rep = ")
-		if c.Codes[offset+2] == math.MaxInt32 {
-			buf.WriteString("inf")
-		} else {
-			fmt.Fprintf(buf, "%d", c.Codes[offset+2])
-		}
-
-	case Branchcount, Lazybranchcount:
-		buf.WriteString(", Limit = ")
-		if c.Codes[offset+2] == math.MaxInt32 {
-			buf.WriteString("inf")
-		} else {
-			fmt.Fprintf(buf, "%d", c.Codes[offset+2])
-		}
-
-	}
-
-	buf.WriteString(")")
-
-	return buf.String()
-}
-
-func (c *Code) Dump() string {
-	buf := &bytes.Buffer{}
-
-	if c.RightToLeft {
-		fmt.Fprintln(buf, "Direction:  right-to-left")
-	} else {
-		fmt.Fprintln(buf, "Direction:  left-to-right")
-	}
-	if c.FcPrefix == nil {
-		fmt.Fprintln(buf, "Firstchars: n/a")
-	} else {
-		fmt.Fprintf(buf, "Firstchars: %v\n", c.FcPrefix.PrefixSet.String())
-	}
-
-	if c.BmPrefix == nil {
-		fmt.Fprintln(buf, "Prefix:     n/a")
-	} else {
-		fmt.Fprintf(buf, "Prefix:     %v\n", Escape(c.BmPrefix.String()))
-	}
-
-	fmt.Fprintf(buf, "Anchors:    %v\n", c.Anchors)
-	fmt.Fprintln(buf)
-
-	if c.BmPrefix != nil {
-		fmt.Fprintln(buf, "BoyerMoore:")
-		fmt.Fprintln(buf, c.BmPrefix.Dump("    "))
-	}
-	for i := 0; i < len(c.Codes); i += opcodeSize(InstOp(c.Codes[i])) {
-		fmt.Fprintln(buf, c.OpcodeDescription(i))
-	}
-
-	return buf.String()
 }

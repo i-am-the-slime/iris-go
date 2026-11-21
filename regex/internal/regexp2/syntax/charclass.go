@@ -2,9 +2,8 @@ package syntax
 
 import (
 	"bytes"
-	"encoding/binary"
-	"fmt"
 	"sort"
+	"strconv"
 	"unicode"
 	"unicode/utf8"
 )
@@ -206,8 +205,8 @@ func (c CharSet) mapHashFill(buf *bytes.Buffer) {
 		buf.WriteByte(1)
 	}
 
-	binary.Write(buf, binary.LittleEndian, len(c.ranges))
-	binary.Write(buf, binary.LittleEndian, len(c.categories))
+	// The counts keep sets whose parts would otherwise run together apart.
+	buf.WriteString(strconv.Itoa(len(c.ranges)) + "," + strconv.Itoa(len(c.categories)) + ",")
 	for _, r := range c.ranges {
 		buf.WriteRune(r.first)
 		buf.WriteRune(r.last)
@@ -330,7 +329,7 @@ func CharDescription(ch rune) string {
 	}*/
 
 	b := &bytes.Buffer{}
-	escape(b, ch, false) //fmt.Sprintf("%U", ch)
+	escape(b, ch, false)
 	return b.String()
 }
 
@@ -526,7 +525,7 @@ func isValidUnicodeCat(catName string) bool {
 func (c *CharSet) addCategory(categoryName string, negate, caseInsensitive bool, pattern string) {
 	if !isValidUnicodeCat(categoryName) {
 		// unknown unicode category, script, or property "blah"
-		panic(fmt.Errorf("Unknown unicode category, script, or property '%v'", categoryName))
+		panic("Unknown unicode category, script, or property '" + categoryName + "'")
 
 	}
 

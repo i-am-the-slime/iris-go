@@ -1,12 +1,8 @@
 package regexp2
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	"math"
-	"strconv"
-	"strings"
 	"time"
 	"unicode"
 
@@ -120,12 +116,6 @@ func (r *runner) scan(rt []rune, textstart int, quick bool, timeout time.Duratio
 
 	r.startTimeoutWatch()
 	for {
-		if r.re.Debug() {
-			//fmt.Printf("\nSearch content: %v\n", string(r.runtext))
-			fmt.Printf("\nSearch range: from 0 to %v\n", r.runtextend)
-			fmt.Printf("Firstchar search starting at %v stopping at %v\n", r.runtextpos, stoppos)
-		}
-
 		if r.findFirstChar() {
 			if err := r.checkTimeout(); err != nil {
 				return nil, err
@@ -134,10 +124,6 @@ func (r *runner) scan(rt []rune, textstart int, quick bool, timeout time.Duratio
 			if !initted {
 				r.initMatch()
 				initted = true
-			}
-
-			if r.re.Debug() {
-				fmt.Printf("Executing engine starting at %v\n\n", r.runtextpos)
 			}
 
 			if err := r.execute(); err != nil {
@@ -176,10 +162,6 @@ func (r *runner) execute() error {
 	r.goTo(0)
 
 	for {
-
-		if r.re.Debug() {
-			r.dumpState()
-		}
 
 		if err := r.checkTimeout(); err != nil {
 			return err
@@ -1033,14 +1015,6 @@ func (r *runner) backtrack() {
 	newpos := r.runtrack[r.runtrackpos]
 	r.runtrackpos++
 
-	if r.re.Debug() {
-		if newpos < 0 {
-			fmt.Printf("       Backtracking (back2) to code position %v\n", -newpos)
-		} else {
-			fmt.Printf("       Backtracking to code position %v\n", newpos)
-		}
-	}
-
 	if newpos < 0 {
 		newpos = -newpos
 		r.setOperator(r.code.Codes[newpos] | syntax.Back2)
@@ -1333,7 +1307,6 @@ func (r *runner) findFirstChar() bool {
 	} else {
 		for i := r.forwardchars(); i > 0; i-- {
 			n := r.forwardcharnext()
-			//fmt.Printf("%v in %v: %v\n", string(n), set.String(), set.CharIn(n))
 			if set.CharIn(n) {
 				r.backwardnext()
 				return true
@@ -1468,76 +1441,6 @@ func (r *runner) uncapture() {
 	r.runmatch.removeMatch(capnum)
 }
 
-//debug
-
-func (r *runner) dumpState() {
-	back := ""
-	if r.operator&syntax.Back != 0 {
-		back = " Back"
-	}
-	if r.operator&syntax.Back2 != 0 {
-		back += " Back2"
-	}
-	fmt.Printf("Text:  %v\nTrack: %v\nStack: %v\n       %s%s\n\n",
-		r.textposDescription(),
-		r.stackDescription(r.runtrack, r.runtrackpos),
-		r.stackDescription(r.runstack, r.runstackpos),
-		r.code.OpcodeDescription(r.codepos),
-		back)
-}
-
-func (r *runner) stackDescription(a []int, index int) string {
-	buf := &bytes.Buffer{}
-
-	fmt.Fprintf(buf, "%v/%v", len(a)-index, len(a))
-	if buf.Len() < 8 {
-		buf.WriteString(strings.Repeat(" ", 8-buf.Len()))
-	}
-
-	buf.WriteRune('(')
-	for i := index; i < len(a); i++ {
-		if i > index {
-			buf.WriteRune(' ')
-		}
-
-		buf.WriteString(strconv.Itoa(a[i]))
-	}
-
-	buf.WriteRune(')')
-
-	return buf.String()
-}
-
-func (r *runner) textposDescription() string {
-	buf := &bytes.Buffer{}
-
-	buf.WriteString(strconv.Itoa(r.runtextpos))
-
-	if buf.Len() < 8 {
-		buf.WriteString(strings.Repeat(" ", 8-buf.Len()))
-	}
-
-	if r.runtextpos > 0 {
-		buf.WriteString(syntax.CharDescription(r.runtext[r.runtextpos-1]))
-	} else {
-		buf.WriteRune('^')
-	}
-
-	buf.WriteRune('>')
-
-	for i := r.runtextpos; i < r.runtextend; i++ {
-		buf.WriteString(syntax.CharDescription(r.runtext[i]))
-	}
-	if buf.Len() >= 64 {
-		buf.Truncate(61)
-		buf.WriteString("...")
-	} else {
-		buf.WriteRune('$')
-	}
-
-	return buf.String()
-}
-
 // decide whether the pos
 // at the specified index is a boundary or not. It's just not worth
 // emitting inline code for this logic.
@@ -1563,17 +1466,7 @@ func (r *runner) checkTimeout() error {
 		return nil
 	}
 
-	if r.re.Debug() {
-		//Debug.WriteLine("")
-		//Debug.WriteLine("RegEx match timeout occurred!")
-		//Debug.WriteLine("Specified timeout:       " + TimeSpan.FromMilliseconds(_timeout).ToString())
-		//Debug.WriteLine("Timeout check frequency: " + TimeoutCheckFrequency)
-		//Debug.WriteLine("Search pattern:          " + _runregex._pattern)
-		//Debug.WriteLine("Input:                   " + r.runtext)
-		//Debug.WriteLine("About to throw RegexMatchTimeoutException.")
-	}
-
-	return fmt.Errorf("match timeout after %v on input `%v`", r.timeout, string(r.runtext))
+	return errors.New("match timeout after " + r.timeout.String() + " on input `" + string(r.runtext) + "`")
 }
 
 func (r *runner) initTrackCount() {

@@ -2,7 +2,6 @@ package regexp2
 
 import (
 	"bytes"
-	"fmt"
 )
 
 // Match is a single regex result match that contains groups and repeated captures
@@ -311,39 +310,4 @@ func newGroup(name string, text []rune, caps []int, capcount int) Group {
 	//log.Printf("newGroup! capcount %v, %+v", capcount, g)
 
 	return g
-}
-
-func (m *Match) dump() string {
-	buf := &bytes.Buffer{}
-	buf.WriteRune('\n')
-	if len(m.sparseCaps) > 0 {
-		for k, v := range m.sparseCaps {
-			fmt.Fprintf(buf, "Slot %v -> %v\n", k, v)
-		}
-	}
-
-	for i, g := range m.Groups() {
-		fmt.Fprintf(buf, "Group %v (%v), %v caps:\n", i, g.Name, len(g.Captures))
-
-		for _, c := range g.Captures {
-			fmt.Fprintf(buf, "  (%v, %v) %v\n", c.Index, c.Length, c.String())
-		}
-	}
-	/*
-		for i := 0; i < len(m.matchcount); i++ {
-			fmt.Fprintf(buf, "\nGroup %v (%v):\n", i, m.regex.GroupNameFromNumber(i))
-
-			for j := 0; j < m.matchcount[i]; j++ {
-				text := ""
-
-				if m.matches[i][j*2] >= 0 {
-					start := m.matches[i][j*2]
-					text = m.text[start : start+m.matches[i][j*2+1]]
-				}
-
-				fmt.Fprintf(buf, "  (%v, %v) %v\n", m.matches[i][j*2], m.matches[i][j*2+1], text)
-			}
-		}
-	*/
-	return buf.String()
 }
