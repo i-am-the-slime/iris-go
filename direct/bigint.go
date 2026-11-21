@@ -20,7 +20,7 @@ var BigIntOne = big.NewInt(1)
 // BigIntFromString implements JS.BigInt.fromStringImpl, which is JavaScript's
 // `BigInt(string)`: surrounding whitespace is ignored, an empty string is 0, a
 // decimal literal may carry a sign, and 0x/0o/0b literals may not. A lone
-// sign is 0, as in JavaScriptCore.
+// sign is not a number.
 func BigIntFromString[R any](just func(*big.Int) R, nothing R, s string) R {
 	if n, ok := parseBigIntLiteral(s); ok {
 		return just(n)
@@ -36,8 +36,11 @@ func BigIntFromTypeLevelInt(s string) *big.Int {
 
 func parseBigIntLiteral(s string) (*big.Int, bool) {
 	s = strings.TrimFunc(s, isJavaScriptSpace)
-	if s == "" || s == "+" || s == "-" {
+	if s == "" {
 		return new(big.Int), true
+	}
+	if s == "+" || s == "-" {
+		return nil, false
 	}
 	base := 10
 	if len(s) > 2 && s[0] == '0' {

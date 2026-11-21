@@ -140,10 +140,10 @@ func TestPatternsRE2CannotExpressBacktrackAsJavaScriptDoes(t *testing.T) {
 			t.Errorf("%q.search(/%s/%s) = %d, want %d", c.input, c.source, unglobal, got, c.search)
 		}
 	}
-	if _, err := Compile("(", "gy"); err == nil || !strings.HasPrefix(err.Error(), "Invalid regular expression: /(/gy: ") {
+	if _, err := Compile("(", "gy"); err == nil || !strings.HasPrefix(err.Error(), "Invalid regex /(/gy: ") {
 		t.Errorf("Compile(\"(\") = %v", err)
 	}
-	if _, err := Compile("(?<=a", ""); err == nil || !strings.HasPrefix(err.Error(), "Invalid regular expression: /(?<=a/: ") {
+	if _, err := Compile("(?<=a", ""); err == nil || !strings.HasPrefix(err.Error(), "Invalid regex /(?<=a/: ") {
 		t.Errorf("Compile(\"(?<=a\") = %v", err)
 	}
 }

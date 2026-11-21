@@ -153,10 +153,10 @@ type regexSyntaxError struct{ message string }
 
 func (e regexSyntaxError) Error() string { return e.message }
 
-// syntaxError words a rejected pattern the way V8 does; the reason itself is
-// RE2's or the translator's, not V8's.
+// syntaxError names the rejected pattern and why RE2 or the translator
+// rejected it.
 func syntaxError(source string, flags string, reason string) error {
-	return regexSyntaxError{"Invalid regular expression: /" + source + "/" + canonicalFlags(flags) + ": " + reason}
+	return regexSyntaxError{"Invalid regex /" + source + "/" + canonicalFlags(flags) + ": " + reason}
 }
 
 // modePrefix carries the flags RE2 implements itself; dotAll is translated
