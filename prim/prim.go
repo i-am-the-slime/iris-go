@@ -237,15 +237,11 @@ func IntMul(x int, y int) int {
 	return int(int32(int64(float64(x) * float64(y))))
 }
 
-// MultiplyInt32 is Data.Semiring's intMul, `x * y | 0`: JS rounds the
-// product to a double before ToInt32, which differs from wrapping
-// multiplication once the product exceeds 2^53 in magnitude.
+// MultiplyInt32 is Data.Semiring's intMul: int32 multiplication, which wraps
+// modulo 2^32. JavaScript's `x * y | 0` rounds a product beyond 2^53 to a
+// double first and so loses its low bits; PureScript's Int doesn't ask for that.
 func MultiplyInt32(x int32, y int32) int32 {
-	product := int64(x) * int64(y)
-	if product <= 1<<53 && product >= -(1<<53) {
-		return int32(product)
-	}
-	return int32(int64(float64(x) * float64(y)))
+	return x * y
 }
 
 func IntSub(x int, y int) int {

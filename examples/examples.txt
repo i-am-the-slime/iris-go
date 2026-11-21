@@ -182,7 +182,7 @@ PartialMatch01|Main.main|program|ok: here\nfailed: Failed pattern match\nfailed:
 StringOrdering01|Main.main|program|GT GT LT\nfalse true true\nLT LT LT\n[\"a\",\"z\",\"U+1F600\",\"U+10FFFF\",\"U+E000\",\"U+FFFF\"]\n[\"U+FFFF\",\"U+1F600\",\"m\"]
 ObjectFromHomogeneous01|Main.main|program|[\"alice=3\",\"bob=5\",\"carol=8\"]\n3 (Just 5)\n[\"alice=30\",\"bob=50\",\"carol=80\"]\n[\"north=\\\"N\\\"\",\"south=\\\"S\\\"\"]\n[1,2] (Just true)\n[\"10\",\"zeta\",\"alpha\",\"middle\"] [3,1,2,4]\n[\"zeta\",\"alpha\"]\n[\"zeta\",\"alpha\"]
 PartialCaseSection01|Main.main|program|ok: 2.5\nfailed: Failed pattern match\nok: inside\nfailed: Failed pattern match\nok: two\nfailed: Failed pattern match\nok: [2,8]\nok: [3.0,9.0]
-IntMultiply01|Main.main|program|123456789 * 987654321 = -67153024\n2147483647 * 2147483647 = 0\n99999999 * 99999999 = 1674919424\n-2147483648 * -2147483648 = 0\n-2147483648 * 3 = -2147483648\n46341 * 46341 = -2147479015\n-7 * 6 = -42\n-67153024 0 1674919424\n-1160465920 0
+IntMultiply01|Main.main|program|123456789 * 987654321 = -67153019\n2147483647 * 2147483647 = 1\n99999999 * 99999999 = 1674919425\n-2147483648 * -2147483648 = 0\n-2147483648 * 3 = -2147483648\n46341 * 46341 = -2147479015\n-7 * 6 = -42\n-67153019 1 1674919425\n-1160465913 0
 NegativeZero01|Main.main|program|0.0 -Infinity\n0.0 -Infinity\n0.0 -Infinity\n-Infinity -Infinity\n-Infinity\ntrue EQ\n-Infinity -Infinity Infinity Infinity
 FreeState01|Main.main|program|42
 FreeEffect01|Main.main|program|hello\nworld 3 false\nworld!\nstepped! after 5

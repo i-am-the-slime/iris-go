@@ -455,10 +455,30 @@ func IntRem(x int32, y int32) int32 {
 	return int32(int(x) % int(y))
 }
 
-// IntPow is `Math.pow(x, y) | 0`: computed on doubles, so negative exponents
-// truncate to 0 (except for ±1 bases) and overflow wraps modulo 2^32.
+// IntPow is Data.Int.pow: exponentiation by squaring in int32, which wraps
+// modulo 2^32 like every Int product. A negative exponent gives 1 / x^-y
+// truncated: 0, except for the bases 1 and -1.
 func IntPow(x int32, y int32) int32 {
-	return toInt32(NumberPow(float64(x), float64(y)))
+	if y < 0 {
+		switch x {
+		case 1:
+			return 1
+		case -1:
+			if y%2 == 0 {
+				return 1
+			}
+			return -1
+		}
+		return 0
+	}
+	result := int32(1)
+	for ; y > 0; y >>= 1 {
+		if y&1 == 1 {
+			result *= x
+		}
+		x *= x
+	}
+	return result
 }
 
 // IntToStringAs is `i.toString(radix)` for a Radix in 2..36: lower-case

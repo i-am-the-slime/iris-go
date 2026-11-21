@@ -237,7 +237,10 @@ func TestIntQuotRemPowFollowJavaScriptInt32Semantics(t *testing.T) {
 		{"pow -1 -3", IntPow(-1, -3), -1},
 		{"pow 0 -1", IntPow(0, -1), 0},
 		{"pow 0 0", IntPow(0, 0), 1},
-		{"pow 3 40 loses precision then wraps", IntPow(3, 40), 689956864},
+		{"pow 3 40 wraps", IntPow(3, 40), 689956897},
+		{"pow -1 -4", IntPow(-1, -4), 1},
+		{"pow 1 -5", IntPow(1, -5), 1},
+		{"pow -2 31 wraps", IntPow(-2, 31), -2147483648},
 		{"degree -5", IntDegree(-5), 5},
 		{"degree bottom", IntDegree(-2147483648), 2147483647},
 	}

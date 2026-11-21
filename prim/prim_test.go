@@ -165,11 +165,11 @@ func TestExistsCaseDispatchesOnThePayloadWitness(t *testing.T) {
 	}
 }
 
-func TestMultiplyInt32RoundsTheProductLikeJavaScript(t *testing.T) {
+func TestMultiplyInt32WrapsLikeInt32(t *testing.T) {
 	cases := []struct{ x, y, want int32 }{
-		{123456789, 987654321, -67153024},
-		{2147483647, 2147483647, 0},
-		{99999999, 99999999, 1674919424},
+		{123456789, 987654321, -67153019},
+		{2147483647, 2147483647, 1},
+		{99999999, 99999999, 1674919425},
 		{-2147483648, -2147483648, 0},
 		{-2147483648, 3, -2147483648},
 		{46341, 46341, -2147479015},
