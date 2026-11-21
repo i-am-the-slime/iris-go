@@ -1,7 +1,6 @@
 package aff
 
 import (
-	"fmt"
 	"os"
 	"sync"
 
@@ -213,7 +212,7 @@ func crash(failure exception.Error) {
 		wake := newWake()
 		settle(wake)
 		<-wake
-		fmt.Fprintln(os.Stderr, exception.Stack(failure))
+		os.Stderr.WriteString(exception.Stack(failure) + "\n")
 		os.Exit(1)
 	}()
 }

@@ -19,8 +19,8 @@
 package console
 
 import (
-	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -100,7 +100,7 @@ const clearTerminal = "\x1b[2J\x1b[3J\x1b[H"
 func Clear() {
 	info, err := os.Stdout.Stat()
 	if err == nil && info.Mode()&os.ModeCharDevice != 0 {
-		fmt.Fprint(os.Stdout, clearTerminal)
+		os.Stdout.WriteString(clearTerminal)
 	}
 }
 
@@ -111,15 +111,16 @@ func printIndented(stream *os.File, message string) {
 }
 
 func writeIndented(stream *os.File, message string) {
-	fmt.Fprintln(stream, strings.Repeat("  ", state.depth)+prim.ToUTF8(message))
+	stream.WriteString(strings.Repeat("  ", state.depth) + prim.ToUTF8(message) + "\n")
 }
 
 func printElapsed(start time.Time, label string) {
-	elapsed := fmt.Sprintf("[%.2fms]", float64(time.Since(start).Nanoseconds())/1e6)
+	milliseconds := float64(time.Since(start).Nanoseconds()) / 1e6
+	elapsed := "[" + strconv.FormatFloat(milliseconds, 'f', 2, 64) + "ms]"
 	if label != "" {
 		elapsed += " " + prim.ToUTF8(label)
 	}
-	fmt.Fprintln(os.Stderr, elapsed)
+	os.Stderr.WriteString(elapsed + "\n")
 }
 
 func Log(message string) func() {

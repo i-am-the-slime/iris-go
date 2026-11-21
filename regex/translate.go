@@ -2,7 +2,6 @@ package regex
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -425,7 +424,7 @@ func countGroups(source string) (count int, named bool) {
 }
 
 func codePoint(r rune) string {
-	return fmt.Sprintf(`\x{%x}`, r)
+	return `\x{` + strconv.FormatInt(int64(r), 16) + `}`
 }
 
 func isASCIILetter(r rune) bool {

@@ -4,7 +4,6 @@
 package exception
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -138,7 +137,7 @@ func ReportUncaught() {
 	if !ok {
 		panic(recovered)
 	}
-	fmt.Fprintln(os.Stderr, stack(failure))
+	os.Stderr.WriteString(stack(failure) + "\n")
 	os.Exit(1)
 }
 
