@@ -7,8 +7,6 @@ import (
 	"testing"
 )
 
-// The expected outputs are what Bun 1.2 prints for the same calls.
-
 func TestGroupsIndentTheFirstLineOfEachMessage(t *testing.T) {
 	stdout, stderr := captured(t, func() {
 		Print("a")

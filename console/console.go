@@ -1,5 +1,6 @@
 // Package console is the typed Go implementation of Effect.Console's foreign
-// imports, with the output of Bun's console, which the JavaScript build runs on:
+// imports. Effect.Console leaves the format of groups and timers to the host;
+// this one prints them much like Bun's console does:
 //
 //   - log, info and debug write to standard output, warn and error to standard
 //     error;
@@ -92,8 +93,8 @@ func TimeEnd(label string) {
 	}
 }
 
-// clearTerminal is what Bun writes: erase the screen and the scrollback, then
-// move the cursor home.
+// clearTerminal erases the screen and the scrollback, then moves the cursor
+// home.
 const clearTerminal = "\x1b[2J\x1b[3J\x1b[H"
 
 func Clear() {
