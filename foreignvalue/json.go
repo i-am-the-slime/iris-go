@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/i-am-the-slime/iris-go/exception"
+	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
 
@@ -152,22 +153,7 @@ func (p *jsonParser) object() any {
 // newObjectTable is the `Object Foreign` of the members in order, a repeated
 // key keeping its first slot and taking its last value.
 func newObjectTable(keys []string, values []any) objectTable {
-	table := objectTable(&struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []any
-	}{Index: make(map[string]int, len(keys)), Keys: make([]string, 0, len(keys)), Vals: make([]any, 0, len(keys))})
-	for i, key := range keys {
-		if slot, repeated := table.Index[key]; repeated {
-			table.Vals[slot] = values[i]
-			continue
-		}
-		table.Index[key] = len(table.Keys)
-		table.Keys = append(table.Keys, key)
-		table.Vals = append(table.Vals, values[i])
-	}
-	return table
+	return object.FromEntries(keys, values)
 }
 
 func (p *jsonParser) keyword(word string) {

@@ -2,9 +2,12 @@
 //
 // An `Object a` (and an `STObject h a`, which unsafeFreeze hands back
 // unchanged) is a pointer to a table whose fields match
-// TypeDocs.objectGoType: Index maps each key to its slot in the parallel
-// Keys/Vals slices, which hold entries in insertion order. Every traversal
-// visits entries in that order. Ints is unused and stays zero.
+// TypeDocs.objectGoType: Keys/Vals are parallel slices that hold entries in
+// insertion order, and Index maps each key to its slot. A table of at most
+// scanLimit keys may have no Index and is searched by scanning its keys,
+// which is faster for so few than hashing and saves building a map (JSON
+// documents hold many small objects). Every traversal visits entries in
+// insertion order. Ints is unused and stays zero.
 //
 // Immutable operations never mutate a table they did not allocate, so the
 // pure map functions share the key index with their source.
@@ -197,7 +200,7 @@ func Lookup[A, Z any](no Z, yes func(A) Z, k string, m *struct {
 	Keys  []string
 	Vals  []A
 }) Z {
-	if i, ok := m.Index[k]; ok {
+	if i, ok := of(m).slot(k); ok {
 		return yes(m.Vals[i])
 	}
 	return no
@@ -361,22 +364,54 @@ func UnsafeIndex[A any](m *struct {
 	Vals  []A
 }, k string) A {
 	var zero A
-	if i, ok := m.Index[k]; ok {
+	if i, ok := of(m).slot(k); ok {
 		return m.Vals[i]
 	}
 	return zero
 }
 
-func fresh[A any](capacity int) *table[A] {
-	return &table[A]{
-		Index: make(map[string]int, capacity),
-		Keys:  make([]string, 0, capacity),
-		Vals:  make([]A, 0, capacity),
+// scanLimit is the most keys a table without an Index holds.
+const scanLimit = 8
+
+// Slot is the position of key k in m's Keys and Vals.
+func Slot[A any](m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}, k string) (int, bool) {
+	return of(m).slot(k)
+}
+
+func (t *table[A]) slot(k string) (int, bool) {
+	if t.Index != nil {
+		i, ok := t.Index[k]
+		return i, ok
 	}
+	for i, key := range t.Keys {
+		if key == k {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+func fresh[A any](capacity int) *table[A] {
+	t := &table[A]{
+		Keys: make([]string, 0, capacity),
+		Vals: make([]A, 0, capacity),
+	}
+	if capacity > scanLimit {
+		t.Index = make(map[string]int, capacity)
+	}
+	return t
 }
 
 func (t *table[A]) clone() *table[A] {
 	c := fresh[A](len(t.Keys))
+	if t.Index != nil && c.Index == nil {
+		c.Index = make(map[string]int, len(t.Keys))
+	}
 	for k, i := range t.Index {
 		c.Index[k] = i
 	}
@@ -386,30 +421,38 @@ func (t *table[A]) clone() *table[A] {
 }
 
 func (t *table[A]) set(k string, v A) {
-	if i, ok := t.Index[k]; ok {
+	if i, ok := t.slot(k); ok {
 		t.Vals[i] = v
 		return
 	}
-	if t.Index == nil {
-		t.Index = map[string]int{}
-	}
-	t.Index[k] = len(t.Keys)
 	t.Keys = append(t.Keys, k)
 	t.Vals = append(t.Vals, v)
+	switch {
+	case t.Index != nil:
+		t.Index[k] = len(t.Keys) - 1
+	case len(t.Keys) > scanLimit:
+		t.Index = make(map[string]int, 2*len(t.Keys))
+		for i, key := range t.Keys {
+			t.Index[key] = i
+		}
+	}
 }
 
 func (t *table[A]) remove(k string) {
-	i, ok := t.Index[k]
+	i, ok := t.slot(k)
 	if !ok {
 		return
 	}
-	delete(t.Index, k)
 	copy(t.Keys[i:], t.Keys[i+1:])
 	t.Keys = t.Keys[:len(t.Keys)-1]
 	copy(t.Vals[i:], t.Vals[i+1:])
 	var zero A
 	t.Vals[len(t.Vals)-1] = zero
 	t.Vals = t.Vals[:len(t.Vals)-1]
+	if t.Index == nil {
+		return
+	}
+	delete(t.Index, k)
 	for j := i; j < len(t.Keys); j++ {
 		t.Index[t.Keys[j]] = j
 	}

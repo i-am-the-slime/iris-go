@@ -123,7 +123,7 @@ func hasKey[K any](value any, key K) bool {
 	if !ok {
 		return false
 	}
-	_, found := table.Index[keyText(key)]
+	_, found := object.Slot(table, keyText(key))
 	return found
 }
 

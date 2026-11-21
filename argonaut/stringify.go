@@ -93,7 +93,8 @@ func (w writer) object(table Object, current string) {
 		if w.indent != "" {
 			w.out.WriteByte(' ')
 		}
-		w.value(table.Vals[table.Index[key]], inner)
+		slot, _ := object.Slot(table, key)
+		w.value(table.Vals[slot], inner)
 	}
 	w.newline(current)
 	w.out.WriteByte('}')

@@ -11,6 +11,7 @@ package argonaut
 import (
 	"slices"
 
+	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
 
@@ -178,11 +179,11 @@ func compareObjects(a, b Object) int {
 	keys := slices.Concat(a.Keys, b.Keys)
 	slices.SortStableFunc(keys, prim.CompareString)
 	for _, key := range keys {
-		left, inLeft := a.Index[key]
+		left, inLeft := object.Slot(a, key)
 		if !inLeft {
 			return -1
 		}
-		right, inRight := b.Index[key]
+		right, inRight := object.Slot(b, key)
 		if !inRight {
 			return 1
 		}

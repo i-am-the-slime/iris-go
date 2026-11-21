@@ -69,3 +69,36 @@ func TestFromEntriesKeepsAssignmentOrder(t *testing.T) {
 		t.Fatalf("Lookup alpha = %d", got)
 	}
 }
+
+func TestTablesFindKeysBeforeAndAfterTheyOutgrowScanning(t *testing.T) {
+	m := New[int]()()
+	keys := []string{}
+	for i := range 3 * scanLimit {
+		key := string(rune('a' + i))
+		keys = append(keys, key)
+		Poke(key, i, m)()
+		if (m.Index != nil) != (len(m.Keys) > scanLimit) {
+			t.Fatalf("with %d keys Index is %v", len(m.Keys), m.Index)
+		}
+		for j, earlier := range keys {
+			if got := Lookup(-1, func(v int) int { return v }, earlier, m); got != j {
+				t.Fatalf("after %d pokes %s = %d", i+1, earlier, got)
+			}
+		}
+	}
+	if got := Keys(m); !reflect.DeepEqual(got, keys) {
+		t.Fatalf("Keys = %v", got)
+	}
+}
+
+func TestScannedTablesDeleteAndCopy(t *testing.T) {
+	m := FromEntries([]string{"x", "y", "z", "y"}, []int{1, 2, 3, 4})
+	if m.Index != nil || !reflect.DeepEqual(m.Keys, []string{"x", "y", "z"}) || UnsafeIndex(m, "y") != 4 {
+		t.Fatalf("FromEntries = %+v", *m)
+	}
+	c := CopyST(m)()
+	Delete("x", c)()
+	if _, found := Slot(c, "x"); found || UnsafeIndex(c, "z") != 3 || UnsafeIndex(m, "x") != 1 {
+		t.Fatalf("copy %+v, source %+v", *c, *m)
+	}
+}
