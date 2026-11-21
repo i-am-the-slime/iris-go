@@ -2,222 +2,143 @@ package argonaut
 
 import (
 	"strconv"
-	"strings"
-	"unicode/utf16"
-	"unicode/utf8"
 
 	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
 
-// JsonParser implements Data.Argonaut.Parser._jsonParser: `JSON.parse(s)`
-// passed to succ, or the message of the SyntaxError it throws passed to fail.
-//
-// The messages are JavaScriptCore's (Bun's), whose JSON parser this follows
-// token by token: a lexical error reports the lexer's message, a grammatical
-// one the parser's, and trailing input after a complete value a generic one.
+// JsonParser implements Data.Argonaut.Parser._jsonParser: the parsed value
+// passed to succ, or "Invalid JSON at offset N" passed to fail, N counting
+// UTF-16 code units up to the first character that cannot continue a JSON
+// text.
 func JsonParser[A any](fail func(string) A, succ func(Json) A, text string) A {
-	value, message := parse(text)
-	if message != "" {
-		return fail("JSON Parse error: " + message)
+	value, offset, ok := parse(text)
+	if !ok {
+		return fail("Invalid JSON at offset " + strconv.Itoa(int(offset)))
 	}
 	return succ(value)
 }
 
-type tokenKind int
-
-const (
-	tokenEnd tokenKind = iota
-	tokenError
-	tokenPunctuation
-	tokenString
-	tokenNumber
-	tokenTrue
-	tokenFalse
-	tokenNull
-	tokenIdentifier
-)
-
-type token struct {
-	kind tokenKind
-	// text is a punctuation character, a string's contents or an identifier.
-	text   string
-	number float64
-}
-
-// syntaxError ends a parse with its message, the lexer's if it found an error.
-type syntaxError struct{ message string }
+// syntaxError ends a parse at the byte where the input stopped being JSON.
+type syntaxError struct{ at int }
 
 type parser struct {
 	input    string
 	position int
-	// lexical is the lexer's error, which outranks the parser's.
-	lexical string
 }
 
-func parse(text string) (value Json, message string) {
-	parser := &parser{input: text}
+func parse(text string) (value Json, offset int32, ok bool) {
+	p := &parser{input: text}
 	defer func() {
 		if failure := recover(); failure != nil {
-			failed, ok := failure.(syntaxError)
-			if !ok {
+			failed, isSyntaxError := failure.(syntaxError)
+			if !isSyntaxError {
 				panic(failure)
 			}
-			value, message = nil, failed.message
+			value, offset, ok = nil, prim.CodeUnitLength(text[:failed.at]), false
 		}
 	}()
-	value = parser.value(parser.next())
-	if parser.next().kind != tokenEnd {
-		parser.fail("")
+	value = p.value()
+	p.skipWhitespace()
+	if p.position != len(p.input) {
+		p.fail()
 	}
-	return value, ""
+	return value, 0, true
 }
 
-func (p *parser) fail(message string) {
-	switch {
-	case p.lexical != "":
-		message = p.lexical
-	case message == "":
-		message = "Unable to parse JSON string"
-	}
-	panic(syntaxError{message})
+func (p *parser) fail() {
+	panic(syntaxError{p.position})
 }
 
-func (p *parser) value(current token) Json {
-	switch current.kind {
-	case tokenString:
-		return jsonString(current.text)
-	case tokenNumber:
-		return jsonNumber(current.number)
-	case tokenTrue:
+func (p *parser) value() Json {
+	p.skipWhitespace()
+	switch p.peek() {
+	case '{':
+		return p.object()
+	case '[':
+		return p.array()
+	case '"':
+		return jsonString(p.string())
+	case 't':
+		p.keyword("true")
 		return jsonBoolean(true)
-	case tokenFalse:
+	case 'f':
+		p.keyword("false")
 		return jsonBoolean(false)
-	case tokenNull:
+	case 'n':
+		p.keyword("null")
 		return nil
-	case tokenEnd:
-		p.fail("Unexpected EOF")
-	case tokenIdentifier:
-		p.fail(`Unexpected identifier "` + current.text + `"`)
-	case tokenPunctuation:
-		switch current.text {
-		case "[":
-			return p.array()
-		case "{":
-			return p.object()
-		}
-		p.fail("Unexpected token '" + current.text + "'")
 	}
-	p.fail("")
-	return nil
+	return jsonNumber(p.number())
 }
 
 func (p *parser) array() Json {
+	p.position++
 	values := jsonArray{}
-	current := p.next()
-	if isPunctuation(current, "]") {
+	if p.skipWhitespace(); p.peek() == ']' {
+		p.position++
 		return values
 	}
 	for {
-		values = append(values, p.value(current))
-		current = p.next()
-		switch {
-		case isPunctuation(current, ","):
-			current = p.next()
-			if isPunctuation(current, "]") {
-				p.fail("Unexpected comma at the end of array expression")
-			}
-		case isPunctuation(current, "]"):
+		values = append(values, p.value())
+		p.skipWhitespace()
+		switch p.peek() {
+		case ',':
+			p.position++
+		case ']':
+			p.position++
 			return values
 		default:
-			p.fail("Expected ']'")
+			p.fail()
 		}
 	}
 }
 
 func (p *parser) object() Json {
+	p.position++
 	table := object.New[Json]()()
-	current := p.next()
-	if isPunctuation(current, "}") {
+	if p.skipWhitespace(); p.peek() == '}' {
+		p.position++
 		return jsonObject{table}
 	}
-	if current.kind != tokenString {
-		p.fail("Expected '}'")
-	}
 	for {
-		key := current.text
-		if !isPunctuation(p.next(), ":") {
-			p.fail("Expected ':' before value in object property definition")
+		p.skipWhitespace()
+		if p.peek() != '"' {
+			p.fail()
 		}
-		object.Poke(key, p.value(p.next()), table)()
-		current = p.next()
-		switch {
-		case isPunctuation(current, ","):
-			current = p.next()
-			if current.kind != tokenString {
-				p.fail("Property name must be a string literal")
-			}
-		case isPunctuation(current, "}"):
+		key := p.string()
+		p.skipWhitespace()
+		p.expect(':')
+		object.Poke(key, p.value(), table)()
+		p.skipWhitespace()
+		switch p.peek() {
+		case ',':
+			p.position++
+		case '}':
+			p.position++
 			return jsonObject{table}
 		default:
-			p.fail("Expected '}'")
+			p.fail()
 		}
 	}
 }
 
-func isPunctuation(current token, text string) bool {
-	return current.kind == tokenPunctuation && current.text == text
+func (p *parser) keyword(word string) {
+	for index := 0; index < len(word); index++ {
+		p.expect(word[index])
+	}
 }
 
-// next lexes one token, recording a lexical error's message.
-func (p *parser) next() token {
-	for p.position < len(p.input) && isWhitespace(p.input[p.position]) {
-		p.position++
+func (p *parser) expect(character byte) {
+	if p.peek() != character || p.position == len(p.input) {
+		p.fail()
 	}
-	if p.position == len(p.input) {
-		return token{kind: tokenEnd}
-	}
-	character := p.input[p.position]
-	switch character {
-	case '[', ']', '{', '}', ',', ':', '.', '(', ')', ';', '=':
-		p.position++
-		return token{kind: tokenPunctuation, text: string(character)}
-	case '"':
-		return p.string()
-	case '\'':
-		return p.lexicalError("Single quotes (') are not allowed in JSON")
-	}
-	if character == '-' || isDigit(character) {
-		return p.number()
-	}
-	for _, keyword := range keywords {
-		if strings.HasPrefix(p.input[p.position:], keyword.text) {
-			p.position += len(keyword.text)
-			return token{kind: keyword.kind}
-		}
-	}
-	if isIdentifierStart(character) {
-		start := p.position
-		for p.position < len(p.input) && isIdentifierPart(p.input[p.position]) {
-			p.position++
-		}
-		return token{kind: tokenIdentifier, text: p.input[start:p.position]}
-	}
-	return p.lexicalError("Unrecognized token '" + firstCodeUnit(p.input[p.position:]) + "'")
+	p.position++
 }
 
-var keywords = []struct {
-	text string
-	kind tokenKind
-}{{"true", tokenTrue}, {"false", tokenFalse}, {"null", tokenNull}}
-
-func (p *parser) lexicalError(message string) token {
-	p.lexical = message
-	return token{kind: tokenError}
-}
-
-// number lexes `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?`.
-func (p *parser) number() token {
+// number reads `-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?`. Out of
+// range literals become an infinity or a zero.
+func (p *parser) number() float64 {
 	start := p.position
 	if p.peek() == '-' {
 		p.position++
@@ -228,13 +149,10 @@ func (p *parser) number() token {
 	case isDigit(p.peek()):
 		p.digits()
 	default:
-		return p.lexicalError("Invalid number")
+		p.fail()
 	}
 	if p.peek() == '.' {
 		p.position++
-		if !isDigit(p.peek()) {
-			return p.lexicalError("Invalid digits after decimal point")
-		}
 		p.digits()
 	}
 	if p.peek() == 'e' || p.peek() == 'E' {
@@ -242,21 +160,88 @@ func (p *parser) number() token {
 		if p.peek() == '+' || p.peek() == '-' {
 			p.position++
 		}
-		if !isDigit(p.peek()) {
-			return p.lexicalError(
-				"Exponent symbols should be followed by an optional '+' or '-' and then by at least one number",
-			)
-		}
 		p.digits()
 	}
-	// The grammar is ParseFloat's, whose only possible error is a range error
-	// that still returns JavaScript's result: an infinity or a zero.
 	number, _ := strconv.ParseFloat(p.input[start:p.position], 64)
-	return token{kind: tokenNumber, number: number}
+	return number
 }
 
+// digits reads one or more decimal digits.
 func (p *parser) digits() {
+	if !isDigit(p.peek()) {
+		p.fail()
+	}
 	for isDigit(p.peek()) {
+		p.position++
+	}
+}
+
+// string reads a string literal. Escaped surrogates join into one code
+// point when they pair up and stay lone surrogates when they do not.
+func (p *parser) string() string {
+	p.position++
+	var contents prim.Builder
+	for {
+		character := p.peek()
+		switch {
+		case p.position == len(p.input) || character < 0x20:
+			p.fail()
+		case character == '"':
+			p.position++
+			return contents.String()
+		case character != '\\':
+			contents.WriteByte(character)
+			p.position++
+			continue
+		}
+		p.position++
+		escape := p.peek()
+		if escape == 'u' {
+			p.position++
+			contents.WriteRune(p.unicodeEscape())
+			continue
+		}
+		replacement, valid := shortEscapes[escape]
+		if !valid || p.position == len(p.input) {
+			p.fail()
+		}
+		contents.WriteByte(replacement)
+		p.position++
+	}
+}
+
+var shortEscapes = map[byte]byte{
+	'"': '"', '\\': '\\', '/': '/', 'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t',
+}
+
+// unicodeEscape reads the four hex digits after `\u`.
+func (p *parser) unicodeEscape() rune {
+	var value rune
+	for range 4 {
+		digit, valid := hexDigit(p.peek())
+		if !valid || p.position == len(p.input) {
+			p.fail()
+		}
+		value = value<<4 | digit
+		p.position++
+	}
+	return value
+}
+
+func hexDigit(character byte) (rune, bool) {
+	switch {
+	case '0' <= character && character <= '9':
+		return rune(character - '0'), true
+	case 'a' <= character && character <= 'f':
+		return rune(character-'a') + 10, true
+	case 'A' <= character && character <= 'F':
+		return rune(character-'A') + 10, true
+	}
+	return 0, false
+}
+
+func (p *parser) skipWhitespace() {
+	for p.position < len(p.input) && isWhitespace(p.input[p.position]) {
 		p.position++
 	}
 }
@@ -269,111 +254,10 @@ func (p *parser) peek() byte {
 	return 0
 }
 
-// string lexes a string literal. Escaped surrogates join into one code
-// point when they pair up and stay lone surrogates when they do not.
-func (p *parser) string() token {
-	p.position++
-	var contents prim.Builder
-	for {
-		if p.position == len(p.input) {
-			return p.lexicalError("Unterminated string")
-		}
-		character := p.input[p.position]
-		switch {
-		case character == '"':
-			p.position++
-			return token{kind: tokenString, text: contents.String()}
-		case character < 0x20:
-			return p.lexicalError("Unterminated string")
-		case character != '\\':
-			contents.WriteByte(character)
-			p.position++
-			continue
-		}
-		p.position++
-		if p.position == len(p.input) {
-			return p.lexicalError("Unterminated string")
-		}
-		escape := p.input[p.position]
-		if escape != 'u' {
-			replacement, valid := shortEscapes[escape]
-			if !valid {
-				return p.lexicalError("Invalid escape character " + firstCodeUnit(p.input[p.position:]))
-			}
-			contents.WriteByte(replacement)
-			p.position++
-			continue
-		}
-		p.position++
-		unit, message := p.unicodeEscape()
-		if message != "" {
-			return p.lexicalError(message)
-		}
-		contents.WriteRune(unit)
-	}
-}
-
-var shortEscapes = map[byte]byte{
-	'"': '"', '\\': '\\', '/': '/', 'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t',
-}
-
-// unicodeEscape reads the four hex digits after `\u`. JavaScriptCore counts
-// them in UTF-16 code units.
-func (p *parser) unicodeEscape() (rune, string) {
-	rest := p.input[p.position:]
-	units, length := 0, 0
-	for units < 4 && length < len(rest) {
-		character, size := utf8.DecodeRuneInString(rest[length:])
-		units += utf16.RuneLen(character)
-		length += size
-	}
-	if units < 4 {
-		return 0, `\u must be followed by 4 hex digits`
-	}
-	digits := rest[:length]
-	value, err := strconv.ParseUint(digits, 16, 16)
-	if err != nil || len(digits) != 4 {
-		return 0, `"\u` + firstCodeUnits(digits, 4) + `" is not a valid unicode escape`
-	}
-	p.position += 4
-	return rune(value), ""
-}
-
-// firstCodeUnit is the first UTF-16 code unit of a non-empty string, which
-// JavaScriptCore's messages quote: a whole character unless it is astral.
-func firstCodeUnit(text string) string {
-	return firstCodeUnits(text, 1)
-}
-
-func firstCodeUnits(text string, count int) string {
-	var out strings.Builder
-	units := 0
-	for _, character := range text {
-		if units == count {
-			break
-		}
-		units += utf16.RuneLen(character)
-		if units > count {
-			character = utf8.RuneError
-		}
-		out.WriteRune(character)
-	}
-	return out.String()
-}
-
 func isWhitespace(character byte) bool {
 	return character == ' ' || character == '\t' || character == '\n' || character == '\r'
 }
 
 func isDigit(character byte) bool {
 	return '0' <= character && character <= '9'
-}
-
-func isIdentifierStart(character byte) bool {
-	return 'a' <= character && character <= 'z' || 'A' <= character && character <= 'Z' ||
-		character == '_' || character == '$'
-}
-
-func isIdentifierPart(character byte) bool {
-	return isIdentifierStart(character) || isDigit(character)
 }

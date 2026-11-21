@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"math"
 	"os"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/i-am-the-slime/iris-go/object"
 )
 
-// cases are JavaScript's results, recorded by testdata/generate.js.
+// cases are JavaScript's results, recorded by testdata/generate.js. Parse
+// failures are compared by outcome only: the messages are JavaScriptCore's.
 type cases struct {
 	Parse []struct {
 		Input    string
@@ -48,7 +51,7 @@ func parsed(t *testing.T, text string) Json {
 	)
 }
 
-func TestJsonParserMatchesJavaScriptCore(t *testing.T) {
+func TestJsonParserAcceptsWhatJavaScriptAccepts(t *testing.T) {
 	for _, recorded := range load(t).Parse {
 		type outcome struct {
 			message string
@@ -61,8 +64,8 @@ func TestJsonParserMatchesJavaScriptCore(t *testing.T) {
 		)
 		message, value := result.message, result.value
 		if recorded.Compact == nil {
-			if message != recorded.Message {
-				t.Errorf("parse %q: message %q, JavaScript %q", recorded.Input, message, recorded.Message)
+			if !strings.HasPrefix(message, "Invalid JSON at offset ") {
+				t.Errorf("parse %q: message %q, JavaScript rejected it", recorded.Input, message)
 			}
 			continue
 		}
@@ -70,16 +73,59 @@ func TestJsonParserMatchesJavaScriptCore(t *testing.T) {
 			t.Errorf("parse %q: failed with %q, JavaScript parsed it", recorded.Input, message)
 			continue
 		}
-		if got, want := Stringify(value), *recorded.Compact; got != want {
+		if got, want := Stringify(value), *recorded.Compact; !sameUpToKeyOrder(got, want) {
 			t.Errorf("stringify (parse %q) = %q, JavaScript %q", recorded.Input, got, want)
 		}
 		for index, indent := range []int32{-1, 1, 2, 11} {
 			got := StringifyWithIndent(indent, value)
-			if want := recorded.Indented[index]; got != want {
+			if want := recorded.Indented[index]; !sameUpToKeyOrder(got, want) {
 				t.Errorf("stringifyWithIndent %d (parse %q) = %q, JavaScript %q", indent, recorded.Input, got, want)
 			}
 		}
 	}
+}
+
+func TestJsonParserReportsTheOffsetInCodeUnits(t *testing.T) {
+	for input, want := range map[string]string{
+		"":           "Invalid JSON at offset 0",
+		"[1,]":       "Invalid JSON at offset 3",
+		`{"a" 1}`:    "Invalid JSON at offset 5",
+		"tru":        "Invalid JSON at offset 3",
+		`["😀", @]`:   "Invalid JSON at offset 7",
+		"1 2":        "Invalid JSON at offset 2",
+		`"\u12"`:     "Invalid JSON at offset 5",
+		"{\"a\":1}x": "Invalid JSON at offset 7",
+	} {
+		got := JsonParser(func(message string) string { return message }, func(Json) string { return "" }, input)
+		if got != want {
+			t.Errorf("parse %q: %q, want %q", input, got, want)
+		}
+	}
+}
+
+func TestObjectKeysKeepInsertionOrder(t *testing.T) {
+	text := `{"2":1,"1":2,"x":3,"01":4,"-1":5}`
+	if got := Stringify(parsed(t, text)); got != text {
+		t.Errorf("stringify = %s", got)
+	}
+}
+
+// sameUpToKeyOrder holds when two JSON texts are equal or differ only in the
+// order of object keys: JavaScript lists integer-like keys first.
+func sameUpToKeyOrder(got, want string) bool {
+	if got == want {
+		return true
+	}
+	decode := func(text string) (any, bool) {
+		decoder := json.NewDecoder(strings.NewReader(text))
+		decoder.UseNumber()
+		var value any
+		err := decoder.Decode(&value)
+		return value, err == nil
+	}
+	left, leftOK := decode(got)
+	right, rightOK := decode(want)
+	return leftOK && rightOK && reflect.DeepEqual(left, right) && len(got) == len(want)
 }
 
 func TestCompareMatchesArgonautCore(t *testing.T) {
