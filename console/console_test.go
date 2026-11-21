@@ -79,6 +79,41 @@ func TestClearWritesNothingWhenStandardOutputIsNotATerminal(t *testing.T) {
 	}
 }
 
+func TestLogReturnsAThunkThatPrintsWhenCalled(t *testing.T) {
+	var action func()
+	built, _ := captured(t, func() { action = Log("later") })
+	if built != "" {
+		t.Errorf("building the thunk wrote %q, want nothing", built)
+	}
+	if called, _ := captured(t, action); called != "later\n" {
+		t.Errorf("calling the thunk wrote %q, want %q", called, "later\n")
+	}
+}
+
+func TestWarnAndErrorWriteToStandardErrorLikeJavaScript(t *testing.T) {
+	streams := []struct {
+		name   string
+		print  func(string) func()
+		stderr bool
+	}{
+		{"log", Log, false},
+		{"info", Info, false},
+		{"debug", Debug, false},
+		{"warn", Warn, true},
+		{"error", Error, true},
+	}
+	for _, stream := range streams {
+		stdout, stderr := captured(t, stream.print(stream.name))
+		got, other := stdout, stderr
+		if stream.stderr {
+			got, other = stderr, stdout
+		}
+		if got != stream.name+"\n" || other != "" {
+			t.Errorf("%s wrote stdout %q and stderr %q", stream.name, stdout, stderr)
+		}
+	}
+}
+
 // captured runs the calls with fresh console state and returns what they wrote
 // to standard output and standard error.
 func captured(t *testing.T, calls func()) (string, string) {

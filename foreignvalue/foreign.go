@@ -13,12 +13,13 @@ import (
 	"strconv"
 
 	"github.com/i-am-the-slime/iris-go/object"
-	ₚₛ "github.com/i-am-the-slime/iris-go/runtime"
 )
 
-// Undefined is JS undefined (Yoga.JSON._undefined), the runtime's own
-// undefined sentinel.
-var Undefined any = ₚₛ.Undefined
+// undefinedText is the string that stands for JS undefined.
+const undefinedText = "\x00<undefined>\x00"
+
+// Undefined is JS undefined (Yoga.JSON._undefined).
+var Undefined any = undefinedText
 
 // objectTable is an `Object Foreign`.
 type objectTable = *struct {
@@ -30,7 +31,7 @@ type objectTable = *struct {
 
 func isUndefined(value any) bool {
 	text, ok := value.(string)
-	return ok && text == ₚₛ.Undefined
+	return ok && text == undefinedText
 }
 
 // TypeOf implements Foreign.typeOf (JS `typeof`).

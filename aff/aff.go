@@ -20,12 +20,7 @@ import (
 	"time"
 
 	"github.com/i-am-the-slime/iris-go/exception"
-	ₚₛ "github.com/i-am-the-slime/iris-go/runtime"
 )
-
-func init() {
-	ₚₛ.OnExit(Await)
-}
 
 // wrap builds an action from the function that runs it.
 func wrap[A any](run func(any) A) struct{ Run func(any) A } {
