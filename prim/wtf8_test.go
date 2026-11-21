@@ -64,7 +64,7 @@ func TestAppendingTheHalvesOfAPairFormsThePair(t *testing.T) {
 	if got := StringReplaceAll("x", "", take+"x"+drop); got != pair {
 		t.Errorf("replaceAll removing what parts a pair = %q", got)
 	}
-	if got := StringReplace("x", "$`", "x"+drop); got != drop {
+	if got := StringReplace("x", take, "x"+drop); got != pair {
 		t.Errorf("replace = %q", got)
 	}
 }

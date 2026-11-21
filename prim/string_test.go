@@ -309,11 +309,11 @@ func TestStringTrimUsesJavaScriptWhitespace(t *testing.T) {
 	}
 }
 
-func TestStringReplaceExpandsDollarPatterns(t *testing.T) {
+func TestStringReplaceInsertsTheReplacementLiterally(t *testing.T) {
 	cases := []struct{ pattern, replacement, s, want string }{
-		{",", "$$", ",", "$"},
-		{"b", "[$&|$`|$']", "abc", "a[b|a|c]c"},
-		{"", "[$`|$']", "aaa", "[|aaa]aaa"},
+		{",", "$$", ",", "$$"},
+		{"b", "[$&|$`|$']", "abc", "a[$&|$`|$']c"},
+		{"", "[$`|$']", "aaa", "[$`|$']aaa"},
 		{"b", "$1$<n>$0$", "abc", "a$1$<n>$0$c"},
 		{"x", "$&", "abc", "abc"},
 	}
@@ -324,14 +324,14 @@ func TestStringReplaceExpandsDollarPatterns(t *testing.T) {
 	}
 }
 
-func TestStringReplaceAllExpandsDollarPatternsPerMatch(t *testing.T) {
+func TestStringReplaceAllInsertsTheReplacementLiterallyPerMatch(t *testing.T) {
 	cases := []struct{ pattern, replacement, s, want string }{
-		{"ab", "$$", "abc", "$c"},
-		{"", "$&", " ", " "},
-		{"", "[$`]", "ab", "[]a[a]b[ab]"},
-		{"a", "<$'>", "aXa", "<Xa>X<>"},
+		{"ab", "$$", "abc", "$$c"},
+		{"", "$&", " ", "$& $&"},
+		{"", "[$`]", "ab", "[$`]a[$`]b[$`]"},
+		{"a", "<$'>", "aXa", "<$'>X<$'>"},
 		{"a", "plain", "aXa", "plainXplain"},
-		{"é", "$&$&", "éé", "éééé"},
+		{"é", "$&$&", "éé", "$&$&$&$&"},
 	}
 	for _, c := range cases {
 		if got := StringReplaceAll(c.pattern, c.replacement, c.s); got != c.want {

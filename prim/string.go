@@ -209,8 +209,7 @@ func StringSplit(separator string, s string) []string {
 }
 
 // StringReplace implements Data.String.Common.replace: the first occurrence
-// only, with the replacement's `$` patterns expanded as String.prototype.replace
-// does.
+// only, replaced by the literal replacement text.
 func StringReplace(pattern string, replacement string, s string) string {
 	if !utf8.ValidString(pattern) {
 		return replaceInCodeUnits(pattern, replacement, s, false)
@@ -220,16 +219,17 @@ func StringReplace(pattern string, replacement string, s string) string {
 		return s
 	}
 	end := at + len(pattern)
-	return Concat(s[:at], substitute(replacement, s, at, end), s[end:])
+	return Concat(s[:at], replacement, s[end:])
 }
 
-// StringReplaceAll implements Data.String.Common.replaceAll, a global RegExp
-// of the escaped pattern: every occurrence, each with its own `$` patterns.
+// StringReplaceAll implements Data.String.Common.replaceAll: every occurrence,
+// each replaced by the literal replacement text. An empty pattern matches
+// between every two code units.
 func StringReplaceAll(pattern string, replacement string, s string) string {
 	if !utf8.ValidString(pattern) || pattern == "" && !utf8.ValidString(s) || pattern == "" && hasAstral(s) || HasSurrogates(replacement) {
 		return replaceInCodeUnits(pattern, replacement, s, true)
 	}
-	if !strings.Contains(replacement, "$") && !HasSurrogates(s) {
+	if !HasSurrogates(s) {
 		return strings.ReplaceAll(s, pattern, replacement)
 	}
 	var out Builder
@@ -242,7 +242,7 @@ func StringReplaceAll(pattern string, replacement string, s string) string {
 		at := from + found
 		end := at + len(pattern)
 		out.WriteString(s[last:at])
-		out.WriteString(substitute(replacement, s, at, end))
+		out.WriteString(replacement)
 		last, from = end, end
 		if pattern == "" {
 			if at == len(s) {
@@ -284,7 +284,7 @@ func replaceInCodeUnits(pattern string, replacement string, s string, all bool) 
 		}
 		end := at + len(needle)
 		out.WriteString(text(last, at))
-		out.WriteString(substituteText(replacement, text(at, end), text(0, at), text(end, len(units))))
+		out.WriteString(replacement)
 		last = end
 		if !all {
 			break
@@ -300,41 +300,6 @@ func replaceInCodeUnits(pattern string, replacement string, s string, all bool) 
 		at = end
 	}
 	out.WriteString(text(last, len(units)))
-	return out.String()
-}
-
-// substitute is GetSubstitution for a match of s[at:end] without capture
-// groups: "$$" is "$", "$&" the match, "$`" the text before it and "$'" the
-// text after it; any other `$` stays as it is.
-func substitute(replacement string, s string, at int, end int) string {
-	return substituteText(replacement, s[at:end], s[:at], s[end:])
-}
-
-func substituteText(replacement string, match string, before string, after string) string {
-	if !strings.Contains(replacement, "$") {
-		return replacement
-	}
-	var out Builder
-	for i := 0; i < len(replacement); i++ {
-		if replacement[i] != '$' || i+1 == len(replacement) {
-			out.WriteByte(replacement[i])
-			continue
-		}
-		switch replacement[i+1] {
-		case '$':
-			out.WriteByte('$')
-		case '&':
-			out.WriteString(match)
-		case '`':
-			out.WriteString(before)
-		case '\'':
-			out.WriteString(after)
-		default:
-			out.WriteByte('$')
-			continue
-		}
-		i++
-	}
 	return out.String()
 }
 
