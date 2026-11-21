@@ -2,10 +2,8 @@ package exception
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 )
@@ -54,11 +52,10 @@ func TestNameDefaultsToError(t *testing.T) {
 	}
 }
 
-// uncaughtProgram, run as a child process, throws from a main that defers
-// ReportUncaught, the way a generated program's main does.
+// uncaughtProgram, run as a child process, throws from main as a generated
+// program does.
 func uncaughtProgram(thrown any) {
-	defer ReportUncaught()
-	fmt.Println("before the throw")
+	os.Stdout.WriteString("before the throw\n")
 	panic(thrown)
 }
 
@@ -87,29 +84,25 @@ func runUncaught(t *testing.T, kind string) (stdout string, stderr string, statu
 	return out.String(), diagnostics.String(), command.ProcessState.ExitCode()
 }
 
-func TestUncaughtErrorPrintsItsStackAndExitsWithOne(t *testing.T) {
+func TestUncaughtErrorIsAGoPanicWithItsMessage(t *testing.T) {
 	stdout, stderr, status := runUncaught(t, "error")
-	if stdout != "before the throw\n" || stderr != "Error: boom\n" || status != 1 {
+	if stdout != "before the throw\n" || !strings.HasPrefix(stderr, "panic: boom\n") || status != 2 {
 		t.Fatalf("stdout %q, stderr %q, status %d", stdout, stderr, status)
+	}
+	if !strings.Contains(stderr, "uncaughtProgram") {
+		t.Fatalf("stderr %q has no stack through the throw", stderr)
 	}
 }
 
-func TestUncaughtCrashPrintsItsMessageAndExitsWithOne(t *testing.T) {
+func TestUncaughtCrashIsAGoPanicWithItsMessage(t *testing.T) {
 	_, stderr, status := runUncaught(t, "crash")
-	if stderr != "Error: Failed pattern match\n" || status != 1 {
+	if !strings.HasPrefix(stderr, "panic: Failed pattern match\n") || status != 2 {
 		t.Fatalf("stderr %q, status %d", stderr, status)
 	}
 }
 
-func TestReportUncaughtKeepsRuntimeFaults(t *testing.T) {
-	defer func() {
-		if _, ok := recover().(runtime.Error); !ok {
-			t.Fatal("runtime fault was not re-raised")
-		}
-	}()
-	func() {
-		defer ReportUncaught()
-		var xs []int
-		_ = xs[1]
-	}()
+func TestShowErrorIsTheJavaScriptStackHeader(t *testing.T) {
+	if got := ShowErrorImpl(NewError("boom")); got != "Error: boom" {
+		t.Fatalf("got %q", got)
+	}
 }

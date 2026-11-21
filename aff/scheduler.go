@@ -1,7 +1,6 @@
 package aff
 
 import (
-	"os"
 	"sync"
 
 	"github.com/i-am-the-slime/iris-go/exception"
@@ -204,16 +203,16 @@ func Exclusive(callback func()) {
 	callback()
 }
 
-// crash reports an uncaught fiber failure the way node does — on a fresh
-// turn of the event loop, to stderr, with exit status 1.
+// crash ends the program with an uncaught fiber failure on a fresh turn of
+// the event loop, as JavaScript throws it: as a Go panic, which prints
+// `panic: <message>` and exits with status 2.
 func crash(failure exception.Error) {
 	hold()
 	go func() {
 		wake := newWake()
 		settle(wake)
 		<-wake
-		os.Stderr.WriteString(exception.Stack(failure) + "\n")
-		os.Exit(1)
+		panic(failure)
 	}()
 }
 

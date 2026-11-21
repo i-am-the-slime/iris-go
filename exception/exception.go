@@ -1,11 +1,9 @@
-// Package exception implements Effect.Exception. An Error is a plain value
-// (its fields match TypeDocs.errorGoType); throwing one is a Go panic and
-// catching one is a deferred recover scoped to the protected action.
+// Package exception implements Effect.Exception. An Error is a plain value;
+// throwing one is a Go panic and catching one is a deferred recover scoped to
+// the protected action. An exception nothing catches ends the program as any
+// Go panic does: Go prints `panic: <message>` and the stack, and exits with
+// status 2.
 package exception
-
-import (
-	"os"
-)
 
 // Error is Effect.Exception.Error. An empty Name means the JS default,
 // "Error".
@@ -13,10 +11,16 @@ import (
 // Payload is the value an Error subclass carries, such as the error of
 // yoga-om's ParallelError. JavaScript code reaches it only through an
 // `unsafeCoerce` from Error, which erases its type.
-type Error = struct {
+type Error struct {
 	Message string
 	Name    string
 	Payload any
+}
+
+// Error makes an Error a Go error, so that Go reports an uncaught one as
+// `panic: <message>`.
+func (e Error) Error() string {
+	return e.Message
 }
 
 // ShowErrorImpl implements Effect.Exception.showErrorImpl: the error's stack,
@@ -117,28 +121,6 @@ func attempt[A any](action func() A) (result A, failure Error, failed bool) {
 // interruption) are not exceptions; the caller re-panics them.
 func AsError(recovered any) (Error, bool) {
 	return asError(recovered)
-}
-
-// Stack is the text a JS runtime prints for an uncaught Error.
-func Stack(e Error) string {
-	return stack(e)
-}
-
-// ReportUncaught, deferred by a program's main, ends the program the way a JS
-// runtime does when an exception escapes it: the error's stack on stderr and
-// exit status 1. Go runtime faults are not PureScript exceptions and keep
-// Go's own report.
-func ReportUncaught() {
-	recovered := recover()
-	if recovered == nil {
-		return
-	}
-	failure, ok := asError(recovered)
-	if !ok {
-		panic(recovered)
-	}
-	os.Stderr.WriteString(stack(failure) + "\n")
-	os.Exit(1)
 }
 
 // asError recognises what PureScript code can throw: an Error, or a crash

@@ -1,6 +1,9 @@
 package aff
 
 import (
+	"errors"
+	"os"
+	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
@@ -235,6 +238,31 @@ func TestForkInsideADrainRunsTheChildUntilItSuspends(t *testing.T) {
 	log.add("main")
 	Await()
 	expect(t, log, "child,parent,child joined,main")
+}
+
+func TestAnUncaughtFiberFailureIsAGoPanicOnALaterTurn(t *testing.T) {
+	command := exec.Command(os.Args[0], "-test.run=^$")
+	command.Env = append(os.Environ(), "AFF_UNCAUGHT=1")
+	var stdout, stderr strings.Builder
+	command.Stdout, command.Stderr = &stdout, &stderr
+	err := command.Run()
+	var exit *exec.ExitError
+	if err != nil && !errors.As(err, &exit) {
+		t.Fatal(err)
+	}
+	if stdout.String() != "after launch\n" || !strings.HasPrefix(stderr.String(), "panic: boom\n") || command.ProcessState.ExitCode() != 2 {
+		t.Fatalf("stdout %q, stderr %q, status %d", stdout.String(), stderr.String(), command.ProcessState.ExitCode())
+	}
+}
+
+func TestMain(m *testing.M) {
+	if os.Getenv("AFF_UNCAUGHT") != "" {
+		launch(func() struct{} { panic(exception.Error{Message: "boom"}) })
+		os.Stdout.WriteString("after launch\n")
+		Await()
+		os.Stdout.WriteString("unreached\n")
+	}
+	os.Exit(m.Run())
 }
 
 func BenchmarkForkAndJoin(b *testing.B) {
