@@ -12,7 +12,7 @@
 package avar
 
 import (
-	"github.com/i-am-the-slime/iris-go/aff"
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
@@ -224,7 +224,7 @@ func runEffect(effect func()) {
 			if !ok {
 				panic(recovered)
 			}
-			aff.ThrowLater(failure)
+			eventloop.ThrowLater(failure)
 		}
 	}()
 	effect()

@@ -4,12 +4,12 @@
 // A `Promise a` and a `Rejection` are Go `any` values (TypeDocs.foreignGoType):
 // a promise is a *state; a rejection is whatever was thrown (an
 // exception.Error for PureScript errors). Reactions run like JS microtasks:
-// on later turns of go-support/aff's event loop, never synchronously, and a
-// queued reaction keeps the program alive.
+// on later turns of the event loop, never synchronously, and a queued
+// reaction keeps the program alive.
 package promise
 
 import (
-	"github.com/i-am-the-slime/iris-go/aff"
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
@@ -52,11 +52,7 @@ func (p *state) react(reaction func()) {
 }
 
 func queue(reaction func()) {
-	done := aff.Hold()
-	go func() {
-		aff.Exclusive(reaction)
-		done()
-	}()
+	eventloop.Later(reaction)
 }
 
 // attempt runs a callback, turning a thrown value into a rejection.

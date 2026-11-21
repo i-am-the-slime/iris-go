@@ -3,7 +3,7 @@ package promise
 import (
 	"testing"
 
-	"github.com/i-am-the-slime/iris-go/aff"
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
@@ -12,7 +12,7 @@ func TestReactionsRunAfterTheCurrentTurnInOrder(t *testing.T) {
 	p := Resolve(1)
 	Then(func(n int) any { log = append(log, "then"); return Resolve(n + 1) }, p)
 	log = append(log, "sync")
-	aff.Await()
+	eventloop.Await()
 	if len(log) != 2 || log[0] != "sync" || log[1] != "then" {
 		t.Fatalf("log = %v", log)
 	}
@@ -34,7 +34,7 @@ func TestThenOrCatchRoutesRejectionsAndAdoptsPromises(t *testing.T) {
 	Then(func(n int) any { adopted = n; return Resolve(0) }, Resolve[any](Resolve(7)))
 	sum := 0
 	Then(func(xs []any) any { sum = xs[0].(int) + xs[1].(int); return Resolve(0) }, All([]any{Resolve(2), Resolve(3)}))
-	aff.Await()
+	eventloop.Await()
 	if got != "no" || adopted != 7 || sum != 5 {
 		t.Fatalf("got %q adopted %d sum %d", got, adopted, sum)
 	}

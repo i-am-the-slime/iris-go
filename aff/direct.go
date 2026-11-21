@@ -3,6 +3,7 @@ package aff
 import (
 	"time"
 
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
@@ -154,7 +155,7 @@ func MakeAffDirect[A, E any](
 	op := f.newOp()
 	canceler := register(func(result E) { op.complete(result) })
 	running = f
-	if op.done {
+	if op.completed() {
 		f.requeue()
 		running = f
 	}
@@ -175,14 +176,14 @@ func MakeAffDirect[A, E any](
 func DelayDirect(_ any, milliseconds float64) {
 	f := running
 	op := f.newOp()
-	hold()
+	retire := eventloop.Hold()
 	timer := time.AfterFunc(time.Duration(milliseconds*float64(time.Millisecond)), func() {
 		op.complete(nil)
-		settle(nil)
+		retire()
 	})
 	f.await(op, func() {
 		if timer.Stop() {
-			settle(nil)
+			retire()
 		}
 	})
 	running = f

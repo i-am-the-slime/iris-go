@@ -1,8 +1,15 @@
 package aff
 
 import (
+	"sync"
+
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
+
+// operations guards the state that asynchronous steps share with the
+// goroutines that complete them.
+var operations sync.Mutex
 
 // killSignal unwinds an interrupted fiber. It is not an exception: catchError
 // never sees it, bracket releases do.
@@ -47,7 +54,7 @@ type asyncOp struct {
 }
 
 func newFiber(body func(*fiber) any, sup *supervisor) *fiber {
-	return &fiber{wake: newWake(), body: body, supervisor: sup}
+	return &fiber{wake: eventloop.NewWake(), body: body, supervisor: sup}
 }
 
 // checkInterrupt unwinds a fiber killed while it was running or queued.
@@ -65,27 +72,27 @@ func (f *fiber) start() {
 	}
 	f.started = true
 	go f.main()
-	yieldTo(f.wake)
+	eventloop.YieldTo(f.wake)
 }
 
 // launch is Fiber.run: inside a drain of Aff's scheduler the fiber starts at
 // once, as start does; outside one it starts a drain, which returns only once
 // no fiber can run.
 func (f *fiber) launch() {
-	if draining || f.started {
+	if eventloop.Draining() || f.started {
 		f.start()
 		return
 	}
 	f.started = true
 	go f.main()
-	drain(f.wake)
+	eventloop.Drain(f.wake)
 }
 
 func (f *fiber) main() {
 	<-f.wake
 	result := f.runBody()
 	f.finish(result)
-	release()
+	eventloop.Release()
 }
 
 func (f *fiber) runBody() (result outcome) {
@@ -128,7 +135,7 @@ func (f *fiber) finish(result outcome) {
 		joiner.handler(result)
 	}
 	if result.failure != nil && rethrow && f.interrupt == nil {
-		crash(*result.failure)
+		eventloop.ThrowLater(*result.failure)
 	}
 }
 
@@ -160,15 +167,15 @@ func (f *fiber) kill(failure exception.Error, done func()) func() {
 		f.finish(outcome{failure: f.interrupt})
 		return cancel
 	}
-	loop.mu.Lock()
+	operations.Lock()
 	op := f.blocked
 	interruptible := op != nil && !op.done && f.masked == 0
 	if interruptible {
 		op.canceled = true
 	}
-	loop.mu.Unlock()
+	operations.Unlock()
 	if interruptible {
-		yieldTo(f.wake)
+		eventloop.YieldTo(f.wake)
 	}
 	return cancel
 }
@@ -177,17 +184,17 @@ func (f *fiber) kill(failure exception.Error, done func()) func() {
 // killed. A killed fiber runs `onCancel` (a finalizer, uninterruptible) and
 // unwinds.
 func (f *fiber) await(op *asyncOp, onCancel func()) any {
-	loop.mu.Lock()
+	operations.Lock()
 	if !op.done {
 		op.waiting = true
 		f.blocked = op
-		loop.mu.Unlock()
-		suspend(f.wake)
-		loop.mu.Lock()
+		operations.Unlock()
+		eventloop.Suspend(f.wake)
+		operations.Lock()
 		f.blocked = nil
 	}
 	canceled := op.canceled
-	loop.mu.Unlock()
+	operations.Unlock()
 	if canceled {
 		if onCancel != nil {
 			f.masked++
@@ -205,10 +212,7 @@ func (f *fiber) await(op *asyncOp, onCancel func()) any {
 // requeue suspends the running fiber behind every goroutine that is ready,
 // as a resumption that JavaScript's Aff enqueues on its scheduler.
 func (f *fiber) requeue() {
-	loop.mu.Lock()
-	loop.queue = append(loop.queue, f.wake)
-	loop.mu.Unlock()
-	suspend(f.wake)
+	eventloop.Requeue(f.wake)
 }
 
 func (f *fiber) newOp() *asyncOp {
@@ -218,18 +222,26 @@ func (f *fiber) newOp() *asyncOp {
 // complete resolves an async step from any goroutine; the first resolution
 // wins and a canceled step ignores it.
 func (op *asyncOp) complete(result any) {
-	loop.mu.Lock()
+	operations.Lock()
 	if op.done || op.canceled {
-		loop.mu.Unlock()
+		operations.Unlock()
 		return
 	}
 	op.done = true
 	op.result = result
 	waiting := op.waiting
-	loop.mu.Unlock()
+	operations.Unlock()
 	if waiting {
-		schedule(op.owner.wake)
+		eventloop.Schedule(op.owner.wake)
 	}
+}
+
+// completed is whether the step has a result yet, which another goroutine
+// may be delivering.
+func (op *asyncOp) completed() bool {
+	operations.Lock()
+	defer operations.Unlock()
+	return op.done
 }
 
 // waitFor blocks the current fiber until `target` finishes, without

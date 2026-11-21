@@ -7,10 +7,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/i-am-the-slime/iris-go/direct"
+	"github.com/i-am-the-slime/iris-go/eventloop"
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
@@ -22,7 +24,7 @@ func TestSuspendingInALoopRunsInConstantStack(t *testing.T) {
 		}
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	if result != 100_000 {
 		t.Fatalf("result = %d", result)
 	}
@@ -41,7 +43,7 @@ func TestCatchErrorRecoversThrownErrors(t *testing.T) {
 		log.add("after")
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	expect(t, log, "try,caught boom,after")
 }
 
@@ -55,7 +57,7 @@ func TestBracketReleasesOnFailure(t *testing.T) {
 			return struct{}{}
 		})
 	})
-	Await()
+	eventloop.Await()
 	expect(t, log, "failed use,handled")
 }
 
@@ -74,7 +76,7 @@ func TestBracketReleasesWhenItsFiberIsKilled(t *testing.T) {
 		return struct{}{}
 	})
 	start := time.Now()
-	Await()
+	eventloop.Await()
 	expect(t, log, "killed stop,kill done")
 	if time.Since(start) > 500*time.Millisecond {
 		t.Fatalf("killed delay still kept the program alive")
@@ -94,7 +96,7 @@ func TestForkRunsChildUntilItSuspends(t *testing.T) {
 		log.add("joined " + strconv.Itoa(join(child)))
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	expect(t, log, "child start,parent,child end,joined 7")
 }
 
@@ -103,7 +105,7 @@ func TestDelaysWakeInDeadlineOrder(t *testing.T) {
 	launch(func() struct{} { DelayDirect(nil, 60); log.add("slow"); return struct{}{} })
 	launch(func() struct{} { DelayDirect(nil, 10); log.add("fast"); return struct{}{} })
 	log.add("sync")
-	Await()
+	eventloop.Await()
 	expect(t, log, "sync,fast,slow")
 }
 
@@ -118,7 +120,7 @@ func TestParApplyRunsOperandsConcurrently(t *testing.T) {
 		result = ParApplyDirect(add, func() int { return sleepThen(2, 50) })
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	if result != 3 {
 		t.Fatalf("result = %d", result)
 	}
@@ -148,7 +150,7 @@ func TestParApplyFailureKillsTheOtherOperand(t *testing.T) {
 		})
 	})
 	start := time.Now()
-	Await()
+	eventloop.Await()
 	expect(t, log, "caught fast failure")
 	if time.Since(start) > 500*time.Millisecond {
 		t.Fatalf("the losing operand was not killed")
@@ -162,7 +164,7 @@ func TestParAltTakesTheFirstSuccess(t *testing.T) {
 		return struct{}{}
 	})
 	start := time.Now()
-	Await()
+	eventloop.Await()
 	if result != 2 || time.Since(start) > 150*time.Millisecond {
 		t.Fatalf("parAlt = %d after %v", result, time.Since(start))
 	}
@@ -172,7 +174,7 @@ func TestMakeAffResolvedFromAnotherGoroutine(t *testing.T) {
 	result := 0
 	launch(func() struct{} {
 		result = makeAff(func(k func(outcome)) {
-			done := Hold()
+			done := eventloop.Hold()
 			go func() {
 				time.Sleep(5 * time.Millisecond)
 				k(outcome{value: 42})
@@ -181,9 +183,80 @@ func TestMakeAffResolvedFromAnotherGoroutine(t *testing.T) {
 		})
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	if result != 42 {
 		t.Fatalf("result = %d", result)
+	}
+}
+
+func TestMakeAffResolvedFromAGoroutineWhileTheRegistrationReturns(t *testing.T) {
+	results := make([]int, 200)
+	for i := range results {
+		launch(func() struct{} {
+			results[i] = makeAff(func(k func(outcome)) {
+				done := eventloop.Hold()
+				go func() {
+					k(outcome{value: i})
+					done()
+				}()
+			})
+			return struct{}{}
+		})
+	}
+	eventloop.Await()
+	for i, result := range results {
+		if result != i {
+			t.Fatalf("results[%d] = %d", i, result)
+		}
+	}
+}
+
+func TestMakeAffTakesTheFirstOfResolutionsFromManyGoroutines(t *testing.T) {
+	result := -1
+	launch(func() struct{} {
+		result = makeAff(func(k func(outcome)) {
+			done := eventloop.Hold()
+			var resolving sync.WaitGroup
+			for range 16 {
+				resolving.Go(func() { k(outcome{value: 7}) })
+			}
+			go func() {
+				resolving.Wait()
+				done()
+			}()
+		})
+		return struct{}{}
+	})
+	eventloop.Await()
+	if result != 7 {
+		t.Fatalf("result = %d", result)
+	}
+}
+
+func TestTurnsFromGoroutinesRunOneAtATime(t *testing.T) {
+	count := 0
+	launch(func() struct{} {
+		makeAff(func(k func(outcome)) {
+			done := eventloop.Hold()
+			go func() {
+				var turns sync.WaitGroup
+				for range 32 {
+					turns.Go(func() {
+						for range 1000 {
+							eventloop.Turn(func() { count++ })
+						}
+					})
+				}
+				turns.Wait()
+				k(outcome{value: 0})
+				done()
+			}()
+		})
+		return struct{}{}
+	})
+	eventloop.Await()
+	if count != 32_000 {
+		t.Fatalf("count = %d", count)
 	}
 }
 
@@ -200,7 +273,7 @@ func TestTraverseParArrayRunsElementsConcurrentlyInSourceOrder(t *testing.T) {
 		result = TraverseParArrayDirect(worker, []int{1, 2, 3, 4, 5})
 		return struct{}{}
 	})
-	Await()
+	eventloop.Await()
 	expect(t, log, "5,4,3,2,1")
 	if !slices.Equal(result, []int{10, 20, 30, 40, 50}) {
 		t.Fatalf("result = %v", result)
@@ -219,7 +292,7 @@ func TestLaunchDrainsUntilNoFiberCanRun(t *testing.T) {
 		return value
 	})
 	log.add("main")
-	Await()
+	eventloop.Await()
 	expect(t, log, "parent,joined 1,main")
 }
 
@@ -236,7 +309,7 @@ func TestForkInsideADrainRunsTheChildUntilItSuspends(t *testing.T) {
 		return join(child)
 	})
 	log.add("main")
-	Await()
+	eventloop.Await()
 	expect(t, log, "child,parent,child joined,main")
 }
 
@@ -259,7 +332,7 @@ func TestMain(m *testing.M) {
 	if os.Getenv("AFF_UNCAUGHT") != "" {
 		launch(func() struct{} { panic(exception.Error{Message: "boom"}) })
 		os.Stdout.WriteString("after launch\n")
-		Await()
+		eventloop.Await()
 		os.Stdout.WriteString("unreached\n")
 	}
 	os.Exit(m.Run())
@@ -274,7 +347,7 @@ func BenchmarkForkAndJoin(b *testing.B) {
 			}
 			return sum
 		})
-		Await()
+		eventloop.Await()
 	}
 }
 

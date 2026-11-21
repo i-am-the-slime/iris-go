@@ -8,7 +8,7 @@
 // and eliminators from the generated code, so this package never needs to
 // know the Either's Go type.
 //
-// Fibers are goroutines scheduled by a baton (scheduler.go), so exactly one
+// Fibers are goroutines scheduled by eventloop's baton, so exactly one
 // runs PureScript code at a time, as in JS. A `ParAff a` has the same
 // representation as `Aff a` (`parallel` is unsafeCoerce): its combinators run
 // their operands as child fibers.
