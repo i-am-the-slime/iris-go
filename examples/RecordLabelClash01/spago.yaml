@@ -1,0 +1,12 @@
+package:
+  name: example-recordlabelclash01
+  dependencies:
+    - prelude
+    - effect
+    - console
+    - either
+    - profunctor-lenses
+    - yoga-json
+workspace:
+  packageSet:
+    registry: 71.0.0
