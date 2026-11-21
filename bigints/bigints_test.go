@@ -139,11 +139,17 @@ func TestUnaryOperationsMatchBigInteger(t *testing.T) {
 			t.Errorf("even/odd %s", recorded.Value)
 		}
 		for index, base := range bases {
+			if recorded.Bases[index] == javaScriptStackOverflow {
+				continue
+			}
 			if got := attempt(func() string { return ToBase(base, x) }); got != recorded.Bases[index] {
 				t.Errorf("toBase %d %s = %s, JavaScript %s", base, recorded.Value, got, recorded.Bases[index])
 			}
 		}
 		for index, base := range digitBases {
+			if recorded.Digits[index] == javaScriptStackOverflow {
+				continue
+			}
 			got := attempt(func() digits {
 				negative, values := DigitsInBase(base, x)
 				return digits{values, negative}
@@ -203,6 +209,16 @@ func TestPrimeIsBigIntegersMillerRabin(t *testing.T) {
 		if got := Prime(value(t, recorded.Value)); got != recorded.Prime {
 			t.Errorf("prime %s = %t, JavaScript %t", recorded.Value, got, recorded.Prime)
 		}
+	}
+}
+
+// javaScriptStackOverflow is JavaScriptCore running out of stack while
+// spreading a long unary digit array, which Go builds instead.
+const javaScriptStackOverflow = "THROW RangeError: Maximum call stack size exceeded."
+
+func TestUnaryDigitsHaveNoStackLimit(t *testing.T) {
+	if got := ToBase(1, big.NewInt(700000)); got != strings.Repeat("1", 700000) {
+		t.Errorf("toBase 1 700000 has %d characters", len(got))
 	}
 }
 

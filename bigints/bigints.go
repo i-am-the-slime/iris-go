@@ -190,23 +190,14 @@ func negativeUnary(n *big.Int) []int64 {
 	return digits
 }
 
-// arrayLength is the length of big-integer's `Array.apply(null, Array(n))`:
-// `Array(n)` refuses lengths from 2^32, and `apply` spreads its array onto
-// the stack, which overflows for long ones.
+// arrayLength is the length of a digit array, refused like an array of 2^32
+// or more elements.
 func arrayLength(n *big.Int) int {
 	if !n.IsInt64() || n.Int64() > math.MaxUint32 {
 		panic(exception.Error{Name: "RangeError", Message: "Array length must be a positive integer of safe magnitude."})
 	}
-	if n.Int64() > spreadLimit {
-		panic(exception.Error{Name: "RangeError", Message: "Maximum call stack size exceeded."})
-	}
 	return int(n.Int64())
 }
-
-// spreadLimit is the longest array that JavaScriptCore's
-// Function.prototype.apply spreads at the bottom of Bun's stack. The limit
-// falls as the stack deepens, so near it this is an approximation.
-const spreadLimit = 638588
 
 // Pow implements Data.BigInt.pow; a negative exponent gives zero unless the
 // base is zero, one or minus one.
