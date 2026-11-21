@@ -3,6 +3,8 @@ package foreignvalue
 import (
 	"math"
 	"testing"
+
+	"github.com/i-am-the-slime/iris-go/direct"
 )
 
 func TestJSONRoundTripKeepsKeyOrderAndNumbers(t *testing.T) {
@@ -29,17 +31,81 @@ func TestJSONRoundTripKeepsKeyOrderAndNumbers(t *testing.T) {
 }
 
 func TestStringifyRecordsAndUndefinedFields(t *testing.T) {
-	record := struct {
-		Name  string
-		Count int
-		Gone  any
-		Ratio float64
-	}{Name: "a\"b", Count: 3, Gone: Undefined, Ratio: 1e21}
+	record := direct.ForeignRecord([]string{"name", "count", "gone", "ratio", "next"},
+		[]any{"a\"b", int32(3), Undefined, 1e21, func(any) any { return nil }})
 	if got := UnsafeStringify(record); got != `{"name":"a\"b","count":3,"ratio":1e+21}` {
 		t.Fatalf("stringify = %s", got)
 	}
 	if got := UnsafePrettyStringify(2, []any{1.0, map0()}); got != "[\n  1,\n  {}\n]" {
 		t.Fatalf("pretty = %q", got)
+	}
+}
+
+// shape stands for a generated data type: `data Shape = Circle Number | Square Number Number | Dot`.
+type shape struct {
+	tag    uint8
+	radius float64
+	side   float64
+	other  float64
+}
+
+var _ = DataFields(func(value shape) []any {
+	switch value.tag {
+	case 0:
+		return []any{value.radius}
+	case 1:
+		return []any{value.side, value.other}
+	}
+	return nil
+})
+
+func TestDataValuesAreObjectsOfTheirConstructorsFields(t *testing.T) {
+	square := shape{tag: 1, side: 2, other: 3}
+	stringified := map[string]any{
+		`{"value0":1.5}`:            shape{tag: 0, radius: 1.5},
+		`{"value0":2,"value1":3}`:   square,
+		`{}`:                        shape{tag: 2},
+		`[{"value0":1.5}]`:          []any{shape{tag: 0, radius: 1.5}},
+		`{"value0":{"value0":1.5}}`: direct.ForeignRecord([]string{"value0"}, []any{shape{tag: 0, radius: 1.5}}),
+	}
+	for want, value := range stringified {
+		if got := UnsafeStringify(value); got != want {
+			t.Errorf("stringify = %s, want %s", got, want)
+		}
+	}
+	if TypeOf(square) != "object" || TagOf(square) != "Object" || IsArray(square) {
+		t.Errorf("square is %s, %s, array %v", TypeOf(square), TagOf(square), IsArray(square))
+	}
+	read := func(key any) any {
+		return UnsafeReadPropImpl(noValue, func(v any) any { return v }, key, any(square))
+	}
+	if read("value1") != 3.0 || !IsUndefined(read("value2")) || !IsUndefined(read("length")) || !IsUndefined(read(0)) {
+		t.Errorf("properties %v %v %v %v", read("value1"), read("value2"), read("length"), read(0))
+	}
+}
+
+func TestEveryArrayAndFunctionShapeIsRecognised(t *testing.T) {
+	arrays := []any{[]any{1.0}, []string{"a"}, []float64{1}, []int{1}, []int32{1}, []bool{true}}
+	for _, array := range arrays {
+		length := UnsafeReadPropImpl(noValue, func(v any) any { return v }, "length", array)
+		if !IsArray(array) || TagOf(array) != "Array" || TypeOf(array) != "object" || length != 1.0 {
+			t.Errorf("%T reads as %s/%s, length %v", array, TagOf(array), TypeOf(array), length)
+		}
+		if first := UnsafeReadPropImpl(noValue, func(v any) any { return v }, int32(0), array); IsUndefined(first) {
+			t.Errorf("%T has no element 0", array)
+		}
+	}
+	functions := []any{func(any) any { return nil }, func() any { return nil }, func() {}, func(any) {}}
+	for _, function := range functions {
+		if TypeOf(function) != "function" || TagOf(function) != "Function" || UnsafeStringify(function) != Undefined {
+			t.Errorf("%T reads as %s/%s", function, TagOf(function), TypeOf(function))
+		}
+	}
+	if TagOf(nil) != "Null" || TypeOf(nil) != "object" || TagOf(Undefined) != "Undefined" || TypeOf(Undefined) != "undefined" {
+		t.Errorf("null and undefined")
+	}
+	if TypeOf(struct{}{}) != "object" || UnsafeStringify(struct{}{}) != "{}" {
+		t.Errorf("an unregistered Go value is an object without properties")
 	}
 }
 

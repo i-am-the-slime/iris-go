@@ -1,16 +1,23 @@
 // Package foreignvalue implements Foreign, Foreign.Index and the JSON
 // foreigns of Yoga.JSON.
 //
-// A `Foreign` is a Go `any` (TypeDocs.foreignGoType) holding a value in its
-// own Go representation. JSON and JS-shaped values use: nil for null,
-// Undefined for undefined, bool, float64 (and int or int32, which
-// `unsafeToForeign` of an Int produces, depending on the backend), string, []any for arrays and the go-support/object
-// table of `any` (an `Object Foreign`) for objects.
+// A `Foreign` is a Go `any` holding a value in its own Go representation:
+//
+//   - nil for null and Undefined for undefined;
+//   - bool, float64, int32 or int for numbers, and string;
+//   - []any for arrays, and []string, []float64, []int, []int32 and []bool,
+//     which hand-written foreign code may pass;
+//   - the go-support/object table of `any` (an `Object Foreign`) for objects;
+//   - func(any) any, func() any, func() and func(any) for functions;
+//   - a value of a data type the program registered with DataFields, which
+//     JavaScript sees as an object of its constructor's fields.
+//
+// Any other Go value reads as an object without properties.
 package foreignvalue
 
 import (
-	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/i-am-the-slime/iris-go/object"
 )
@@ -49,7 +56,7 @@ func TypeOf(value any) string {
 		}
 		return "string"
 	}
-	if reflect.TypeOf(value).Kind() == reflect.Func {
+	if isFunction(value) {
 		return "function"
 	}
 	return "object"
@@ -70,13 +77,21 @@ func TagOf(value any) string {
 		}
 		return "String"
 	}
-	switch reflect.TypeOf(value).Kind() {
-	case reflect.Slice:
+	if IsArray(value) {
 		return "Array"
-	case reflect.Func:
+	}
+	if isFunction(value) {
 		return "Function"
 	}
 	return "Object"
+}
+
+func isFunction(value any) bool {
+	switch value.(type) {
+	case func(any) any, func() any, func(), func(any):
+		return true
+	}
+	return false
 }
 
 // IsNull implements Foreign.isNull.
@@ -91,7 +106,11 @@ func IsUndefined(value any) bool {
 
 // IsArray implements Foreign.isArray.
 func IsArray(value any) bool {
-	return value != nil && reflect.TypeOf(value).Kind() == reflect.Slice
+	switch value.(type) {
+	case []any, []string, []float64, []int, []int32, []bool:
+		return true
+	}
+	return false
 }
 
 // UnsafeReadPropImpl implements Foreign.Index.unsafeReadPropImpl:
@@ -148,19 +167,22 @@ func property[K any](value any, key K) any {
 	if table, ok := value.(objectTable); ok {
 		return object.Lookup[any, any](Undefined, func(v any) any { return v }, keyText(key), table)
 	}
-	slice := reflect.ValueOf(value)
-	if slice.Kind() == reflect.Slice {
-		index, isIndex := arrayIndex(key)
-		if !isIndex {
-			if name, ok := any(key).(string); ok && name == "length" {
-				return float64(slice.Len())
-			}
-			return Undefined
-		}
-		if index < 0 || index >= slice.Len() {
-			return Undefined
-		}
-		return slice.Index(index).Interface()
+	switch elements := value.(type) {
+	case []any:
+		return element(elements, key)
+	case []string:
+		return element(elements, key)
+	case []float64:
+		return element(elements, key)
+	case []int:
+		return element(elements, key)
+	case []int32:
+		return element(elements, key)
+	case []bool:
+		return element(elements, key)
+	}
+	if fields, ok := dataFields(value); ok {
+		return element(fields, fieldIndex(key))
 	}
 	if text, ok := value.(string); ok {
 		if name, isName := any(key).(string); isName && name == "length" {
@@ -168,6 +190,34 @@ func property[K any](value any, key K) any {
 		}
 	}
 	return Undefined
+}
+
+// element is JS `array[key]`.
+func element[A any, K any](array []A, key K) any {
+	index, isIndex := arrayIndex(key)
+	if !isIndex {
+		if name, ok := any(key).(string); ok && name == "length" {
+			return float64(len(array))
+		}
+		return Undefined
+	}
+	if index < 0 || index >= len(array) {
+		return Undefined
+	}
+	return array[index]
+}
+
+// fieldIndex is the position of a data value's field `value0`, `value1`, …, or
+// a key no array has.
+func fieldIndex[K any](key K) string {
+	if name, ok := any(key).(string); ok {
+		if digits, found := strings.CutPrefix(name, "value"); found {
+			if _, isIndex := arrayIndex(digits); isIndex {
+				return digits
+			}
+		}
+	}
+	return "-"
 }
 
 func arrayIndex[K any](key K) (int, bool) {
@@ -181,4 +231,32 @@ func arrayIndex[K any](key K) (int, bool) {
 		return index, err == nil && strconv.Itoa(index) == k
 	}
 	return 0, false
+}
+
+// fieldReaders holds, for each data type the program registered, a function
+// that reports the fields of a value of that type.
+var fieldReaders []func(any) ([]any, bool)
+
+// DataFields registers how JavaScript sees a value of the data type T that
+// reaches a Foreign: an object whose properties value0, value1, … are the
+// fields `fields` returns, those of the value's constructor. Generated code
+// calls it once for each such data type, before main runs.
+func DataFields[T any](fields func(T) []any) struct{} {
+	fieldReaders = append(fieldReaders, func(value any) ([]any, bool) {
+		typed, ok := value.(T)
+		if !ok {
+			return nil, false
+		}
+		return fields(typed), true
+	})
+	return struct{}{}
+}
+
+func dataFields(value any) ([]any, bool) {
+	for _, read := range fieldReaders {
+		if fields, ok := read(value); ok {
+			return fields, true
+		}
+	}
+	return nil, false
 }

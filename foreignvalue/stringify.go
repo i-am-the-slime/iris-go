@@ -2,10 +2,8 @@ package foreignvalue
 
 import (
 	"math"
-	"reflect"
 	"strconv"
 	"strings"
-	"unicode"
 	"unicode/utf8"
 	"unsafe"
 
@@ -13,20 +11,18 @@ import (
 )
 
 // UnsafeStringify implements Yoga.JSON._unsafeStringify (`JSON.stringify`).
-func UnsafeStringify[A any](value A) string {
+func UnsafeStringify(value any) string {
 	return stringify(value, "")
 }
 
 // UnsafePrettyStringify implements Yoga.JSON._unsafePrettyStringify:
 // `JSON.stringify(value, null, spaces)` (at most ten spaces of indent).
-func UnsafePrettyStringify[A any](spaces int32, value A) string {
+func UnsafePrettyStringify(spaces int32, value any) string {
 	return stringify(value, strings.Repeat(" ", int(max(0, min(spaces, 10)))))
 }
 
 // A jsonWriter appends JSON.stringify's text for the Foreign representations
-// (see the package documentation) with a type switch; a Go value of another
-// shape, a record or a typed slice that `unsafeToForeign` passed on, is read
-// through reflect.
+// (see the package documentation) with a type switch.
 type jsonWriter struct {
 	out    []byte
 	indent string
@@ -70,8 +66,16 @@ func (w *jsonWriter) value(value any) bool {
 		w.array(len(v), func(i int) bool { w.number(v[i]); return true })
 	case []int:
 		w.array(len(v), func(i int) bool { w.out = strconv.AppendInt(w.out, int64(v[i]), 10); return true })
+	case []int32:
+		w.array(len(v), func(i int) bool { w.out = strconv.AppendInt(w.out, int64(v[i]), 10); return true })
+	case []bool:
+		w.array(len(v), func(i int) bool { w.out = strconv.AppendBool(w.out, v[i]); return true })
 	default:
-		return w.reflected(reflect.ValueOf(value))
+		if isFunction(value) {
+			return false
+		}
+		fields, _ := dataFields(value)
+		w.members(len(fields), func(i int) string { return "value" + strconv.Itoa(i) }, func(i int) bool { return w.value(fields[i]) })
 	}
 	return true
 }
@@ -192,66 +196,6 @@ func (w *jsonWriter) newline() {
 	for range w.depth {
 		w.out = append(w.out, w.indent...)
 	}
-}
-
-// reflected writes a value of a Go type the type switch does not name.
-func (w *jsonWriter) reflected(v reflect.Value) bool {
-	for v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer {
-		if v.IsNil() {
-			w.out = append(w.out, "null"...)
-			return true
-		}
-		if v.Kind() == reflect.Interface {
-			return w.value(v.Elem().Interface())
-		}
-		if table, ok := v.Interface().(objectTable); ok {
-			w.object(table)
-			return true
-		}
-		v = v.Elem()
-	}
-	switch v.Kind() {
-	case reflect.Bool:
-		w.out = strconv.AppendBool(w.out, v.Bool())
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		w.out = strconv.AppendInt(w.out, v.Int(), 10)
-	case reflect.Float32, reflect.Float64:
-		w.number(v.Float())
-	case reflect.String:
-		return w.value(v.String())
-	case reflect.Slice, reflect.Array:
-		w.array(v.Len(), func(i int) bool { return w.element(v.Index(i)) })
-	case reflect.Struct:
-		w.record(v)
-	case reflect.Func:
-		return false
-	default:
-		w.out = append(w.out, "null"...)
-	}
-	return true
-}
-
-func (w *jsonWriter) element(v reflect.Value) bool {
-	if v.CanInterface() {
-		return w.value(v.Interface())
-	}
-	return w.reflected(v)
-}
-
-// record writes a PureScript record: its Go fields are the labels with the
-// first letter capitalised.
-func (w *jsonWriter) record(v reflect.Value) {
-	var fields []int
-	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).IsExported() {
-			fields = append(fields, i)
-		}
-	}
-	w.members(len(fields), func(i int) string {
-		name := v.Type().Field(fields[i]).Name
-		r, size := utf8.DecodeRuneInString(name)
-		return string(unicode.ToLower(r)) + name[size:]
-	}, func(i int) bool { return w.element(v.Field(fields[i])) })
 }
 
 // appendJSONString quotes like JSON.stringify: only `"`, `\` and control

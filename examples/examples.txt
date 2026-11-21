@@ -90,7 +90,7 @@ ProgramChainHomeOrder01|Main.main|program|true false
 AffSemantics01|Main.main|program|try caught boom\nhandler again\nrecovered 7\nacquire\nuse\nrelease\nafter bracket\nchild start\nparent continues\nmain returned\nchild end\njoined 42\nsleeper released\nsleeper killed: stop\nfast\nslow\nordering done
 AffParallel01|Main.main|program|worker 2\nworker 1\nsum 5
 NullableRef01|Main.main|program|(Just 3) Nothing (Just \"x\")\n[2,3,1]\n10\n111 y
-ForeignJson01|Main.main|program|[1.5,2,1e+21]\n\"tab\\\\there\"\n[[\"nested\"]]\nArray/object array=true null=false undefined=false\nString/string array=false null=false undefined=false\nNumber/number array=false null=false undefined=false\nUndefined/undefined array=false null=false undefined=true
+ForeignJson01|Main.main|program|[1.5,2,1e+21]\n\"tab\\\\there\"\n[[\"nested\"]]\nArray/object array=true null=false undefined=false\nString/string array=false null=false undefined=false\nNumber/number array=false null=false undefined=false\nUndefined/undefined array=false null=false undefined=true\n{\"value0\":1}\n{}\n{\"count\":2,\"label\":{\"value0\":\"x\"}}\n[{\"value0\":1.5},{}]\nObject/object array=false null=false undefined=false\nFunction/function array=false null=false undefined=false
 EffectFnUncurried01|Main.main|program|adding 3 4\n7\nx1true\nadding 1 2\nadding 3 10\n13
 ParTraverse01|Main.main|program|worker 3\nworker 2\nworker 1\n[10,20,30]\nworker 5\nworker 4\n[40,50]
 PromiseToAff01|Main.main|program|42\npromised

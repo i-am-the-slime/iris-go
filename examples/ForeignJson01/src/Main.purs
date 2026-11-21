@@ -1,5 +1,6 @@
 module Main where
 import Prelude
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Foreign (Foreign, isArray, isNull, isUndefined, tagOf, typeOf, unsafeToForeign)
@@ -17,3 +18,9 @@ main = do
   log (describe (unsafeToForeign "text"))
   log (describe (unsafeToForeign 4.5))
   log (describe undefined)
+  log (unsafeStringify (unsafeToForeign (Just 1)))
+  log (unsafeStringify (unsafeToForeign (Nothing :: Maybe Int)))
+  log (unsafeStringify (unsafeToForeign { count: 2, next: \(n :: Int) -> n + 1, label: Just "x" }))
+  log (unsafeStringify (unsafeToForeign [ Just 1.5, Nothing ]))
+  log (describe (unsafeToForeign (Just 1)))
+  log (describe (unsafeToForeign (\(n :: Int) -> n + 1)))
