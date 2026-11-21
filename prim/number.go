@@ -191,6 +191,12 @@ func NumberToString(n float64) string {
 	return string(formatted)
 }
 
+// AppendNumberString appends NumberToString(n) to out.
+func AppendNumberString(out []byte, n float64) []byte {
+	formatted, _ := appendNumber(out, n)
+	return formatted
+}
+
 // numberBufferSize holds any Number::toString result: a sign, 17 digits and
 // up to 20 zeros or a point and 6 zeros, or an exponent.
 const numberBufferSize = 48
