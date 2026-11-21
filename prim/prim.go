@@ -148,23 +148,28 @@ func ShowArray[T any](show func(T) string, xs []T) string {
 }
 
 func ShowString(s string) string {
-	var out strings.Builder
-	out.Grow(len(s) + 2)
-	out.WriteByte('"')
+	return string(AppendShowString(make([]byte, 0, len(s)+2), s))
+}
+
+// AppendShowString appends ShowString(s) to b.
+func AppendShowString(b []byte, s string) []byte {
+	b = append(b, '"')
+	start := 0
 	for i := 0; i < len(s); i++ {
 		c := s[i]
 		if c >= 0x20 && c != 0x7F && c != '"' && c != '\\' {
-			out.WriteByte(c)
 			continue
 		}
+		b = append(b, s[start:i]...)
+		start = i + 1
 		escape := escapeShown(c, '"')
-		out.WriteString(escape)
+		b = append(b, escape...)
 		if isNumericEscape(escape) && i+1 < len(s) && s[i+1] >= '0' && s[i+1] <= '9' {
-			out.WriteString("\\&")
+			b = append(b, "\\&"...)
 		}
 	}
-	out.WriteByte('"')
-	return out.String()
+	b = append(b, s[start:]...)
+	return append(b, '"')
 }
 
 // showEscapes holds Data.Show's named escapes; every other control character
@@ -192,10 +197,18 @@ func isNumericEscape(escape string) bool {
 // ShowChar mirrors Data.Show.showCharImpl: a single rune (Char is a one-rune
 // string) wrapped in single quotes with escaping.
 func ShowChar(c rune) string {
+	return string(AppendShowChar(make([]byte, 0, 6), c))
+}
+
+// AppendShowChar appends ShowChar(c) to b.
+func AppendShowChar(b []byte, c rune) []byte {
+	b = append(b, '\'')
 	if c < 0x20 || c == 0x7F || c == '\'' || c == '\\' {
-		return "'" + escapeShown(byte(c), '\'') + "'"
+		b = append(b, escapeShown(byte(c), '\'')...)
+	} else {
+		b = AppendRune(b, c)
 	}
-	return "'" + RuneString(c) + "'"
+	return append(b, '\'')
 }
 
 // BoolNot is Data.HeytingAlgebra.boolNot.
@@ -331,9 +344,14 @@ func StringContains(pattern string, value string) bool {
 // it reads as integral (JS `isNaN(str + ".0")` trick).
 func ShowNumber(n float64) string {
 	var buffer [numberBufferSize + 2]byte
-	formatted, integral := appendNumber(buffer[:0], n)
+	return string(AppendShowNumber(buffer[:0], n))
+}
+
+// AppendShowNumber appends ShowNumber(n) to b.
+func AppendShowNumber(b []byte, n float64) []byte {
+	formatted, integral := appendNumber(b, n)
 	if integral {
 		formatted = append(formatted, ".0"...)
 	}
-	return string(formatted)
+	return formatted
 }

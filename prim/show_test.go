@@ -32,3 +32,19 @@ func TestShowCharMatchesDataShow(t *testing.T) {
 		}
 	}
 }
+
+func TestAppendShowExtendsTheBuffer(t *testing.T) {
+	prefix := []byte("[")
+	if actual := string(AppendShowString(prefix[:1:1], "a\x001")); actual != `["a\0\&1"` {
+		t.Errorf("AppendShowString = %s", actual)
+	}
+	if actual := string(AppendShowChar(prefix[:1:1], '\'')); actual != `['\''` {
+		t.Errorf("AppendShowChar = %s", actual)
+	}
+	numbers := map[float64]string{1: "[1.0", 1.5e-7: "[1.5e-7", -0.5: "[-0.5"}
+	for input, expected := range numbers {
+		if actual := string(AppendShowNumber(prefix[:1:1], input)); actual != expected {
+			t.Errorf("AppendShowNumber(%v) = %s, want %s", input, actual, expected)
+		}
+	}
+}
