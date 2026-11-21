@@ -7,7 +7,6 @@ package prim
 
 import (
 	"math"
-	"math/big"
 	"strconv"
 	"strings"
 )
@@ -337,84 +336,4 @@ func ShowNumber(n float64) string {
 		formatted = append(formatted, ".0"...)
 	}
 	return string(formatted)
-}
-
-type BigIntValue = struct {
-	Value string
-}
-
-var BigIntZero = BigIntValue{Value: "0"}
-var BigIntOne = BigIntValue{Value: "1"}
-
-func BigIntFromStringImpl[R any](just func(BigIntValue) R, nothing R, s string) R {
-	n, ok := parseBigInt(s)
-	if !ok {
-		return nothing
-	}
-	return just(bigIntFromBig(n))
-}
-
-func BigIntFromNumberImpl[R any](just func(BigIntValue) R, nothing R, n float64) R {
-	if math.IsNaN(n) || math.IsInf(n, 0) {
-		return nothing
-	}
-	return just(bigIntFromBig(big.NewInt(int64(math.Trunc(n)))))
-}
-
-func BigIntFromInt(n int) BigIntValue {
-	return bigIntFromBig(big.NewInt(int64(n)))
-}
-
-func BigIntToNumber(x BigIntValue) float64 {
-	f, _ := new(big.Float).SetInt(bigIntToBig(x)).Float64()
-	return f
-}
-
-func BigIntAdd(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Add(bigIntToBig(x), bigIntToBig(y)))
-}
-
-func BigIntMul(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Mul(bigIntToBig(x), bigIntToBig(y)))
-}
-
-func BigIntSub(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Sub(bigIntToBig(x), bigIntToBig(y)))
-}
-
-func BigIntAnd(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).And(bigIntToBig(x), bigIntToBig(y)))
-}
-
-func BigIntXor(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Xor(bigIntToBig(x), bigIntToBig(y)))
-}
-
-func BigIntShl(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Lsh(bigIntToBig(x), uint(bigIntToBig(y).Int64())))
-}
-
-func BigIntShr(x BigIntValue, y BigIntValue) BigIntValue {
-	return bigIntFromBig(new(big.Int).Rsh(bigIntToBig(x), uint(bigIntToBig(y).Int64())))
-}
-
-func BigIntCompare(x BigIntValue, y BigIntValue) int {
-	return bigIntToBig(x).Cmp(bigIntToBig(y))
-}
-
-func parseBigInt(s string) (*big.Int, bool) {
-	n, ok := new(big.Int).SetString(s, 0)
-	return n, ok
-}
-
-func bigIntToBig(x BigIntValue) *big.Int {
-	n, ok := new(big.Int).SetString(x.Value, 10)
-	if !ok {
-		return new(big.Int)
-	}
-	return n
-}
-
-func bigIntFromBig(x *big.Int) BigIntValue {
-	return BigIntValue{Value: x.String()}
 }

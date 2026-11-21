@@ -1,4 +1,7 @@
-package direct
+// Package jsbigint implements the foreign imports of JS.BigInt, JavaScript's
+// native BigInt. It is its own package so that only programs that use BigInt
+// link math/big.
+package jsbigint
 
 import (
 	"math"
@@ -8,28 +11,28 @@ import (
 	"unicode/utf16"
 )
 
-// The JS.BigInt foreigns. A BigInt is an immutable *big.Int: every operation
+// A BigInt is an immutable *big.Int: every operation
 // allocates its result and never modifies its operands.
 
-// BigIntZero implements JS.BigInt.biZero.
-var BigIntZero = big.NewInt(0)
+// Zero implements JS.BigInt.biZero.
+var Zero = big.NewInt(0)
 
-// BigIntOne implements JS.BigInt.biOne.
-var BigIntOne = big.NewInt(1)
+// One implements JS.BigInt.biOne.
+var One = big.NewInt(1)
 
-// BigIntFromString implements JS.BigInt.fromStringImpl, which is JavaScript's
+// FromString implements JS.BigInt.fromStringImpl, which is JavaScript's
 // `BigInt(string)`: surrounding whitespace is ignored, an empty string is 0, a
 // decimal literal may carry a sign, and 0x/0o/0b literals may not. A lone
 // sign is not a number.
-func BigIntFromString[R any](just func(*big.Int) R, nothing R, s string) R {
+func FromString[R any](just func(*big.Int) R, nothing R, s string) R {
 	if n, ok := parseBigIntLiteral(s); ok {
 		return just(n)
 	}
 	return nothing
 }
 
-// BigIntFromTypeLevelInt implements JS.BigInt.fromTypeLevelInt.
-func BigIntFromTypeLevelInt(s string) *big.Int {
+// FromTypeLevelInt implements JS.BigInt.fromTypeLevelInt.
+func FromTypeLevelInt(s string) *big.Int {
 	n, _ := parseBigIntLiteral(s)
 	return n
 }
@@ -73,10 +76,10 @@ func isJavaScriptSpace(r rune) bool {
 	return unicode.Is(unicode.Zs, r)
 }
 
-// BigIntFromStringAs implements JS.BigInt.fromStringAsImpl, including its
+// FromStringAs implements JS.BigInt.fromStringAsImpl, including its
 // quirks: the digits are read in chunks of six with `parseInt`, which stops at
 // the first character that is not a digit of the radix.
-func BigIntFromStringAs[R any](just func(*big.Int) R, nothing R, radix int32, s string) R {
+func FromStringAs[R any](just func(*big.Int) R, nothing R, radix int32, s string) R {
 	units := utf16.Encode([]rune(s))
 	negative := len(units) > 0 && units[0] == '-'
 	if negative {
@@ -148,9 +151,9 @@ func digitValue(r rune) int64 {
 	return -1
 }
 
-// BigIntFromNumber implements JS.BigInt.fromNumberImpl: only integral, finite
+// FromNumber implements JS.BigInt.fromNumberImpl: only integral, finite
 // numbers convert.
-func BigIntFromNumber[R any](just func(*big.Int) R, nothing R, n float64) R {
+func FromNumber[R any](just func(*big.Int) R, nothing R, n float64) R {
 	if math.IsNaN(n) || math.IsInf(n, 0) || n != math.Trunc(n) {
 		return nothing
 	}
@@ -158,87 +161,87 @@ func BigIntFromNumber[R any](just func(*big.Int) R, nothing R, n float64) R {
 	return just(integer)
 }
 
-// BigIntFromInt implements JS.BigInt.fromInt.
-func BigIntFromInt(n int32) *big.Int {
+// FromInt implements JS.BigInt.fromInt.
+func FromInt(n int32) *big.Int {
 	return big.NewInt(int64(n))
 }
 
-// BigIntToNumber implements JS.BigInt.toNumber: the nearest float64, ties to
+// ToNumber implements JS.BigInt.toNumber: the nearest float64, ties to
 // even, and ±Inf beyond the float64 range.
-func BigIntToNumber(x *big.Int) float64 {
+func ToNumber(x *big.Int) float64 {
 	n, _ := new(big.Float).SetInt(x).Float64()
 	return n
 }
 
-// BigIntAdd implements JS.BigInt.biAdd.
-func BigIntAdd(x *big.Int, y *big.Int) *big.Int {
+// Add implements JS.BigInt.biAdd.
+func Add(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Add(x, y)
 }
 
-// BigIntMul implements JS.BigInt.biMul.
-func BigIntMul(x *big.Int, y *big.Int) *big.Int {
+// Mul implements JS.BigInt.biMul.
+func Mul(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Mul(x, y)
 }
 
-// BigIntSub implements JS.BigInt.biSub.
-func BigIntSub(x *big.Int, y *big.Int) *big.Int {
+// Sub implements JS.BigInt.biSub.
+func Sub(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Sub(x, y)
 }
 
-// BigIntMod implements JS.BigInt.biMod: the Euclidean modulus, which is never
+// Mod implements JS.BigInt.biMod: the Euclidean modulus, which is never
 // negative, and 0 for a zero divisor.
-func BigIntMod(x *big.Int, y *big.Int) *big.Int {
+func Mod(x *big.Int, y *big.Int) *big.Int {
 	if y.Sign() == 0 {
 		return new(big.Int)
 	}
 	return new(big.Int).Mod(x, y)
 }
 
-// BigIntDiv implements JS.BigInt.biDiv: the Euclidean quotient, and 0 for a
+// Div implements JS.BigInt.biDiv: the Euclidean quotient, and 0 for a
 // zero divisor.
-func BigIntDiv(x *big.Int, y *big.Int) *big.Int {
+func Div(x *big.Int, y *big.Int) *big.Int {
 	if y.Sign() == 0 {
 		return new(big.Int)
 	}
-	remainder := new(big.Int).Sub(x, BigIntMod(x, y))
+	remainder := new(big.Int).Sub(x, Mod(x, y))
 	return remainder.Quo(remainder, y)
 }
 
-// BigIntDegree implements JS.BigInt.biDegree, the absolute value as an Int.
-func BigIntDegree(x *big.Int) int32 {
+// Degree implements JS.BigInt.biDegree, the absolute value as an Int.
+func Degree(x *big.Int) int32 {
 	return int32(new(big.Int).Abs(x).Int64())
 }
 
-// BigIntPow implements JS.BigInt.pow: 0 for a negative exponent.
-func BigIntPow(x *big.Int, y *big.Int) *big.Int {
+// Pow implements JS.BigInt.pow: 0 for a negative exponent.
+func Pow(x *big.Int, y *big.Int) *big.Int {
 	if y.Sign() < 0 {
 		return new(big.Int)
 	}
 	return new(big.Int).Exp(x, y, nil)
 }
 
-// BigIntNot implements JS.BigInt.not.
-func BigIntNot(x *big.Int) *big.Int {
+// Not implements JS.BigInt.not.
+func Not(x *big.Int) *big.Int {
 	return new(big.Int).Not(x)
 }
 
-// BigIntOr implements JS.BigInt.or with two's complement semantics.
-func BigIntOr(x *big.Int, y *big.Int) *big.Int {
+// Or implements JS.BigInt.or with two's complement semantics.
+func Or(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Or(x, y)
 }
 
-// BigIntXor implements JS.BigInt.xor with two's complement semantics.
-func BigIntXor(x *big.Int, y *big.Int) *big.Int {
+// Xor implements JS.BigInt.xor with two's complement semantics.
+func Xor(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).Xor(x, y)
 }
 
-// BigIntAnd implements JS.BigInt.and with two's complement semantics.
-func BigIntAnd(x *big.Int, y *big.Int) *big.Int {
+// And implements JS.BigInt.and with two's complement semantics.
+func And(x *big.Int, y *big.Int) *big.Int {
 	return new(big.Int).And(x, y)
 }
 
-// BigIntShl implements JS.BigInt.shl: a negative count shifts right.
-func BigIntShl(x *big.Int, n *big.Int) *big.Int {
+// Shl implements JS.BigInt.shl: a negative count shifts right.
+func Shl(x *big.Int, n *big.Int) *big.Int {
 	count := n.Int64()
 	if count < 0 {
 		return new(big.Int).Rsh(x, uint(-count))
@@ -246,43 +249,43 @@ func BigIntShl(x *big.Int, n *big.Int) *big.Int {
 	return new(big.Int).Lsh(x, uint(count))
 }
 
-// BigIntShr implements JS.BigInt.shr, an arithmetic shift that rounds toward
+// Shr implements JS.BigInt.shr, an arithmetic shift that rounds toward
 // negative infinity; a negative count shifts left.
-func BigIntShr(x *big.Int, n *big.Int) *big.Int {
-	return BigIntShl(x, new(big.Int).Neg(n))
+func Shr(x *big.Int, n *big.Int) *big.Int {
+	return Shl(x, new(big.Int).Neg(n))
 }
 
-// BigIntEquals implements JS.BigInt.biEquals.
-func BigIntEquals(x *big.Int, y *big.Int) bool {
+// Equals implements JS.BigInt.biEquals.
+func Equals(x *big.Int, y *big.Int) bool {
 	return x.Cmp(y) == 0
 }
 
-// BigIntCompare implements JS.BigInt.biCompare.
-func BigIntCompare(x *big.Int, y *big.Int) int32 {
+// Compare implements JS.BigInt.biCompare.
+func Compare(x *big.Int, y *big.Int) int32 {
 	return int32(x.Cmp(y))
 }
 
-// BigIntToString implements JS.BigInt.toString.
-func BigIntToString(x *big.Int) string {
+// ToString implements JS.BigInt.toString.
+func ToString(x *big.Int) string {
 	return x.String()
 }
 
-// BigIntToStringAs implements JS.BigInt.toStringAs.
-func BigIntToStringAs(radix int32, x *big.Int) string {
+// ToStringAs implements JS.BigInt.toStringAs.
+func ToStringAs(radix int32, x *big.Int) string {
 	return x.Text(int(radix))
 }
 
-// BigIntAsIntN implements JS.BigInt.asIntN: x modulo 2^bits as a signed
+// AsIntN implements JS.BigInt.asIntN: x modulo 2^bits as a signed
 // two's complement value.
-func BigIntAsIntN(bits int32, x *big.Int) *big.Int {
-	wrapped := BigIntAsUintN(bits, x)
+func AsIntN(bits int32, x *big.Int) *big.Int {
+	wrapped := AsUintN(bits, x)
 	if bits > 0 && wrapped.Bit(int(bits)-1) == 1 {
-		wrapped.Sub(wrapped, new(big.Int).Lsh(BigIntOne, uint(bits)))
+		wrapped.Sub(wrapped, new(big.Int).Lsh(One, uint(bits)))
 	}
 	return wrapped
 }
 
-// BigIntAsUintN implements JS.BigInt.asUintN: x modulo 2^bits.
-func BigIntAsUintN(bits int32, x *big.Int) *big.Int {
-	return new(big.Int).Mod(x, new(big.Int).Lsh(BigIntOne, uint(bits)))
+// AsUintN implements JS.BigInt.asUintN: x modulo 2^bits.
+func AsUintN(bits int32, x *big.Int) *big.Int {
+	return new(big.Int).Mod(x, new(big.Int).Lsh(One, uint(bits)))
 }

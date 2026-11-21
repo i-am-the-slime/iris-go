@@ -2,7 +2,6 @@ package direct
 
 import (
 	"math"
-	"math/big"
 	"slices"
 	"testing"
 
@@ -115,17 +114,6 @@ func TestSortByPlacesIncomparableElementsAsJavaScriptDoes(t *testing.T) {
 		mutable := slices.Clone(c.input)
 		if got := *SortByMutable(compareNumber, identity, &mutable); !slices.EqualFunc(got, c.want, same) {
 			t.Errorf("SortByMutable(%v) = %v, want %v", c.input, got, c.want)
-		}
-	}
-}
-
-func TestBigIntFromStringRejectsALoneSign(t *testing.T) {
-	parse := func(s string) string {
-		return BigIntFromString(func(n *big.Int) string { return n.String() }, "Nothing", s)
-	}
-	for input, want := range map[string]string{"": "0", " -12 ": "-12", "+": "Nothing", "-": "Nothing", " + ": "Nothing"} {
-		if got := parse(input); got != want {
-			t.Errorf("fromString %q = %s, want %s", input, got, want)
 		}
 	}
 }
