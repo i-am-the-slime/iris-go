@@ -21,10 +21,10 @@ type completion struct {
 	removed bool
 }
 
-// fiber is the context every Aff action receives (as `any`).
+// fiber is a running or finished Aff fiber; the one holding the baton is
+// `running`.
 type fiber struct {
 	wake      chan struct{}
-	tail      any
 	interrupt *exception.Error
 	masked    int
 	started   bool
@@ -46,25 +46,8 @@ type asyncOp struct {
 	result   any
 }
 
-func current(ctx any) *fiber {
-	return ctx.(*fiber)
-}
-
 func newFiber(body func(*fiber) any, sup *supervisor) *fiber {
 	return &fiber{wake: newWake(), body: body, supervisor: sup}
-}
-
-// run executes an action to completion on the fiber, following the tail
-// actions binds leave behind so right-nested recursion runs in constant
-// stack.
-func run[A any](action struct{ Run func(any) A }, f *fiber) A {
-	result := action.Run(f)
-	for f.tail != nil {
-		next := f.tail
-		f.tail = nil
-		result = next.(struct{ Run func(any) A }).Run(f)
-	}
-	return result
 }
 
 // checkInterrupt unwinds a fiber killed while it was running or queued.
