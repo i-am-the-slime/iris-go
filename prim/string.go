@@ -326,7 +326,23 @@ func replaceInCodeUnits(pattern string, replacement string, s string, all bool) 
 // StringTrim implements Data.String.Common.trim (String.prototype.trim), whose
 // whitespace includes U+FEFF and excludes U+0085, unlike strings.TrimSpace.
 func StringTrim(s string) string {
-	return strings.TrimFunc(s, isJSWhitespace)
+	start, end := 0, len(s)
+	for start < end && isASCIIWhitespace(s[start]) {
+		start++
+	}
+	for end > start && isASCIIWhitespace(s[end-1]) {
+		end--
+	}
+	if start < end && (s[start] >= utf8.RuneSelf || s[end-1] >= utf8.RuneSelf) {
+		return strings.TrimFunc(s[start:end], isJSWhitespace)
+	}
+	return s[start:end]
+}
+
+const asciiWhitespace = 1<<'\t' | 1<<'\n' | 1<<'\v' | 1<<'\f' | 1<<'\r' | 1<<' '
+
+func isASCIIWhitespace(c byte) bool {
+	return c <= ' ' && uint64(1)<<c&asciiWhitespace != 0
 }
 
 // CodePointAt implements Data.String.CodePoints._codePointAt: the code point

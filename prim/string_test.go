@@ -301,6 +301,16 @@ func TestStringTrimUsesJavaScriptWhitespace(t *testing.T) {
 		"\u0085nel\u0085":          "\u0085nel\u0085",
 		"\u3000\u2028x\t\r\n\v\f ": "x",
 		"\u180emvs":                "\u180emvs",
+		"":                         "",
+		" \t\n":                    "",
+		"  word ":                  "word",
+		" a b ":                    "a b",
+		" \u00a0 x \u00a0 ":        "x",
+		" \u00e9 ":                 "\u00e9",
+		"\t\U0001F600 \u2029":      "\U0001F600",
+		" \xed\xa0\x80 ":           "\xed\xa0\x80",
+		" \xff ":                   "\xff",
+		"\x1c\x1d\x1e\x1fx\x85":    "\x1c\x1d\x1e\x1fx\x85",
 	}
 	for input, want := range cases {
 		if got := StringTrim(input); got != want {
