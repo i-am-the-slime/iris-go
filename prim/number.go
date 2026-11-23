@@ -445,11 +445,16 @@ func exactDigits(n float64) (string, int) {
 }
 
 // Data.Int foreigns. quot and pow spell out JS `| 0` (ToInt32) in the
-// PureScript FFI, so they apply it on the double result.
+// PureScript FFI; on int32 operands it is the wrap of Go's own arithmetic.
 
 // IntQuot is `x / y | 0`: truncating division, 0 for a zero divisor.
+// `bottom / -1` is 2147483648 in JS, which `| 0` wraps to -2147483648, as
+// Go's `/` does.
 func IntQuot(x int32, y int32) int32 {
-	return toInt32(float64(x) / float64(y))
+	if y == 0 {
+		return 0
+	}
+	return x / y
 }
 
 // IntRem is JS `x % y` (the dividend's sign). JS yields NaN for a zero
@@ -458,7 +463,7 @@ func IntRem(x int32, y int32) int32 {
 	if y == 0 {
 		return 0
 	}
-	return int32(int(x) % int(y))
+	return x % y
 }
 
 // IntPow is Data.Int.pow: exponentiation by squaring in int32, which wraps
@@ -497,20 +502,4 @@ func IntToStringAs(radix int32, i int32) string {
 // is 2147483647 for -2147483648, whose absolute value is no Int.
 func IntDegree(x int32) int32 {
 	return int32(min(max(int(x), -int(x)), math.MaxInt32))
-}
-
-// toInt32 is ECMAScript ToInt32: truncate, wrap modulo 2^32 into the signed
-// 32-bit range; NaN and ±Infinity become 0.
-func toInt32(n float64) int32 {
-	if math.IsNaN(n) || math.IsInf(n, 0) {
-		return 0
-	}
-	wrapped := math.Mod(math.Trunc(n), 4294967296)
-	if wrapped < 0 {
-		wrapped += 4294967296
-	}
-	if wrapped >= 2147483648 {
-		wrapped -= 4294967296
-	}
-	return int32(wrapped)
 }
