@@ -16,6 +16,10 @@ import (
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
+func init() {
+	eventloop.SerializeTurns()
+}
+
 // AVar is Effect.AVar's `AVar a`, a reference to a variable.
 type AVar[A any] struct{ state *state[A] }
 

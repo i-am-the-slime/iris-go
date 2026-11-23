@@ -44,6 +44,12 @@ var draining bool
 
 var loop = newScheduler()
 
+var serialized bool
+
+func SerializeTurns() {
+	serialized = true
+}
+
 // mainWake is the wake channel of the goroutine that runs the program's
 // `main` effect; it holds the baton from the start.
 var mainWake = NewWake()
@@ -170,6 +176,10 @@ func Requeue(wake chan struct{}) {
 // callback while holding it, and hands it on, also when the callback panics
 // into the caller.
 func Turn(callback func()) {
+	if !serialized {
+		callback()
+		return
+	}
 	wake := NewWake()
 	Schedule(wake)
 	<-wake

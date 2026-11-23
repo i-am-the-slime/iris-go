@@ -11,6 +11,10 @@ import (
 // goroutines that complete them.
 var operations sync.Mutex
 
+func init() {
+	eventloop.SerializeTurns()
+}
+
 // killSignal unwinds an interrupted fiber. It is not an exception: catchError
 // never sees it, bracket releases do.
 type killSignal struct{}

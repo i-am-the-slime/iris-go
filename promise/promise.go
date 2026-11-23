@@ -13,6 +13,10 @@ import (
 	"github.com/i-am-the-slime/iris-go/exception"
 )
 
+func init() {
+	eventloop.SerializeTurns()
+}
+
 type state struct {
 	settled   bool
 	rejected  bool
