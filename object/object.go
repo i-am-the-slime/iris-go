@@ -7,7 +7,8 @@
 // scanLimit keys may have no Index and is searched by scanning its keys,
 // which is faster for so few than hashing and saves building a map (JSON
 // documents hold many small objects). Every traversal visits entries in
-// insertion order. Ints is unused and stays zero.
+// insertion order. Ints is zero, except in a table that Lend made, which
+// shares its entries with another table until its first write.
 //
 // Immutable operations never mutate a table they did not allocate, so the
 // pure map functions share the key index with their source.
@@ -334,6 +335,111 @@ func Delete[A any](k string, m *struct {
 	}
 }
 
+// Insert implements Foreign.Object.insert: a copy of m with k set to v; an
+// existing key keeps its position.
+func Insert[A any](k string, v A, m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	src := of(m)
+	if i, ok := src.slot(k); ok {
+		vals := make([]A, len(src.Vals))
+		copy(vals, src.Vals)
+		vals[i] = v
+		return out(&table[A]{Index: src.Index, Keys: src.Keys, Vals: vals})
+	}
+	c := src.clone()
+	c.set(k, v)
+	return out(c)
+}
+
+// Remove implements Foreign.Object.delete: a copy of m without k, or m
+// itself when it has no k.
+func Remove[A any](k string, m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	src := of(m)
+	if _, ok := src.slot(k); !ok {
+		return m
+	}
+	c := src.clone()
+	c.remove(k)
+	return out(c)
+}
+
+// Lend hands an object to a loop that inserts into it in place: a table of
+// its own that shares m's entries until its first write copies them, so m
+// never changes. Ints marks a lent table. The object slot of a constructor
+// the accumulator does not hold is nil and stays nil.
+func Lend[A any](m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	if m == nil {
+		return nil
+	}
+	return out(&table[A]{Index: m.Index, Ints: lent, Keys: m.Keys, Vals: m.Vals})
+}
+
+// InsertOwned is Insert into an object that nothing else holds, which Lend
+// handed out: it writes into m and returns it.
+func InsertOwned[A any](k string, v A, m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	of(m).own().set(k, v)
+	return m
+}
+
+// RemoveOwned is Remove from an object that nothing else holds, which Lend
+// handed out: it removes k from m and returns it.
+func RemoveOwned[A any](k string, m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	t := of(m)
+	if _, ok := t.slot(k); ok {
+		t.own().remove(k)
+	}
+	return m
+}
+
 // UnsafeFreeze implements Foreign.Object.ST.Unsafe.unsafeFreeze.
 func UnsafeFreeze[A any](m *struct {
 	Index map[string]int
@@ -418,6 +524,20 @@ func (t *table[A]) clone() *table[A] {
 	c.Keys = append(c.Keys, t.Keys...)
 	c.Vals = append(c.Vals, t.Vals...)
 	return c
+}
+
+// lent is the Ints of a table that Lend made, whose entries still belong to
+// the table it was lent from.
+const lent = 1
+
+// own gives a lent table entries of its own, so that writes to it leave the
+// table it was lent from unchanged.
+func (t *table[A]) own() *table[A] {
+	if t.Ints != lent {
+		return t
+	}
+	*t = *t.clone()
+	return t
 }
 
 func (t *table[A]) set(k string, v A) {

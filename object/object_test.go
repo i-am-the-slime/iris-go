@@ -2,6 +2,7 @@ package object
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -100,5 +101,111 @@ func TestScannedTablesDeleteAndCopy(t *testing.T) {
 	Delete("x", c)()
 	if _, found := Slot(c, "x"); found || UnsafeIndex(c, "z") != 3 || UnsafeIndex(m, "x") != 1 {
 		t.Fatalf("copy %+v, source %+v", *c, *m)
+	}
+}
+
+func entries(m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []string
+}) []string {
+	return ToArrayWithKey(func(k, v string) string { return k + "=" + v }, m)
+}
+
+func TestInsertAndRemoveLeaveTheirSourceUnchanged(t *testing.T) {
+	small := build("a", "b")
+	large := build("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
+	for _, m := range []*struct {
+		Index map[string]int
+		Ints  int
+		Keys  []string
+		Vals  []string
+	}{small, large} {
+		before := entries(m)
+		replaced := Insert("a", "new", m)
+		added := Insert("z", "z!", m)
+		removed := Remove("b", m)
+		if got := entries(m); !reflect.DeepEqual(got, before) {
+			t.Fatalf("source changed to %v", got)
+		}
+		if got := entries(replaced)[0]; got != "a=new" {
+			t.Fatalf("replaced first entry = %v", got)
+		}
+		if got := Keys(added); got[len(got)-1] != "z" || len(got) != len(before)+1 {
+			t.Fatalf("added keys = %v", got)
+		}
+		if got := Keys(removed); len(got) != len(before)-1 || slices.Contains(got, "b") {
+			t.Fatalf("removed keys = %v", got)
+		}
+		if Remove("missing", m) != m {
+			t.Fatal("removing a missing key copied the object")
+		}
+	}
+}
+
+func TestOwnedWritesToALentObjectLeaveTheLenderUnchanged(t *testing.T) {
+	lender := build("a", "b", "c", "d", "e", "f", "g", "h", "i", "j")
+	mapped := FmapObject(lender, func(v string) string { return v + "?" })
+	before := entries(lender)
+	borrowed := Lend(mapped)
+	for _, k := range []string{"a", "k", "l"} {
+		borrowed = InsertOwned(k, k+"*", borrowed)
+	}
+	borrowed = RemoveOwned("b", borrowed)
+	if got := entries(lender); !reflect.DeepEqual(got, before) {
+		t.Fatalf("lender changed to %v", got)
+	}
+	if got := Keys(mapped); len(got) != 10 || got[1] != "b" {
+		t.Fatalf("mapped keys changed to %v", got)
+	}
+	want := []string{"a=a*", "c=c!?", "d=d!?", "e=e!?", "f=f!?", "g=g!?", "h=h!?", "i=i!?", "j=j!?", "k=k*", "l=l*"}
+	if got := entries(borrowed); !reflect.DeepEqual(got, want) {
+		t.Fatalf("borrowed = %v", got)
+	}
+}
+
+func TestOwnedInsertsGrowInLinearTime(t *testing.T) {
+	m := Lend(Empty[int]())
+	keys := make([]string, 20000)
+	for i := range keys {
+		keys[i] = string(rune('a'+i%26)) + string(rune(i))
+	}
+	allocations := testing.AllocsPerRun(1, func() {
+		m = Lend(Empty[int]())
+		for i, k := range keys {
+			m = InsertOwned(k, i, m)
+		}
+	})
+	if allocations > 200 {
+		t.Fatalf("%v allocations for %d inserts", allocations, len(keys))
+	}
+	if int(Size(m)) != len(keys) {
+		t.Fatalf("size = %d", Size(m))
+	}
+}
+
+func BenchmarkInsertOwned(b *testing.B) {
+	keys := make([]string, 10000)
+	for i := range keys {
+		keys[i] = string(rune('a'+i%26)) + string(rune(i))
+	}
+	for b.Loop() {
+		m := Lend(Empty[int]())
+		for i, k := range keys {
+			m = InsertOwned(k, i, m)
+		}
+	}
+}
+
+func TestLendingTheEmptySlotOfAnotherConstructorKeepsItEmpty(t *testing.T) {
+	var absent *struct {
+		Index map[string]int
+		Ints  int
+		Keys  []string
+		Vals  []int
+	}
+	if Lend(absent) != nil {
+		t.Fatal("Lend(nil) is not nil")
 	}
 }
