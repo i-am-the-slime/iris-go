@@ -149,6 +149,13 @@ func CodeUnitIndexOf[R any](just func(int32) R, nothing R, pattern string, s str
 	return just(index)
 }
 
+func CodeUnitContains(pattern string, s string) bool {
+	if plainPattern(pattern) {
+		return strings.Contains(s, pattern)
+	}
+	return codeUnitIndexOf(pattern, s) >= 0
+}
+
 func codeUnitIndexOf(pattern string, s string) int32 {
 	if index, decided := plainIndex(pattern, s); decided {
 		return index

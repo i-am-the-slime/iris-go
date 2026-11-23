@@ -136,6 +136,9 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			if got, want := CodeUnitIndexOf(justInt, nothingInt, pattern, s), wholeIndexOf(pattern, 0, s); got != want {
 				t.Errorf("CodeUnitIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
+			if got, want := CodeUnitContains(pattern, s), wholeIndexOf(pattern, 0, s) != nothingInt; got != want {
+				t.Errorf("CodeUnitContains(%q, %q) = %v, want %v", pattern, s, got, want)
+			}
 			if got, want := CodeUnitLastIndexOf(justInt, nothingInt, pattern, s), wholeLastIndexOf(pattern, length, s); got != want {
 				t.Errorf("CodeUnitLastIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
