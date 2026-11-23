@@ -71,6 +71,40 @@ func Characters(s string) iter.Seq2[int, rune] {
 	}
 }
 
+func IsASCII(s string) bool {
+	offset := 0
+	for ; offset+8 <= len(s); offset += 8 {
+		if !allAscii(eightBytes(s, offset)) {
+			return false
+		}
+	}
+	return shortASCII(s[offset:])
+}
+
+func CountCodePoints(s string) int {
+	if len(s) <= 16 && shortASCII(s) {
+		return len(s)
+	}
+	count := 0
+	for offset := 0; offset < len(s); count++ {
+		first := s[offset]
+		switch {
+		case first < utf8.RuneSelf:
+			offset++
+			for offset+8 <= len(s) && allAscii(eightBytes(s, offset)) {
+				offset += 8
+				count += 8
+			}
+		case first >= 0xC2 && first < 0xE0 && offset+1 < len(s) && s[offset+1]&0xC0 == 0x80:
+			offset += 2
+		default:
+			_, size := DecodeRune(s[offset:])
+			offset += size
+		}
+	}
+	return count
+}
+
 // HasSurrogates tells whether s may hold a lone surrogate: false means it
 // certainly holds none, so the UTF-8 view of it is its UTF-16 one.
 func HasSurrogates(s string) bool {

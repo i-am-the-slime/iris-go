@@ -2,6 +2,7 @@ package prim
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -117,5 +118,21 @@ func TestTextLeavesWithLoneSurrogatesAsReplacementCharacters(t *testing.T) {
 	}
 	if got := ToUTF8("퟿ plain"); got != "퟿ plain" {
 		t.Errorf("ToUTF8 of U+D7FF = %q", got)
+	}
+}
+
+func TestIsASCIIFindsAHighBitAtEveryPosition(t *testing.T) {
+	for length := range 40 {
+		ascii := strings.Repeat("a", length)
+		if !IsASCII(ascii) {
+			t.Errorf("IsASCII(%q) = false", ascii)
+		}
+		for at := range length {
+			bytes := []byte(ascii)
+			bytes[at] = 0xC3
+			if IsASCII(string(bytes)) {
+				t.Errorf("IsASCII(0xC3 at %d of %d) = true", at, length)
+			}
+		}
 	}
 }

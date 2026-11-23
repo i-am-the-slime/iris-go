@@ -70,7 +70,7 @@ func wholeTake(count int32, s string) string {
 }
 
 func codePointSamples() []string {
-	fragments := []string{"a", " ", "abcdefghij", "é", "日本", "\U0001F600", "\U00010000", "�", "\xff", "\xed\xa0\x80", "\xf0\x9f", "\x80", "\xed\xb0\x80"}
+	fragments := []string{"a", " ", "abcdefghij", "é", "日本", "\U0001F600", "\U00010000", "�", "\xff", "\xed\xa0\x80", "\xf0\x9f", "\x80", "\xed\xb0\x80", "\xc3", "\xc0\x80", "\xc2\xc2", "ü", "abcdefghijklmnopq"}
 	samples := []string{"", "a\U0001F600b", "\U0001F600"}
 	random := rand.New(rand.NewPCG(3, 4))
 	for range 400 {

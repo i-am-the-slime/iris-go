@@ -1,7 +1,6 @@
 package direct
 
 import (
-	"math"
 	"unicode/utf8"
 
 	"github.com/i-am-the-slime/iris-go/prim"
@@ -43,10 +42,7 @@ func ToCodePointArray(_ any, _ any, s string) []int32 {
 // CodePointLength is Data.String.CodePoints.length, which the compiler emits
 // in place of the length of _toCodePointArray's result.
 func CodePointLength(s string) int32 {
-	if prim.HasSurrogates(s) {
-		return CodePointLengthUpTo(math.MaxInt32, s)
-	}
-	return int32(utf8.RuneCountInString(s))
+	return int32(prim.CountCodePoints(s))
 }
 
 // CodePointLengthUpTo is min(CodePointLength(s), limit), counting no further

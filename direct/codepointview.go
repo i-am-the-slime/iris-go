@@ -41,11 +41,11 @@ func CodePoints(text string) CodePointsView {
 	if len(text) > math.MaxInt32 || prim.HasSurrogates(text) {
 		return CodePointsView{text: text, form: walkedPoints}
 	}
-	count := utf8.RuneCountInString(text)
-	valid := utf8.ValidString(text)
-	if count == len(text) && valid {
+	if prim.IsASCII(text) {
 		return CodePointsView{text: text, form: asciiPoints, valid: true}
 	}
+	count := utf8.RuneCountInString(text)
+	valid := utf8.ValidString(text)
 	points := make([]int32, 0, count)
 	starts := make([]int32, 0, count)
 	for offset, point := range text {
