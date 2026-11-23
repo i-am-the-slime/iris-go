@@ -131,11 +131,48 @@ func Bind[A, B any](xs []A, f func(A) []B) []B {
 
 // Concat implements Data.Array.concat (flatten one level).
 func Concat[T any](xss [][]T) []T {
-	out := []T{}
+	total := 0
+	for _, xs := range xss {
+		room(total, len(xs))
+		total += len(xs)
+	}
+	out := make([]T, 0, total)
 	for _, xs := range xss {
 		out = append(out, xs...)
 	}
-	return Bounded(out)
+	return out
+}
+
+// NubComparable implements Data.Array.nub at an element type whose Ord
+// instance agrees with Go's ==: the first occurrence of each element, in the
+// order of xs, as purescript-arrays' sort-based nub keeps them, found with a
+// set in linear time instead.
+func NubComparable[T comparable](xs []T) []T {
+	seen := make(map[T]struct{})
+	out := []T{}
+	for _, x := range xs {
+		if _, found := seen[x]; !found {
+			seen[x] = struct{}{}
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+// GroupBy implements Data.Array.groupBy: the runs of consecutive elements
+// that are equal by the predicate to the run's first element. Each run is a
+// view of xs, capped at its length like Slice's.
+func GroupBy[T any](equal func(T, T) bool, xs []T) [][]T {
+	groups := [][]T{}
+	for start := 0; start < len(xs); {
+		end := start + 1
+		for end < len(xs) && equal(xs[start], xs[end]) {
+			end++
+		}
+		groups = append(groups, xs[start:end:end])
+		start = end
+	}
+	return groups
 }
 
 // Append implements Data.Semigroup.concatArray — the `<>` on arrays, which

@@ -160,3 +160,46 @@ func TestSliceAtTheEdges(t *testing.T) {
 		}
 	}
 }
+
+func TestConcatMakesOneArrayOfEveryElement(t *testing.T) {
+	got := Concat([][]int32{{1, 2}, {}, {3}, {4, 5, 6}})
+	if !slices.Equal(got, []int32{1, 2, 3, 4, 5, 6}) || cap(got) != len(got) {
+		t.Fatalf("Concat = %v with capacity %d", got, cap(got))
+	}
+	if empty := Concat([][]int32{}); empty == nil || len(empty) != 0 {
+		t.Fatalf("Concat of nothing = %#v", empty)
+	}
+}
+
+func TestNubComparableKeepsFirstOccurrencesInOrder(t *testing.T) {
+	if got := NubComparable([]int32{3, 1, 3, 2, 1, 4, 2}); !slices.Equal(got, []int32{3, 1, 2, 4}) {
+		t.Fatalf("NubComparable = %v", got)
+	}
+	if got := NubComparable([]string{"b", "a", "b", ""}); !slices.Equal(got, []string{"b", "a", ""}) {
+		t.Fatalf("NubComparable = %v", got)
+	}
+	if got := NubComparable([]bool{}); got == nil || len(got) != 0 {
+		t.Fatalf("NubComparable of nothing = %#v", got)
+	}
+}
+
+func TestGroupByComparesWithTheFirstOfEachRun(t *testing.T) {
+	xs := []int32{1, 2, 3, 7, 8, 1, 1}
+	within := func(first int32, x int32) bool { return x >= first && x-first < 3 }
+	groups := GroupBy(within, xs)
+	want := [][]int32{{1, 2, 3}, {7, 8}, {1, 1}}
+	if !reflect.DeepEqual(groups, want) {
+		t.Fatalf("GroupBy = %v, want %v", groups, want)
+	}
+	for _, group := range groups {
+		if cap(group) != len(group) {
+			t.Fatalf("group %v keeps capacity %d", group, cap(group))
+		}
+	}
+	if grown := append(groups[0], 9); xs[3] != 7 || !slices.Equal(grown, []int32{1, 2, 3, 9}) {
+		t.Fatalf("an append to a group wrote into xs: %v", xs)
+	}
+	if empty := GroupBy(within, []int32{}); empty == nil || len(empty) != 0 {
+		t.Fatalf("GroupBy of nothing = %#v", empty)
+	}
+}
