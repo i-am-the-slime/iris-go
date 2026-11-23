@@ -247,3 +247,31 @@ func BenchmarkPushPopAlternating(b *testing.B) {
 		}
 	}
 }
+
+func TestUnsafeThawOfASliceLeavesTheArrayItCameFrom(t *testing.T) {
+	xs := []int{1, 2, 3, 4}
+	back := Slice(1, 4, xs)
+	arr := UnsafeThaw(back)()
+	PokeUnsafe(0, 7, arr)()
+	Poke(1, 8, arr)()
+	Pop(just[int], optional[int]{}, arr)()
+	Shift(just[int], optional[int]{}, arr)()
+	if !reflect.DeepEqual(xs, []int{1, 2, 3, 4}) || !reflect.DeepEqual(back, []int{2, 3, 4}) {
+		t.Fatalf("xs=%v back=%v", xs, back)
+	}
+}
+
+func TestMutatingAfterTakingASliceOfTheFrozenArray(t *testing.T) {
+	arr := Thaw([]int{1, 2, 3})()
+	frozen := UnsafeFreeze(arr)()
+	front := Slice(0, 2, frozen)
+	again := UnsafeThaw(front)()
+	Push(9, again)()
+	Poke(0, 5, again)()
+	if !reflect.DeepEqual(frozen, []int{1, 2, 3}) || !reflect.DeepEqual(front, []int{1, 2}) {
+		t.Fatalf("frozen=%v front=%v", frozen, front)
+	}
+	if !reflect.DeepEqual(*again, []int{5, 2, 9}) {
+		t.Fatalf("again=%v", *again)
+	}
+}

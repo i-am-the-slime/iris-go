@@ -108,7 +108,7 @@ func Uncons[A, B any](none B, some func(A, []A) B, xs []A) B {
 	if len(xs) == 0 {
 		return none
 	}
-	return some(xs[0], xs[1:])
+	return some(xs[0], xs[1:len(xs):len(xs)])
 }
 
 // MapWithIndex implements Data.FunctorWithIndex.mapWithIndexArray.
@@ -252,16 +252,17 @@ func Push[A any](x A, arr *[]A) func() int32 {
 	}
 }
 
-// Slice implements Data.Array.sliceImpl start end xs (a copy of [start, end)),
-// which is Array.prototype.slice: a negative index counts from the end.
+// Slice implements Data.Array.sliceImpl start end xs, which is
+// Array.prototype.slice: a negative index counts from the end. The elements
+// [start, end) are shared with xs rather than copied, so take, drop, init and
+// the like take constant time. The view's capacity ends where it does, so an
+// append to it copies instead of writing into xs.
 func Slice[T any](start int32, end int32, xs []T) []T {
 	from, to := sliceIndex(start, len(xs)), sliceIndex(end, len(xs))
 	if from >= to {
 		return []T{}
 	}
-	out := make([]T, to-from)
-	copy(out, xs[from:to])
-	return out
+	return xs[from:to:to]
 }
 
 // sliceIndex resolves an Array.prototype.slice index against a length.

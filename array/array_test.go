@@ -88,3 +88,75 @@ func TestSliceCountsNegativeIndicesFromTheEnd(t *testing.T) {
 		}
 	}
 }
+
+func TestSliceSharesElementsInConstantTime(t *testing.T) {
+	xs := []int32{1, 2, 3, 4, 5}
+	middle := Slice(1, 4, xs)
+	if &middle[0] != &xs[1] {
+		t.Fatal("Slice copied the elements")
+	}
+	if cap(middle) != len(middle) {
+		t.Fatalf("Slice keeps capacity %d past its length %d", cap(middle), len(middle))
+	}
+}
+
+func TestAppendingToASliceLeavesTheArrayItCameFrom(t *testing.T) {
+	xs := []int32{1, 2, 3, 4, 5}
+	front := Slice(0, 2, xs)
+	grown := append(front, 9)
+	extended := Snoc(Slice(1, 3, xs), 8)
+	if !slices.Equal(xs, []int32{1, 2, 3, 4, 5}) {
+		t.Fatalf("xs=%v", xs)
+	}
+	if !slices.Equal(grown, []int32{1, 2, 9}) || !slices.Equal(extended, []int32{2, 3, 8}) {
+		t.Fatalf("grown=%v extended=%v", grown, extended)
+	}
+}
+
+func TestAppendingInPlaceToAnArrayLeavesItsSlices(t *testing.T) {
+	xs := make([]int32, 3, 8)
+	copy(xs, []int32{1, 2, 3})
+	front, back := Slice(0, 3, xs), Slice(1, 3, xs)
+	xs = append(xs, 4)
+	front = append(front, 7)
+	if !slices.Equal(xs, []int32{1, 2, 3, 4}) || !slices.Equal(front, []int32{1, 2, 3, 7}) {
+		t.Fatalf("xs=%v front=%v", xs, front)
+	}
+	if !slices.Equal(back, []int32{2, 3}) {
+		t.Fatalf("back=%v", back)
+	}
+}
+
+func TestUnconsSharesTheTailWithoutItsCapacity(t *testing.T) {
+	xs := make([]int32, 3, 8)
+	copy(xs, []int32{1, 2, 3})
+	tail := Uncons(nil, func(_ int32, rest []int32) []int32 { return rest }, xs)
+	if &tail[0] != &xs[1] || cap(tail) != len(tail) {
+		t.Fatalf("tail=%v cap=%d", tail, cap(tail))
+	}
+	_ = append(tail, 9)
+	if xs[:4][3] != 0 {
+		t.Fatalf("an append to the tail wrote into xs: %v", xs[:4])
+	}
+}
+
+func TestSliceAtTheEdges(t *testing.T) {
+	empty := []int32{}
+	for _, c := range []struct {
+		start, end int32
+		xs, want   []int32
+	}{
+		{0, 0, empty, []int32{}},
+		{0, 3, empty, []int32{}},
+		{-1, 1, empty, []int32{}},
+		{3, 3, []int32{1, 2, 3}, []int32{}},
+		{0, 3, []int32{1, 2, 3}, []int32{1, 2, 3}},
+		{2, 1, []int32{1, 2, 3}, []int32{}},
+		{-2147483648, 2147483647, []int32{1, 2, 3}, []int32{1, 2, 3}},
+	} {
+		got := Slice(c.start, c.end, c.xs)
+		if got == nil || !slices.Equal(got, c.want) {
+			t.Errorf("Slice(%d, %d, %v) = %#v, want %v", c.start, c.end, c.xs, got, c.want)
+		}
+	}
+}

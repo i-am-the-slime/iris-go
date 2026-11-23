@@ -14,12 +14,13 @@ func New[A any]() func() *[]A {
 	}
 }
 
-// UnsafeThaw implements Data.Array.ST.unsafeThawImpl — the immutable array
-// reused directly as the mutable one, without a copy. Its capacity is capped,
-// so a push never writes into a longer array that shares the backing store.
+// UnsafeThaw implements Data.Array.ST.unsafeThawImpl with a copy, as Thaw
+// does. An immutable array may be a view that shares its elements with other
+// arrays (Slice, Uncons), which a poke into it in place would change; only the
+// thawed array itself is promised to be unused afterwards.
 func UnsafeThaw[A any](xs []A) func() *[]A {
 	return func() *[]A {
-		out := xs[:len(xs):len(xs)]
+		out := copyOf(xs)
 		return &out
 	}
 }

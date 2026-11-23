@@ -25,7 +25,7 @@ func Uncons[A, B any](empty func(struct{}) B, nonEmpty func(A, []A) B, xs []A) B
 	if len(xs) == 0 {
 		return empty(struct{}{})
 	}
-	return nonEmpty(xs[0], xs[1:])
+	return nonEmpty(xs[0], xs[1:len(xs):len(xs)])
 }
 
 // SortBy implements Data.Array.sortByImpl with the JavaScript implementation's
