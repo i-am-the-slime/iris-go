@@ -61,7 +61,7 @@ func TestCodeUnitsViewUnsafeCharAtReadsSurrogatesAndPanicsOutOfRange(t *testing.
 	for _, i := range []int32{-1, 4} {
 		func() {
 			defer func() {
-				if recover() != "Data.String.Unsafe.charAt: Invalid index" {
+				if recover() != "Data.String.Unsafe.charAt: Invalid index." {
 					t.Errorf("UnsafeCharAt(%d) did not panic as CharAt does", i)
 				}
 			}()

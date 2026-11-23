@@ -169,7 +169,7 @@ func CharAt(i int32, s string) rune {
 	}
 	unit, ok := codeUnitAt(s, int(i))
 	if !ok {
-		panic("Data.String.Unsafe.charAt: Invalid index")
+		panic("Data.String.Unsafe.charAt: Invalid index.")
 	}
 	return unit
 }

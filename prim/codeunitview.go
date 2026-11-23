@@ -105,7 +105,7 @@ func (view *CodeUnitsView) CharAt[R any](just func(rune) R, nothing R, i int32) 
 func (view *CodeUnitsView) UnsafeCharAt(i int32) rune {
 	unit, ok := view.unitAt(int(i))
 	if !ok {
-		panic("Data.String.Unsafe.charAt: Invalid index")
+		panic("Data.String.Unsafe.charAt: Invalid index.")
 	}
 	return unit
 }
