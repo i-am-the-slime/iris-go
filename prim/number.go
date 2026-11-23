@@ -77,19 +77,17 @@ func NumberRemainder(n float64, m float64) float64 {
 }
 
 // NumberRound is Math.round: nearest integer, ties toward +Infinity, keeping
-// -0 for inputs in [-0.5, -0].
+// -0 for inputs in [-0.5, -0]. The step up from the floor is floor(2·fraction),
+// 1 exactly when the fraction is at least a half, without a data-dependent
+// branch. The fraction is exact except for tiny negative inputs, where n+1
+// can round up to 1, hence the min. The result takes the input's sign, which
+// only a zero result can lack. Infinities would make the fraction NaN.
 func NumberRound(n float64) float64 {
-	if math.IsNaN(n) || math.IsInf(n, 0) || n == 0 {
+	if math.IsInf(n, 0) {
 		return n
 	}
-	rounded := math.Floor(n)
-	if n-rounded >= 0.5 {
-		rounded += 1
-	}
-	if rounded == 0 && n < 0 {
-		return math.Copysign(0, -1)
-	}
-	return rounded
+	floor := math.Floor(n)
+	return math.Copysign(floor+min(math.Floor(2*(n-floor)), 1), n)
 }
 
 // NumberSign is Math.sign: NaN and ±0 map to themselves.
