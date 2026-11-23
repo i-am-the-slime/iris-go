@@ -51,6 +51,9 @@ func codeUnitBoundary(s string, n int) (offset int, split bool, valid bool) {
 
 // splitCodeUnits is (take n s, drop n s) with n clamped into [0, length].
 func splitCodeUnits(s string, n int) (before string, after string) {
+	if shortASCIIPrefix(s, n) {
+		return s[:n], s[n:]
+	}
 	offset, split, valid := codeUnitBoundary(s, n)
 	if !valid {
 		units := codeUnits(s)
@@ -69,6 +72,9 @@ func splitCodeUnits(s string, n int) (before string, after string) {
 func codeUnitAt(s string, i int) (rune, bool) {
 	if i < 0 {
 		return 0, false
+	}
+	if shortASCIIPrefix(s, i+1) {
+		return rune(s[i]), true
 	}
 	offset, split, _ := codeUnitBoundary(s, i)
 	if offset >= len(s) {
@@ -95,6 +101,9 @@ func codeUnitLength(s string) int {
 // further than limit (the count may pass limit by one, inside a surrogate
 // pair), and whether the bytes counted are valid UTF-8.
 func codeUnitLengthUpTo(s string, limit int) (length int, valid bool) {
+	if counted := min(limit, len(s)); shortASCIIPrefix(s, counted) {
+		return counted, true
+	}
 	offset, length := wholeCharacterPrefix(s, limit)
 	valid = true
 	for offset < len(s) && length < limit {
@@ -124,6 +133,49 @@ func codeUnitLengthUpTo(s string, limit int) (length int, valid bool) {
 
 func allAscii(word uint64) bool {
 	return word&0x8080808080808080 == 0
+}
+
+func asciiThroughFirstOrSecond(s string, last int32) bool {
+	return uint32(last) < 2 && int(last) < len(s) && s[0]|s[last] < utf8.RuneSelf
+}
+
+func shortASCIIPrefix(s string, n int) bool {
+	return 0 <= n && n <= min(len(s), 16) && shortASCII(s[:n])
+}
+
+func shortASCII(s string) bool {
+	switch {
+	case len(s) >= 8:
+		return allAscii(eightBytes(s, 0) | eightBytes(s, len(s)-8))
+	case len(s) >= 4:
+		return allAscii(uint64(fourBytes(s, 0) | fourBytes(s, len(s)-4)))
+	case len(s) > 0:
+		return s[0]|s[len(s)/2]|s[len(s)-1] < utf8.RuneSelf
+	}
+	return true
+}
+
+func fourBytes(s string, at int) uint32 {
+	s = s[at : at+4]
+	return uint32(s[0]) | uint32(s[1])<<8 | uint32(s[2])<<16 | uint32(s[3])<<24
+}
+
+func plainIndex(pattern string, s string) (index int32, decided bool) {
+	if pattern == "" || !plainPattern(pattern) {
+		return 0, false
+	}
+	at := strings.Index(s, pattern)
+	if at < 0 {
+		return -1, true
+	}
+	return int32(codeUnitLength(s[:at])), true
+}
+
+func plainPattern(pattern string) bool {
+	if len(pattern) <= 16 && shortASCII(pattern) {
+		return true
+	}
+	return utf8.ValidString(pattern) && !strings.Contains(pattern, string(utf8.RuneError))
 }
 
 // eightBytes reads s[at:at+8] as one little-endian word; the compiler turns

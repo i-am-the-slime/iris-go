@@ -81,6 +81,17 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			if got := CodeUnitLengthUpTo(limit, s); got != min(length, limit) {
 				t.Errorf("CodeUnitLengthUpTo(%d, %q) = %d", limit, s, got)
 			}
+			if limit < length {
+				if got := CharAt(limit, s); got != rune(units[limit]) {
+					t.Errorf("CharAt(%d, %q) = %x, want %x", limit, s, got, units[limit])
+				}
+			}
+			if got, want := CodeUnitTake(limit, s), referenceString(units[:min(limit, length)]); got != want {
+				t.Errorf("CodeUnitTake(%d, %q) = %q, want %q", limit, s, got, want)
+			}
+			if got, want := CodeUnitDrop(limit, s), referenceString(units[min(limit, length):]); got != want && ValidString(s) {
+				t.Errorf("CodeUnitDrop(%d, %q) = %q, want %q", limit, s, got, want)
+			}
 		}
 		wantChar := nothingChar
 		if len(units) == 1 {
@@ -141,6 +152,34 @@ func TestEightBytesReadsAWordThatIsAllAsciiOnlyWithoutAHighBit(t *testing.T) {
 		bytes[at] = 0x80
 		if allAscii(eightBytes(string(bytes), 0)) {
 			t.Errorf("eightBytes(0x80 at %d) is all ASCII", at)
+		}
+	}
+}
+
+func TestShortASCIIFindsAHighBitAtEveryPositionOfEveryLength(t *testing.T) {
+	for length := range 17 {
+		ascii := strings.Repeat("a", length)
+		if !shortASCII(ascii) {
+			t.Errorf("shortASCII(%q) = false", ascii)
+		}
+		for at := range length {
+			bytes := []byte(ascii)
+			bytes[at] = 0x80
+			if shortASCII(string(bytes)) {
+				t.Errorf("shortASCII(0x80 at %d of %d) = true", at, length)
+			}
+		}
+	}
+}
+
+func TestCodeUnitIndexOfAPlainPatternIsTheIndexInTheConvertedString(t *testing.T) {
+	texts := []string{"", "xab", "é😀ab", "\xffab", "\xed\xa0\x80ab", "a\U0001F600b", "日本ab日", "\xffa\xfe"}
+	patterns := []string{"ab", "b", "日", "😀", "é😀", "abc"}
+	for _, s := range texts {
+		for _, pattern := range patterns {
+			if got, want := CodeUnitIndexOf(justInt, nothingInt, pattern, s), wholeIndexOf(pattern, 0, s); got != want {
+				t.Errorf("CodeUnitIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
+			}
 		}
 	}
 }

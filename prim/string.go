@@ -126,20 +126,40 @@ func CodeUnitLength(s string) int32 {
 }
 
 func CodeUnitTake(n int32, s string) string {
+	if asciiThroughFirstOrSecond(s, n-1) {
+		return s[:n]
+	}
 	before, _ := splitCodeUnits(s, int(n))
 	return before
 }
 
 func CodeUnitDrop(n int32, s string) string {
+	if asciiThroughFirstOrSecond(s, n-1) {
+		return s[n:]
+	}
 	_, after := splitCodeUnits(s, int(n))
 	return after
 }
 
 func CodeUnitIndexOf[R any](just func(int32) R, nothing R, pattern string, s string) R {
-	return CodeUnitIndexOfStartingAt(just, nothing, pattern, 0, s)
+	index := codeUnitIndexOf(pattern, s)
+	if index < 0 {
+		return nothing
+	}
+	return just(index)
+}
+
+func codeUnitIndexOf(pattern string, s string) int32 {
+	if index, decided := plainIndex(pattern, s); decided {
+		return index
+	}
+	return CodeUnitIndexOfStartingAt(func(index int32) int32 { return index }, -1, pattern, 0, s)
 }
 
 func CharAt(i int32, s string) rune {
+	if asciiThroughFirstOrSecond(s, i) {
+		return rune(s[i])
+	}
 	unit, ok := codeUnitAt(s, int(i))
 	if !ok {
 		panic("Data.String.Unsafe.charAt: Invalid index")
@@ -385,6 +405,9 @@ func StringToCharArray(s string) []rune {
 
 // CodeUnitCharAt implements Data.String.CodeUnits._charAt.
 func CodeUnitCharAt[R any](just func(rune) R, nothing R, i int32, s string) R {
+	if asciiThroughFirstOrSecond(s, i) {
+		return just(rune(s[i]))
+	}
 	unit, ok := codeUnitAt(s, int(i))
 	if !ok {
 		return nothing
@@ -515,6 +538,12 @@ func CodeUnitSplitAt(i int32, s string) struct {
 	After  string
 	Before string
 } {
+	if asciiThroughFirstOrSecond(s, i-1) {
+		return struct {
+			After  string
+			Before string
+		}{After: s[i:], Before: s[:i]}
+	}
 	before, after := splitCodeUnits(s, int(i))
 	return struct {
 		After  string
@@ -600,6 +629,10 @@ func sliceIndex(i int, length int) int {
 // than limit: the compiler uses it where the length is only compared with
 // integers below limit, so a check like `length s == 0` does not walk s.
 func CodeUnitLengthUpTo(limit int32, s string) int32 {
+	counted := int32(min(int(limit), len(s)))
+	if counted == 0 && limit >= 0 || asciiThroughFirstOrSecond(s, counted-1) {
+		return counted
+	}
 	length, _ := codeUnitLengthUpTo(s, int(limit))
 	return int32(min(length, int(limit)))
 }

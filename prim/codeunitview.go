@@ -19,8 +19,9 @@ import (
 // a string holding invalid UTF-8 or a lone surrogate is not indexed at all but
 // walked by those operations, so that their reading of it stays the only one.
 type CodeUnitsView struct {
-	text string
-	form viewForm
+	text        string
+	asciiLength uint32
+	form        viewForm
 	// The code units of text, which a walk counts once, when the view is
 	// built. It wraps like int32(CodeUnitLength(text)) for text too long for
 	// int32 offsets, where no method but Length reads it.
@@ -49,7 +50,7 @@ func UTF16(text string) CodeUnitsView {
 	case !valid || len(text) > math.MaxInt32 || HasSurrogates(text):
 		return CodeUnitsView{text: text, form: walkedForm, length: int32(length)}
 	case length == len(text):
-		return CodeUnitsView{text: text, form: asciiForm, length: int32(length)}
+		return CodeUnitsView{text: text, asciiLength: uint32(length), form: asciiForm, length: int32(length)}
 	}
 	units, starts := wideCodeUnits(text, length)
 	return CodeUnitsView{text: text, form: wideForm, length: int32(length), units: units, starts: starts}
@@ -123,10 +124,14 @@ func (view *CodeUnitsView) Drop(n int32) string {
 
 // Slice is CodeUnitSlice: Drop(begin, Take(end, text)), read off the view.
 func (view *CodeUnitsView) Slice(begin int32, end int32) string {
-	return view.slice(int(begin), int(end))
+	if uint32(begin) <= uint32(end) && uint32(end) <= view.asciiLength {
+		return view.text[begin:end]
+	}
+	return view.slice(begin, end)
 }
 
-func (view *CodeUnitsView) slice(begin int, end int) string {
+func (view *CodeUnitsView) slice(begin32 int32, end32 int32) string {
+	begin, end := int(begin32), int(end32)
 	if view.form == walkedForm {
 		return sliceCodeUnits(begin, end, view.text)
 	}
@@ -140,6 +145,9 @@ func (view *CodeUnitsView) slice(begin int, end int) string {
 	}
 	_, after := view.cut(begin)
 	before, _ := view.cut(end)
+	if after.prefix == "" && before.suffix == "" {
+		return view.text[after.offset:before.offset]
+	}
 	return after.prefix + view.text[after.offset:before.offset] + before.suffix
 }
 
