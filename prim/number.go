@@ -445,6 +445,33 @@ func exactDigits(n float64) (string, int) {
 // Data.Int foreigns. quot and pow spell out JS `| 0` (ToInt32) in the
 // PureScript FFI; on int32 operands it is the wrap of Go's own arithmetic.
 
+// IntFloor, IntCeil, IntTrunc and IntRound are Data.Int's floor, ceil,
+// trunc and round: the Number rounded, then `unsafeClamp`ed into an Int,
+// where NaN and ±Infinity become 0 and anything else outside the Int range
+// its nearest bound.
+func IntFloor(n float64) int32 { return unsafeClamp(math.Floor(n)) }
+
+func IntCeil(n float64) int32 { return unsafeClamp(math.Ceil(n)) }
+
+func IntTrunc(n float64) int32 { return unsafeClamp(math.Trunc(n)) }
+
+// IntRound rounds as NumberRound does; its sign and infinities do not matter
+// here, as a zero is 0 either way and an infinite fraction is NaN, which
+// clamps to 0 as the infinity itself would.
+func IntRound(n float64) int32 {
+	floor := math.Floor(n)
+	return unsafeClamp(floor + min(math.Floor(2*(n-floor)), 1))
+}
+
+// unsafeClamp tests finiteness once: n - n is 0 for every finite n and NaN
+// for NaN and both infinities.
+func unsafeClamp(n float64) int32 {
+	if n-n != 0 {
+		return 0
+	}
+	return int32(min(max(n, math.MinInt32), math.MaxInt32))
+}
+
 // IntQuot is `x / y | 0`: truncating division, 0 for a zero divisor.
 // `bottom / -1` is 2147483648 in JS, which `| 0` wraps to -2147483648, as
 // Go's `/` does.
