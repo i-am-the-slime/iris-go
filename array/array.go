@@ -303,6 +303,12 @@ func Slice[T any](start int32, end int32, xs []T) []T {
 	return xs[from:to:to]
 }
 
+// Tail is Slice(1, len(xs), xs) for an xs that is not empty, the tail uncons
+// gives: shared, capped at its length, without Slice's clamps.
+func Tail[T any](xs []T) []T {
+	return xs[1:len(xs):len(xs)]
+}
+
 // sliceIndex resolves an Array.prototype.slice index against a length.
 func sliceIndex(index int32, length int) int {
 	if index < 0 {

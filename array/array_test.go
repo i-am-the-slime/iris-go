@@ -89,6 +89,19 @@ func TestSliceCountsNegativeIndicesFromTheEnd(t *testing.T) {
 	}
 }
 
+func TestTailIsSliceFromOneAndAppendsWithoutWritingIntoTheArray(t *testing.T) {
+	for _, xs := range [][]int32{{7}, {7, 8}, {3, 1, 2}} {
+		tail := Tail(xs)
+		if !slices.Equal(tail, Slice(1, int32(len(xs)), xs)) || cap(tail) != len(tail) {
+			t.Errorf("Tail(%v) = %v with capacity %d", xs, tail, cap(tail))
+		}
+		_ = append(tail, 9)
+		if xs[len(xs)-1] == 9 {
+			t.Errorf("appending to Tail(%v) wrote into it", xs)
+		}
+	}
+}
+
 func TestSliceSharesElementsInConstantTime(t *testing.T) {
 	xs := []int32{1, 2, 3, 4, 5}
 	middle := Slice(1, 4, xs)
