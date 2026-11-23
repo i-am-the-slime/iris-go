@@ -25,8 +25,9 @@ func Replicate[T any](n int32, value T) []T {
 		return []T{}
 	}
 	out := make([]T, n)
-	for i := range out {
-		out[i] = value
+	out[0] = value
+	for filled := 1; filled < len(out); filled *= 2 {
+		copy(out[filled:], out[:filled])
 	}
 	return out
 }
