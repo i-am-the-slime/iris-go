@@ -304,6 +304,13 @@ func ValidString(s string) bool {
 	return true
 }
 
+func WellFormedString(s string) string {
+	if _, valid := codeUnitLengthUpTo(s, len(s)); valid {
+		return s
+	}
+	return FromCodeUnits(CodeUnits(s))
+}
+
 // ToUTF8 is s as UTF-8 text leaves a JavaScript runtime: each lone surrogate
 // becomes U+FFFD, which takes as many bytes.
 func ToUTF8(s string) string {

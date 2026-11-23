@@ -11,6 +11,9 @@ func TestCharArraysPastAnASCIIPrefix(t *testing.T) {
 	loneLeading := string(AppendRune(nil, 0xD800))
 	texts := []string{
 		"", "abc", "é", "abcé", "abc😀z", "ab" + loneLeading + "c", "a\xffb", "😀", "abc世界",
+		"a long ASCII prefix of more than sixty-four bytes, so that a vector scan reads it \xff",
+		"a long ASCII prefix of more than sixty-four bytes, so that a vector scan reads it " + loneLeading,
+		"\xc3", "\xed\xa0", "😀\xf0\x9f",
 	}
 	for _, text := range texts {
 		units := codeUnits(text)
@@ -27,6 +30,9 @@ func TestCharArraysPastAnASCIIPrefix(t *testing.T) {
 		}
 		if back, encoded := CharArrayToString(got), string(appendChars(nil, want)); back != encoded {
 			t.Errorf("CharArrayToString(%x) = %q, want %q", got, back, encoded)
+		}
+		if wellFormed, roundTrip := WellFormedString(text), CharArrayToString(StringToCharArray(text)); wellFormed != roundTrip {
+			t.Errorf("WellFormedString(%q) = %q, want %q", text, wellFormed, roundTrip)
 		}
 	}
 }
