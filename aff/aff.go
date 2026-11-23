@@ -8,8 +8,10 @@
 // and eliminators from the generated code, so this package never needs to
 // know the Either's Go type.
 //
-// Fibers are goroutines scheduled by eventloop's baton, so exactly one
-// runs PureScript code at a time, as in JS. A `ParAff a` has the same
+// Fibers are goroutines scheduled by eventloop's baton, which this package
+// turns on from its init (eventloop.SerializeTurns): in a program that links
+// aff, exactly one goroutine runs PureScript code at a time, as in JS. A
+// `ParAff a` has the same
 // representation as `Aff a` (`parallel` is unsafeCoerce): its combinators run
 // their operands as child fibers.
 package aff

@@ -1,8 +1,15 @@
 // Package eventloop reproduces the JS event loop's single thread with a
-// baton: exactly one goroutine runs PureScript code at any time. Fibers are
-// goroutines that hand the baton on whenever they suspend, so Refs and every
-// other mutable value keep JS's run-to-suspension semantics without locks,
-// while sequential Aff code runs as plain Go calls on its own goroutine.
+// baton. A program that links aff, avar or promise calls SerializeTurns from
+// their init, and from then on exactly one goroutine runs PureScript code at
+// any time. Fibers are goroutines that hand the baton on whenever they
+// suspend, so Refs and every other mutable value keep JS's
+// run-to-suspension semantics without locks, while sequential Aff code runs
+// as plain Go calls on its own goroutine.
+//
+// A program that links none of them has no fibers to protect: Turn runs its
+// callback right away on the caller's goroutine, so Go.IO threads run
+// PureScript code in parallel, and a Ref they share needs an MVar or an
+// atomic IORef instead.
 //
 // A goroutine waiting for the baton blocks on its own wake channel. The queue
 // holds, in order, the wake channels of goroutines that are ready to run. The

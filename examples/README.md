@@ -2,7 +2,7 @@
 
 Small PureScript programs that Iris's Go backend compiles and runs, comparing the
 output with the JavaScript backend (`compiler-backend/go/scripts/run-examples.sh`
-in purescript-iris).
+in [iris-go-backend](https://github.com/i-am-the-slime/iris-go-backend)).
 
 Each directory is a self-contained spago project. `examples.txt` lists them, one per
 line: `name|entry|kind|expected`, where `kind` is `value` (the entry's shown value),
