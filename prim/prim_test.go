@@ -100,6 +100,16 @@ func TestIntParsingRejectsValuesOutsideInt32(t *testing.T) {
 			t.Errorf("fromString %q = %d, want Nothing", s, *got)
 		}
 	}
+	for _, s := range []string{"", "+", "-", "1_000", "0x10", " 1", "1 ", "1.0", "99999999999999999999", "١"} {
+		if got := parse(10, s); got != nil {
+			t.Errorf("fromString %q = %d, want Nothing", s, *got)
+		}
+	}
+	for s, want := range map[string]int32{"0": 0, "-0": 0, "+7": 7, "007": 7, "2147483647": 2147483647, "-2147483648": -2147483648} {
+		if got := parse(10, s); got == nil || *got != want {
+			t.Errorf("fromString %q = %v, want %d", s, got, want)
+		}
+	}
 	if got := parse(16, "ffffffff"); got != nil {
 		t.Errorf("fromStringAs 16 ffffffff = %d, want Nothing", *got)
 	}

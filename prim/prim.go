@@ -100,6 +100,13 @@ func IntFromNumber[R any](just func(int) R, nothing R, n float64) R {
 }
 
 func IntFromStringAs[R any](just func(int32) R, nothing R, radix int32, s string) R {
+	if radix == 10 {
+		n, err := strconv.Atoi(s)
+		if err != nil || n != int(int32(n)) {
+			return nothing
+		}
+		return just(int32(n))
+	}
 	n, err := strconv.ParseInt(s, int(radix), 32)
 	if err != nil {
 		return nothing
