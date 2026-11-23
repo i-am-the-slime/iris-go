@@ -185,15 +185,7 @@ func StringJoinWith(separator string, xs []string) string {
 // joinHasSeam tells whether joining xs with separator joins two surrogates.
 func joinHasSeam(separator string, xs []string) bool {
 	if separator != "" {
-		if !endsInLeadingSurrogate(separator) && !startsWithTrailingSurrogate(separator) {
-			for _, x := range xs {
-				if seam(x, separator) || seam(separator, x) {
-					return true
-				}
-			}
-			return false
-		}
-		return len(xs) > 1
+		return len(xs) > 1 && (endsInLeadingSurrogate(separator) || startsWithTrailingSurrogate(separator))
 	}
 	return anySeam(xs)
 }

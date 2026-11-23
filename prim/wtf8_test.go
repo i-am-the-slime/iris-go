@@ -62,6 +62,12 @@ func TestAppendingTheHalvesOfAPairFormsThePair(t *testing.T) {
 	if got := StringJoinWith(loneLeading, []string{"x", drop}); got != "x"+pair {
 		t.Errorf("joinWith leading = %q", got)
 	}
+	if got := StringJoinWith(",", []string{take, drop, take}); got != take+","+drop+","+take {
+		t.Errorf("joinWith keeps halves apart around a plain separator = %q", got)
+	}
+	if got := StringJoinWith(loneTrailing, []string{take}); got != take {
+		t.Errorf("joinWith one part = %q", got)
+	}
 	if got := StringReplaceAll("x", "", take+"x"+drop); got != pair {
 		t.Errorf("replaceAll removing what parts a pair = %q", got)
 	}
