@@ -25,6 +25,12 @@ func UnsafeThaw[A any](xs []A) func() *[]A {
 	}
 }
 
+// ThawOwned thaws an array that nothing else reads the elements of, such as a
+// freshly replicated one, by making it the mutable array itself.
+func ThawOwned[A any](xs []A) func() *[]A {
+	return func() *[]A { return &xs }
+}
+
 // Clone implements Data.Array.ST.cloneImpl — an independent mutable copy.
 func Clone[A any](arr *[]A) func() *[]A {
 	return func() *[]A {
