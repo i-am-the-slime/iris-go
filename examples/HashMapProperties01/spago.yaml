@@ -1,0 +1,19 @@
+package:
+  name: example-hashmapproperties01
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - integers
+    - maybe
+    - ordered-collections
+    - prelude
+    - strings
+    - tuples
+    - unordered-collections
+  build:
+    strict: true
+workspace:
+  packageSet:
+    registry: 71.0.0
