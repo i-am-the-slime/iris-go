@@ -61,13 +61,92 @@ func TestPeekPopShift(t *testing.T) {
 	}
 }
 
-func TestPopDoesNotLetALaterPushOverwriteAFrozenAlias(t *testing.T) {
+func TestPushAfterPopReusesTheBackingStore(t *testing.T) {
+	arr := Thaw([]*int{new(int), new(int), new(int)})()
+	store := &(*arr)[0]
+	Pop(just[*int], optional[*int]{}, arr)()
+	if spare := (*arr)[:3][2]; spare != nil {
+		t.Fatalf("the popped slot still holds %v", spare)
+	}
+	Push(new(int), arr)()
+	if &(*arr)[0] != store || len(*arr) != 3 {
+		t.Fatal("Push after Pop reallocated")
+	}
+}
+
+func TestPushAfterShiftAppendsInPlace(t *testing.T) {
+	arr := Thaw([]int{1, 2, 3})()
+	PushAll([]int{4}, arr)()
+	Shift(just[int], optional[int]{}, arr)()
+	before := cap(*arr)
+	Push(5, arr)()
+	if cap(*arr) != before || !reflect.DeepEqual(*arr, []int{2, 3, 4, 5}) {
+		t.Fatalf("Push after Shift reallocated: %v cap %d → %d", *arr, before, cap(*arr))
+	}
+}
+
+func TestShiftAndPushKeepADequeOrdered(t *testing.T) {
+	arr := New[int]()()
+	popped := []int{}
+	for i := range 1000 {
+		Push(i, arr)()
+		if i%3 != 0 {
+			popped = append(popped, Shift(just[int], optional[int]{}, arr)().value)
+		}
+	}
+	for Length(arr)() > 0 {
+		popped = append(popped, Shift(just[int], optional[int]{}, arr)().value)
+	}
+	for i, x := range popped {
+		if x != i {
+			t.Fatalf("Shift %d returned %d", i, x)
+		}
+	}
+}
+
+func TestPushAfterPopDoesNotOverwriteAFrozenCopy(t *testing.T) {
+	arr := Thaw([]int{1, 2, 3})()
+	frozen := Freeze(arr)()
+	Pop(just[int], optional[int]{}, arr)()
+	Push(9, arr)()
+	if !reflect.DeepEqual(frozen, []int{1, 2, 3}) || !reflect.DeepEqual(*arr, []int{1, 2, 9}) {
+		t.Fatalf("frozen=%v arr=%v", frozen, *arr)
+	}
+}
+
+func TestUnsafeFreezeSharesTheStoreLikeJavaScript(t *testing.T) {
 	arr := Thaw([]int{1, 2, 3})()
 	frozen := UnsafeFreeze(arr)()
 	Pop(just[int], optional[int]{}, arr)()
 	Push(9, arr)()
-	if !reflect.DeepEqual(frozen, []int{1, 2, 3}) {
-		t.Fatalf("frozen alias changed: %v", frozen)
+	if !reflect.DeepEqual(frozen, []int{1, 2, 9}) {
+		t.Fatalf("frozen=%v", frozen)
+	}
+	if cap(frozen) != len(frozen) {
+		t.Fatalf("frozen keeps spare capacity %d", cap(frozen))
+	}
+}
+
+func TestUnsafeThawOfAPrefixDoesNotPushIntoTheLongerArray(t *testing.T) {
+	xs := []int{1, 2, 3}
+	arr := UnsafeThaw(xs[:2])()
+	Push(9, arr)()
+	if !reflect.DeepEqual(xs, []int{1, 2, 3}) || !reflect.DeepEqual(*arr, []int{1, 2, 9}) {
+		t.Fatalf("xs=%v arr=%v", xs, *arr)
+	}
+}
+
+func TestSpliceAndUnshiftAllReuseSpareCapacity(t *testing.T) {
+	arr := Thaw([]int{1, 2, 3, 4, 5})()
+	Pop(just[int], optional[int]{}, arr)()
+	Pop(just[int], optional[int]{}, arr)()
+	store := &(*arr)[0]
+	if removed := Splice(1, 1, []int{7, 8}, arr)(); !reflect.DeepEqual(removed, []int{2}) {
+		t.Fatalf("Splice removed %v", removed)
+	}
+	UnshiftAll([]int{0}, arr)()
+	if &(*arr)[0] != store || !reflect.DeepEqual(*arr, []int{0, 1, 7, 8, 3}) {
+		t.Fatalf("arr=%v reallocated=%v", *arr, &(*arr)[0] != store)
 	}
 }
 
@@ -155,5 +234,16 @@ func TestIndicesTakeTheExtremeInts(t *testing.T) {
 	}
 	if got := Push(4, arr)(); got != 1 {
 		t.Errorf("Push = %d", got)
+	}
+}
+
+func BenchmarkPushPopAlternating(b *testing.B) {
+	for b.Loop() {
+		arr := Thaw(make([]int, 1000))()
+		push, pop := Push(1, arr), Pop(just[int], optional[int]{}, arr)
+		for range 1_000_000 {
+			push()
+			pop()
+		}
 	}
 }

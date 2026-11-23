@@ -1,5 +1,7 @@
 package array
 
+import "slices"
+
 // The remaining Data.Array.ST and Data.Array.ST.Partial primitives. An
 // `STArray h a` is a *[]A so every alias observes a mutation; each STFn impl
 // returns the ST action's thunk, exactly like Thaw/UnsafeFreeze/Push.
@@ -13,9 +15,13 @@ func New[A any]() func() *[]A {
 }
 
 // UnsafeThaw implements Data.Array.ST.unsafeThawImpl — the immutable array
-// reused directly as the mutable one, without a copy.
+// reused directly as the mutable one, without a copy. Its capacity is capped,
+// so a push never writes into a longer array that shares the backing store.
 func UnsafeThaw[A any](xs []A) func() *[]A {
-	return func() *[]A { return &xs }
+	return func() *[]A {
+		out := xs[:len(xs):len(xs)]
+		return &out
+	}
 }
 
 // Clone implements Data.Array.ST.cloneImpl — an independent mutable copy.
@@ -65,7 +71,9 @@ func Pop[A, R any](just func(A) R, nothing R, arr *[]A) func() R {
 			return nothing
 		}
 		last := (*arr)[n-1]
-		*arr = (*arr)[: n-1 : n-1]
+		var zero A
+		(*arr)[n-1] = zero
+		*arr = (*arr)[:n-1]
 		return just(last)
 	}
 }
@@ -78,7 +86,9 @@ func Shift[A, R any](just func(A) R, nothing R, arr *[]A) func() R {
 			return nothing
 		}
 		first := (*arr)[0]
-		*arr = copyOf((*arr)[1:])
+		var zero A
+		(*arr)[0] = zero
+		*arr = (*arr)[1:]
 		return just(first)
 	}
 }
@@ -98,9 +108,7 @@ func PushAll[A any](values []A, arr *[]A) func() int32 {
 func UnshiftAll[A any](values []A, arr *[]A) func() int32 {
 	return func() int32 {
 		room(len(*arr), len(values))
-		out := make([]A, 0, len(values)+len(*arr))
-		out = append(out, values...)
-		*arr = append(out, *arr...)
+		*arr = slices.Insert(*arr, 0, values...)
 		return int32(len(*arr))
 	}
 }
@@ -115,10 +123,7 @@ func Splice[A any](start int32, howMany int32, inserted []A, arr *[]A) func() []
 		count := min(max(int(howMany), 0), n-from)
 		removed := copyOf((*arr)[from : from+count])
 		room(n-count, len(inserted))
-		out := make([]A, 0, n-count+len(inserted))
-		out = append(out, (*arr)[:from]...)
-		out = append(out, inserted...)
-		*arr = append(out, (*arr)[from+count:]...)
+		*arr = slices.Replace(*arr, from, from+count, inserted...)
 		return removed
 	}
 }

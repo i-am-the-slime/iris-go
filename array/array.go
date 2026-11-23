@@ -238,9 +238,9 @@ func Thaw[A any](xs []A) func() *[]A {
 }
 
 // UnsafeFreeze implements Data.Array.ST.unsafeFreezeImpl — the mutable array
-// reused directly as the immutable result.
+// reused directly as the immutable result, its spare capacity cut off.
 func UnsafeFreeze[A any](arr *[]A) func() []A {
-	return func() []A { return *arr }
+	return func() []A { return (*arr)[:len(*arr):len(*arr)] }
 }
 
 // Push implements Data.Array.ST.pushImpl — append, yielding the new length.
