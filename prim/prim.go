@@ -304,29 +304,39 @@ func NumSub(x float64, y float64) float64 {
 }
 
 // Euclidean division and modulo, matching the Prelude's JS semantics:
-// division by zero yields 0 and the modulo is always non-negative. They are
-// computed on Go ints, where no Int quotient or remainder overflows, and
-// wrap into an Int like `| 0`. JS (`-Math.floor(x / -y)`, no `| 0`) makes
-// `bottom / -1` 2147483648, which is no Int; it wraps to -2147483648.
+// division by zero yields 0 and the modulo is always non-negative. Go's
+// truncating `/` and `%` are corrected without a branch: a negative
+// remainder moves up by |y| and the quotient one step away from y's sign.
+// JS (`-Math.floor(x / -y)`, no `| 0`) makes `bottom / -1` 2147483648,
+// which is no Int; Go's `/` wraps it to -2147483648. Both bodies are small
+// enough to inline, so a constant divisor folds into a multiply.
 func IntDiv(x int32, y int32) int32 {
 	if y == 0 {
 		return 0
 	}
-	if y > 0 {
-		return int32(floorDiv(int(x), int(y)))
-	}
-	return int32(-floorDiv(int(x), -int(y)))
+	sign := y>>31 | 1
+	return x/y - (x%y)>>31&sign
 }
 
 func IntMod(x int32, y int32) int32 {
 	if y == 0 {
 		return 0
 	}
-	return int32(int(x) - int(y)*int(IntDiv(x, y)))
+	remainder := x % y
+	magnitude := (y ^ y>>31) - y>>31
+	return remainder + remainder>>31&magnitude
 }
 
-func floorDiv(x int, y int) int {
-	return (x + (x>>63)&(1-y)) / y
+// IntDivPositive and IntModPositive are IntDiv and IntMod for a divisor the
+// compiler knows to be a positive constant: Go divides by it with a multiply
+// and the Euclidean correction is one shift and add.
+func IntDivPositive(x int32, divisor int32) int32 {
+	return x/divisor + (x%divisor)>>31
+}
+
+func IntModPositive(x int32, divisor int32) int32 {
+	remainder := x % divisor
+	return remainder + remainder>>31&divisor
 }
 
 // PureScript Int is a 32-bit integer; its Bounded instance pins the JS range.
