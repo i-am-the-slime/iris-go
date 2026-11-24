@@ -2,7 +2,6 @@ package foreignvalue
 
 import (
 	"math"
-	"math/big"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -58,7 +57,7 @@ func (w *jsonWriter) value(value any) bool {
 			return false
 		}
 		w.out = appendJSONString(w.out, v)
-	case *big.Int:
+	case bigInt:
 		w.out = append(w.out, '"')
 		w.out = v.Append(w.out, 10)
 		w.out = append(w.out, '"')

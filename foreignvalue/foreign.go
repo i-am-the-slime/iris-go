@@ -18,13 +18,19 @@
 package foreignvalue
 
 import (
-	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
+
+// bigInt is a *big.Int, recognised by its methods so that a program without
+// BigInts does not link math/big and, through it, reflect.
+type bigInt interface {
+	Append(buf []byte, base int) []byte
+	ProbablyPrime(n int) bool
+}
 
 // undefinedText is the string that stands for JS undefined.
 const undefinedText = "\x00<undefined>\x00"
@@ -97,7 +103,7 @@ func TypeOf(value any) string {
 		return "boolean"
 	case int, int32, float64:
 		return "number"
-	case *big.Int:
+	case bigInt:
 		return "bigint"
 	case string:
 		if isUndefined(v) {
@@ -120,7 +126,7 @@ func TagOf(value any) string {
 		return "Boolean"
 	case int, int32, float64:
 		return "Number"
-	case *big.Int:
+	case bigInt:
 		return "BigInt"
 	case string:
 		if isUndefined(v) {
