@@ -60,8 +60,8 @@ func Name(e Error) string {
 
 // StackImpl implements Effect.Exception.stackImpl in the caller's Maybe
 // representation; a JS Error always carries a stack.
-func StackImpl[R any](just func(string) R, _ R, e Error) R {
-	return just(stack(e))
+func StackImpl(e Error) (string, bool) {
+	return stack(e), true
 }
 
 // ThrowException implements Effect.Exception.throwException.

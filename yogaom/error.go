@@ -19,11 +19,8 @@ func NewParallelError[E any](failure E) exception.Error {
 
 // ToParallelErrorImpl implements Yoga.Om.Error.toParallelErrorImpl: the
 // error as a ParallelError when it is one, in the caller's Maybe representation.
-func ToParallelErrorImpl[M any](just func(exception.Error) M, nothing M, failure exception.Error) M {
-	if isParallel(failure) {
-		return just(failure)
-	}
-	return nothing
+func ToParallelErrorImpl(failure exception.Error) (exception.Error, bool) {
+	return failure, isParallel(failure)
 }
 
 // isParallel tells whether NewParallelError built the error, whatever the

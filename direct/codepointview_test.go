@@ -14,7 +14,7 @@ func TestCodePointsViewAgreesWithTheWalkingOperations(t *testing.T) {
 			t.Errorf("Length(%q) = %d, want %d", s, got, length)
 		}
 		for index := int32(-2); index <= int32(length)+2; index++ {
-			if got, want := view.CodePointAt(justPoint, maybePoint{}, index), CodePointAt(nil, justPoint, maybePoint{}, nil, index, s); got != want {
+			if got, want := foundPoint(view.CodePointAt(index)), foundPoint(CodePointAt(nil, nil, index, s)); got != want {
 				t.Errorf("CodePointAt(%d, %q) = %v, want %v", index, s, got, want)
 			}
 			if got, want := view.Take(index), CodePointTake(nil, index, s); got != want {
@@ -27,7 +27,7 @@ func TestCodePointsViewAgreesWithTheWalkingOperations(t *testing.T) {
 func TestCodePointsViewReadsValidTextWithoutAllocating(t *testing.T) {
 	view := CodePoints("naïve \U0001F600 café")
 	allocations := testing.AllocsPerRun(100, func() {
-		_ = view.CodePointAt(justPoint, maybePoint{}, 6)
+		_, _ = view.CodePointAt(6)
 		_ = view.Take(8)
 	})
 	if allocations != 0 {

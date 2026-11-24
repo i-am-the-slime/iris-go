@@ -9,7 +9,10 @@ import (
 type branchError struct{ label string }
 
 func recognised(failure exception.Error) string {
-	return ToParallelErrorImpl(func(exception.Error) string { return "parallel" }, "plain", failure)
+	if _, parallel := ToParallelErrorImpl(failure); parallel {
+		return "parallel"
+	}
+	return "plain"
 }
 
 func TestParallelErrorsTravelAsErrors(t *testing.T) {

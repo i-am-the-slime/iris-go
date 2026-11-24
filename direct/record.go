@@ -14,7 +14,7 @@ type foreignObject = *struct {
 func ForeignRecord(keys []string, values []any) any {
 	record := object.Empty[any]()
 	for index, key := range keys {
-		object.Poke(key, values[index], record)()
+		object.Poke(key, values[index], record)
 	}
 	return record
 }

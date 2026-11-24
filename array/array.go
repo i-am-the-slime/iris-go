@@ -235,59 +235,43 @@ func SortBy[T, O any](xs []T, comp func(T, T) O, isLess func(O) bool) []T {
 	return out
 }
 
-// Index implements Data.Array.indexImpl just nothing xs i. The PureScript
-// foreign takes the Maybe constructors as arguments (rank-2 in the source, a
-// plain pair of type parameters here), so this package never has to name the
-// generated Maybe struct.
-func Index[A, R any](just func(A) R, nothing R, xs []A, i int) R {
-	if i < 0 || i >= len(xs) {
-		return nothing
-	}
-	return just(xs[i])
-}
-
-// InsertAt inserts value at index, returning the caller's concrete Maybe
-// representation. The input slice is never mutated.
-func InsertAt[A, R any](just func([]A) R, nothing R, index int32, value A, xs []A) R {
+// InsertAt implements Data.Array._insertAt: a copy of xs with value at index,
+// found when index is within [0, len(xs)].
+func InsertAt[A any](index int32, value A, xs []A) ([]A, bool) {
 	at := int(index)
 	if at < 0 || at > len(xs) {
-		return nothing
+		return nil, false
 	}
 	room(len(xs), 1)
 	result := make([]A, len(xs)+1)
 	copy(result, xs[:at])
 	result[at] = value
 	copy(result[at+1:], xs[at:])
-	return just(result)
+	return result, true
 }
 
 // The Data.Array.ST primitives. An `STArray h a` is a *[]A — push must mutate
-// through the pointer so every alias observes the append. Each STFn impl is an
-// ST action, so it returns the effect thunk; the generated code forces it
-// exactly where the optimizer placed the effect's sequencing.
+// through the pointer so every alias observes the append. Each STFn impl
+// performs its ST action when called, as generated code performs an effect.
 
 // Thaw implements Data.Array.ST.thawImpl — a mutable copy of the array.
-func Thaw[A any](xs []A) func() *[]A {
-	return func() *[]A {
-		out := make([]A, len(xs))
-		copy(out, xs)
-		return &out
-	}
+func Thaw[A any](xs []A) *[]A {
+	out := make([]A, len(xs))
+	copy(out, xs)
+	return &out
 }
 
 // UnsafeFreeze implements Data.Array.ST.unsafeFreezeImpl — the mutable array
 // reused directly as the immutable result, its spare capacity cut off.
-func UnsafeFreeze[A any](arr *[]A) func() []A {
-	return func() []A { return (*arr)[:len(*arr):len(*arr)] }
+func UnsafeFreeze[A any](arr *[]A) []A {
+	return (*arr)[:len(*arr):len(*arr)]
 }
 
 // Push implements Data.Array.ST.pushImpl — append, yielding the new length.
-func Push[A any](x A, arr *[]A) func() int32 {
-	return func() int32 {
-		room(len(*arr), 1)
-		*arr = append(*arr, x)
-		return int32(len(*arr))
-	}
+func Push[A any](x A, arr *[]A) int32 {
+	room(len(*arr), 1)
+	*arr = append(*arr, x)
+	return int32(len(*arr))
 }
 
 // Slice implements Data.Array.sliceImpl start end xs, which is
@@ -419,37 +403,36 @@ func Unfoldr[M, T, A, B any](
 	}
 }
 
-// FindIndex returns the first matching index using the caller's concrete Maybe
-// representation.
-func FindIndex[A, R any](just func(int32) R, nothing R, predicate func(A) bool, xs []A) R {
+// FindIndex implements Data.Array.findIndexImpl: the first matching index.
+func FindIndex[A any](predicate func(A) bool, xs []A) (int32, bool) {
 	for i, x := range xs {
 		if predicate(x) {
-			return just(int32(i))
+			return int32(i), true
 		}
 	}
-	return nothing
+	return 0, false
 }
 
-// Find returns the first matching value using the caller's concrete Maybe
-// representation.
-func Find[A, R any](just func(A) R, nothing R, predicate func(A) bool, xs []A) R {
+// Find returns the first matching value.
+func Find[A any](predicate func(A) bool, xs []A) (A, bool) {
 	for _, x := range xs {
 		if predicate(x) {
-			return just(x)
+			return x, true
 		}
 	}
-	return nothing
+	var zero A
+	return zero, false
 }
 
 // FindLastIndex implements Data.Array.findLastIndexImpl: the last matching
-// index, in the caller's concrete Maybe representation.
-func FindLastIndex[A, R any](just func(int32) R, nothing R, predicate func(A) bool, xs []A) R {
+// index.
+func FindLastIndex[A any](predicate func(A) bool, xs []A) (int32, bool) {
 	for i := len(xs) - 1; i >= 0; i-- {
 		if predicate(xs[i]) {
-			return just(int32(i))
+			return int32(i), true
 		}
 	}
-	return nothing
+	return 0, false
 }
 
 // Partition implements Data.Array.partitionImpl. The `{ yes, no }` record is

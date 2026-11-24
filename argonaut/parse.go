@@ -96,7 +96,7 @@ func (p *parser) array() Json {
 
 func (p *parser) object() Json {
 	p.position++
-	table := object.New[Json]()()
+	table := object.New[Json]()
 	if p.skipWhitespace(); p.peek() == '}' {
 		p.position++
 		return jsonObject{table}
@@ -109,7 +109,7 @@ func (p *parser) object() Json {
 		key := p.string()
 		p.skipWhitespace()
 		p.expect(':')
-		object.Poke(key, p.value(), table)()
+		object.Poke(key, p.value(), table)
 		p.skipWhitespace()
 		switch p.peek() {
 		case ',':

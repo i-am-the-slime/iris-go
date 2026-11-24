@@ -25,6 +25,54 @@ func justChar(c rune) maybeChar { return maybeChar{just: true, value: c} }
 
 var nothingChar = maybeChar{}
 
+func foundInt(i int32, found bool) maybeInt {
+	if !found {
+		return nothingInt
+	}
+	return justInt(i)
+}
+
+func foundChar(c rune, found bool) maybeChar {
+	if !found {
+		return nothingChar
+	}
+	return justChar(c)
+}
+
+// The operations below answer as the PureScript functions do, with a Maybe.
+
+func maybeCharAt(i int32, s string) maybeChar { return foundChar(CodeUnitCharAt(i, s)) }
+
+func maybeToChar(s string) maybeChar { return foundChar(CodeUnitToChar(s)) }
+
+func maybeIndexOf(pattern string, s string) maybeInt {
+	return foundInt(CodeUnitIndexOf(pattern, s))
+}
+
+func maybeIndexOfStartingAt(pattern string, startAt int32, s string) maybeInt {
+	return foundInt(CodeUnitIndexOfStartingAt(pattern, startAt, s))
+}
+
+func maybeLastIndexOf(pattern string, s string) maybeInt {
+	return foundInt(CodeUnitLastIndexOf(pattern, s))
+}
+
+func maybeLastIndexOfStartingAt(pattern string, startAt int32, s string) maybeInt {
+	return foundInt(CodeUnitLastIndexOfStartingAt(pattern, startAt, s))
+}
+
+func maybeSearch(rx RegexValue, s string) maybeInt { return foundInt(RegexSearch(rx, s)) }
+
+func maybeViewCharAt(view CodeUnitsView, i int32) maybeChar { return foundChar(view.CharAt(i)) }
+
+func maybeViewIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int32) maybeInt {
+	return foundInt(view.IndexOfStartingAt(pattern, startAt))
+}
+
+func maybeViewLastIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int32) maybeInt {
+	return foundInt(view.LastIndexOfStartingAt(pattern, startAt))
+}
+
 // "a😀b": the emoji is the surrogate pair D83D DE00 at code units 1 and 2.
 const astral = "a\U0001F600b"
 
@@ -42,19 +90,19 @@ func TestCharArraysAreUtf16CodeUnits(t *testing.T) {
 }
 
 func TestCharAtAndToCharCountCodeUnits(t *testing.T) {
-	if got := CodeUnitCharAt(justChar, nothingChar, 2, astral); got != justChar(0xDE00) {
+	if got := maybeCharAt(2, astral); got != justChar(0xDE00) {
 		t.Errorf("CodeUnitCharAt low surrogate = %v", got)
 	}
-	if got := CodeUnitCharAt(justChar, nothingChar, 4, astral); got != nothingChar {
+	if got := maybeCharAt(4, astral); got != nothingChar {
 		t.Errorf("CodeUnitCharAt past end = %v", got)
 	}
-	if got := CodeUnitCharAt(justChar, nothingChar, -1, astral); got != nothingChar {
+	if got := maybeCharAt(-1, astral); got != nothingChar {
 		t.Errorf("CodeUnitCharAt negative = %v", got)
 	}
-	if got := CodeUnitToChar(justChar, nothingChar, "é"); got != justChar('é') {
+	if got := maybeToChar("é"); got != justChar('é') {
 		t.Errorf("CodeUnitToChar = %v", got)
 	}
-	if got := CodeUnitToChar(justChar, nothingChar, "\U0001F600"); got != nothingChar {
+	if got := maybeToChar("\U0001F600"); got != nothingChar {
 		t.Errorf("CodeUnitToChar astral is two code units = %v", got)
 	}
 	if got := CharFromString("x"); got != 'x' {
@@ -89,17 +137,17 @@ func TestIndexOfsAreCodeUnitIndices(t *testing.T) {
 		got  maybeInt
 		want maybeInt
 	}{
-		{"startingAt 0", CodeUnitIndexOfStartingAt(justInt, nothingInt, "ab", 0, s), justInt(2)},
-		{"startingAt 3", CodeUnitIndexOfStartingAt(justInt, nothingInt, "ab", 3, s), justInt(6)},
-		{"startingAt past end", CodeUnitIndexOfStartingAt(justInt, nothingInt, "", 9, s), nothingInt},
-		{"startingAt end, empty", CodeUnitIndexOfStartingAt(justInt, nothingInt, "", 8, s), justInt(8)},
-		{"startingAt negative", CodeUnitIndexOfStartingAt(justInt, nothingInt, "ab", -1, s), nothingInt},
-		{"last", CodeUnitLastIndexOf(justInt, nothingInt, "ab", s), justInt(6)},
-		{"last missing", CodeUnitLastIndexOf(justInt, nothingInt, "x", s), nothingInt},
-		{"last empty", CodeUnitLastIndexOf(justInt, nothingInt, "", s), justInt(8)},
-		{"lastStartingAt 5", CodeUnitLastIndexOfStartingAt(justInt, nothingInt, "ab", 5, s), justInt(2)},
-		{"lastStartingAt negative", CodeUnitLastIndexOfStartingAt(justInt, nothingInt, "\U0001F600", -3, s), justInt(0)},
-		{"lastStartingAt huge", CodeUnitLastIndexOfStartingAt(justInt, nothingInt, "ab", 99, s), justInt(6)},
+		{"startingAt 0", maybeIndexOfStartingAt("ab", 0, s), justInt(2)},
+		{"startingAt 3", maybeIndexOfStartingAt("ab", 3, s), justInt(6)},
+		{"startingAt past end", maybeIndexOfStartingAt("", 9, s), nothingInt},
+		{"startingAt end, empty", maybeIndexOfStartingAt("", 8, s), justInt(8)},
+		{"startingAt negative", maybeIndexOfStartingAt("ab", -1, s), nothingInt},
+		{"last", maybeLastIndexOf("ab", s), justInt(6)},
+		{"last missing", maybeLastIndexOf("x", s), nothingInt},
+		{"last empty", maybeLastIndexOf("", s), justInt(8)},
+		{"lastStartingAt 5", maybeLastIndexOfStartingAt("ab", 5, s), justInt(2)},
+		{"lastStartingAt negative", maybeLastIndexOfStartingAt("\U0001F600", -3, s), justInt(0)},
+		{"lastStartingAt huge", maybeLastIndexOfStartingAt("ab", 99, s), justInt(6)},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
@@ -166,10 +214,10 @@ func TestRegexForeignsFollowJavaScript(t *testing.T) {
 	if !flags.Global || !flags.IgnoreCase || flags.Multiline || flags.DotAll || flags.Sticky || flags.Unicode {
 		t.Errorf("RegexFlags = %+v", flags)
 	}
-	if got := RegexSearch(justInt, nothingInt, RegexValue{Source: "b"}, astral); got != justInt(3) {
+	if got := maybeSearch(RegexValue{Source: "b"}, astral); got != justInt(3) {
 		t.Errorf("RegexSearch = %v", got)
 	}
-	if got := RegexSearch(justInt, nothingInt, RegexValue{Source: "z"}, astral); got != nothingInt {
+	if got := maybeSearch(RegexValue{Source: "z"}, astral); got != nothingInt {
 		t.Errorf("RegexSearch missing = %v", got)
 	}
 	render := func(match string) func([]string) string {
@@ -208,7 +256,7 @@ func TestCodeUnitOperationsWalkingThePrefixMatchUTF16(t *testing.T) {
 			if n >= 0 && n < length {
 				want = justChar(rune(units[n]))
 			}
-			if got := CodeUnitCharAt(justChar, nothingChar, n, s); got != want {
+			if got := maybeCharAt(n, s); got != want {
 				t.Errorf("CodeUnitCharAt(%d, %q) = %v, want %v", n, s, got, want)
 			}
 		}
@@ -271,7 +319,7 @@ func TestCodeUnitOperationsTakeTheExtremeInts(t *testing.T) {
 		if got := CodeUnitDrop(n, s); got != after || view.Drop(n) != after {
 			t.Errorf("CodeUnitDrop(%d) = %q, want %q", n, got, after)
 		}
-		if got := CodeUnitCharAt(justChar, nothingChar, n, s); got != nothingChar || view.CharAt(justChar, nothingChar, n) != nothingChar {
+		if got := maybeCharAt(n, s); got != nothingChar || maybeViewCharAt(view,n) != nothingChar {
 			t.Errorf("CodeUnitCharAt(%d) = %v", n, got)
 		}
 		if n == -1 {
@@ -284,13 +332,13 @@ func TestCodeUnitOperationsTakeTheExtremeInts(t *testing.T) {
 			t.Errorf("CodeUnitLengthUpTo(%d) = %d", n, got)
 		}
 	}
-	if got := CodeUnitIndexOfStartingAt(justInt, nothingInt, "b", bottom, s); got != nothingInt {
+	if got := maybeIndexOfStartingAt("b", bottom, s); got != nothingInt {
 		t.Errorf("CodeUnitIndexOfStartingAt(bottom) = %v", got)
 	}
-	if got := CodeUnitLastIndexOfStartingAt(justInt, nothingInt, "b", top, s); got != justInt(3) {
+	if got := maybeLastIndexOfStartingAt("b", top, s); got != justInt(3) {
 		t.Errorf("CodeUnitLastIndexOfStartingAt(top) = %v", got)
 	}
-	if got := CodeUnitLastIndexOfStartingAt(justInt, nothingInt, "a", bottom, s); got != justInt(0) {
+	if got := maybeLastIndexOfStartingAt("a", bottom, s); got != justInt(0) {
 		t.Errorf("CodeUnitLastIndexOfStartingAt(bottom) = %v", got)
 	}
 }

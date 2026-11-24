@@ -45,6 +45,15 @@ func TestCompareFollowsOrdArrayImplConvention(t *testing.T) {
 	}
 }
 
+type optional[T any] struct {
+	value T
+	valid bool
+}
+
+func just[T any](value T) optional[T] {
+	return optional[T]{value: value, valid: true}
+}
+
 func TestUnfoldr1AlwaysEmitsTheSeedsElement(t *testing.T) {
 	type pair struct {
 		value int

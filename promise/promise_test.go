@@ -26,7 +26,10 @@ func TestThenOrCatchRoutesRejectionsAndAdoptsPromises(t *testing.T) {
 	ThenOrCatch(
 		func(int) any { got = "value"; return Resolve(0) },
 		func(reason any) any {
-			got = ToError(func(e exception.Error) string { return e.Message }, "not an error", reason)
+			got = "not an error"
+			if e, ok := ToError(reason); ok {
+				got = e.Message
+			}
 			return Resolve(0)
 		},
 		rejected)

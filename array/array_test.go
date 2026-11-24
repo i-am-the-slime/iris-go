@@ -6,21 +6,12 @@ import (
 	"testing"
 )
 
-type optional[T any] struct {
-	value T
-	valid bool
-}
-
-func just[T any](value T) optional[T] {
-	return optional[T]{value: value, valid: true}
-}
-
 func TestInsertAt(t *testing.T) {
 	original := []int{1, 3}
-	inserted := InsertAt(just[[]int], optional[[]int]{}, 1, 2, original)
+	inserted, found := InsertAt(1, 2, original)
 
-	if !inserted.valid || !reflect.DeepEqual(inserted.value, []int{1, 2, 3}) {
-		t.Fatalf("InsertAt returned %#v", inserted)
+	if !found || !reflect.DeepEqual(inserted, []int{1, 2, 3}) {
+		t.Fatalf("InsertAt returned %#v, %v", inserted, found)
 	}
 	if !reflect.DeepEqual(original, []int{1, 3}) {
 		t.Fatalf("InsertAt mutated its input: %v", original)
@@ -28,9 +19,8 @@ func TestInsertAt(t *testing.T) {
 }
 
 func TestInsertAtBounds(t *testing.T) {
-	nothing := optional[[]int]{}
 	for _, index := range []int32{-1, 3} {
-		if result := InsertAt(just[[]int], nothing, index, 9, []int{1, 2}); result.valid {
+		if result, found := InsertAt(index, 9, []int{1, 2}); found {
 			t.Fatalf("InsertAt(%d) unexpectedly succeeded: %#v", index, result)
 		}
 	}
@@ -40,16 +30,14 @@ func TestFindAndFindIndex(t *testing.T) {
 	isEven := func(value int) bool { return value%2 == 0 }
 	values := []int{1, 4, 6}
 
-	found := Find(just[int], optional[int]{}, isEven, values)
-	if !found.valid || found.value != 4 {
-		t.Fatalf("Find returned %#v", found)
+	if value, found := Find(isEven, values); !found || value != 4 {
+		t.Fatalf("Find returned %d, %v", value, found)
 	}
-	index := FindIndex(just[int32], optional[int32]{}, isEven, values)
-	if !index.valid || index.value != 1 {
-		t.Fatalf("FindIndex returned %#v", index)
+	if index, found := FindIndex(isEven, values); !found || index != 1 {
+		t.Fatalf("FindIndex returned %d, %v", index, found)
 	}
-	if missing := Find(just[int], optional[int]{}, isEven, []int{1, 3}); missing.valid {
-		t.Fatalf("Find unexpectedly succeeded: %#v", missing)
+	if missing, found := Find(isEven, []int{1, 3}); found {
+		t.Fatalf("Find unexpectedly succeeded: %d", missing)
 	}
 }
 

@@ -158,8 +158,8 @@ func TestStringifyNumbersAsJavaScript(t *testing.T) {
 }
 
 func TestCaseJsonSeesEachKind(t *testing.T) {
-	table := object.New[Json]()()
-	object.Poke("key", FromString("value"), table)()
+	table := object.New[Json]()
+	object.Poke("key", FromString("value"), table)
 	kinds := map[string]Json{
 		"null": JsonNull, "boolean": FromBoolean(false), "number": FromNumber(0), "string": FromString(""),
 		"array": FromArray(nil), "object": FromObject(table),
@@ -181,9 +181,9 @@ func TestCaseJsonSeesEachKind(t *testing.T) {
 }
 
 func TestFromObjectSharesTheTable(t *testing.T) {
-	table := object.New[Json]()()
+	table := object.New[Json]()
 	value := FromObject(table)
-	object.Poke("later", JsonNull, table)()
+	object.Poke("later", JsonNull, table)
 	if got := Stringify(value); got != `{"later":null}` {
 		t.Errorf("stringify = %s", got)
 	}

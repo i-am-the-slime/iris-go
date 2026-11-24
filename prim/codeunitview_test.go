@@ -22,7 +22,7 @@ func TestCodeUnitsViewAgreesWithTheWalkingOperations(t *testing.T) {
 			t.Errorf("Length(%q) = %d, want %d", s, got, length)
 		}
 		for n := int32(-2); n <= length+2; n++ {
-			if got, want := view.CharAt(justChar, nothingChar, n), CodeUnitCharAt(justChar, nothingChar, n, s); got != want {
+			if got, want := maybeViewCharAt(view, n), maybeCharAt(n, s); got != want {
 				t.Errorf("CharAt(%d, %q) = %v, want %v", n, s, got, want)
 			}
 			if got, want := view.Take(n), CodeUnitTake(n, s); got != want {
@@ -32,10 +32,10 @@ func TestCodeUnitsViewAgreesWithTheWalkingOperations(t *testing.T) {
 				t.Errorf("Drop(%d, %q) = %q, want %q", n, s, got, want)
 			}
 			for _, pattern := range codeUnitPatterns {
-				if got, want := view.IndexOfStartingAt(justInt, nothingInt, pattern, n), CodeUnitIndexOfStartingAt(justInt, nothingInt, pattern, n, s); got != want {
+				if got, want := maybeViewIndexOfStartingAt(view, pattern, n), maybeIndexOfStartingAt(pattern, n, s); got != want {
 					t.Errorf("IndexOfStartingAt(%q, %d, %q) = %v, want %v", pattern, n, s, got, want)
 				}
-				if got, want := view.LastIndexOfStartingAt(justInt, nothingInt, pattern, n), CodeUnitLastIndexOfStartingAt(justInt, nothingInt, pattern, n, s); got != want {
+				if got, want := maybeViewLastIndexOfStartingAt(view, pattern, n), maybeLastIndexOfStartingAt(pattern, n, s); got != want {
 					t.Errorf("LastIndexOfStartingAt(%q, %d, %q) = %v, want %v", pattern, n, s, got, want)
 				}
 			}
@@ -77,8 +77,8 @@ func TestCodeUnitsViewSlicesValidTextWithoutCopying(t *testing.T) {
 		_ = view.Drop(2)
 		_ = view.Take(50)
 		_ = view.Slice(3, 60)
-		_ = view.CharAt(justChar, nothingChar, 101)
-		_ = view.IndexOfStartingAt(justInt, nothingInt, "\U0001F600", 7)
+		_, _ = view.CharAt(101)
+		_, _ = view.IndexOfStartingAt("\U0001F600", 7)
 	})
 	if allocations != 0 {
 		t.Errorf("indexing valid text allocated %v times", allocations)
@@ -99,7 +99,7 @@ func TestCodeUnitsViewASCIIIsTheTextOfBytesBelow0x80(t *testing.T) {
 			t.Errorf("ASCII(%q) = %q, want %q", s, ascii, want)
 		}
 		for i := 0; i < len(ascii); i++ {
-			if got, want := justChar(rune(ascii[i])), view.CharAt(justChar, nothingChar, int32(i)); got != want {
+			if got, want := justChar(rune(ascii[i])), maybeViewCharAt(view, int32(i)); got != want {
 				t.Errorf("ASCII(%q)[%d] = %v, CharAt gives %v", s, i, got, want)
 			}
 		}

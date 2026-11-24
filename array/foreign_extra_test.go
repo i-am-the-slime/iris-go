@@ -7,11 +7,11 @@ import (
 
 func TestFindLastIndex(t *testing.T) {
 	isOne := func(value int) bool { return value == 1 }
-	if got := FindLastIndex(just[int32], optional[int32]{}, isOne, []int{3, 1, 4, 1, 5}); !got.valid || got.value != 3 {
-		t.Fatalf("FindLastIndex returned %#v", got)
+	if got, found := FindLastIndex(isOne, []int{3, 1, 4, 1, 5}); !found || got != 3 {
+		t.Fatalf("FindLastIndex returned %d, %v", got, found)
 	}
-	if got := FindLastIndex(just[int32], optional[int32]{}, isOne, []int{2}); got.valid {
-		t.Fatalf("FindLastIndex unexpectedly succeeded: %#v", got)
+	if got, found := FindLastIndex(isOne, []int{2}); found {
+		t.Fatalf("FindLastIndex unexpectedly succeeded: %d", got)
 	}
 }
 

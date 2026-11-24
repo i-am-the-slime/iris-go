@@ -68,16 +68,16 @@ func (view *CodePointsView) Length() int32 {
 }
 
 // CodePointAt is CodePointAt.
-func (view *CodePointsView) CodePointAt[R any](just func(int32) R, nothing R, index int32) R {
+func (view *CodePointsView) CodePointAt(index int32) (int32, bool) {
 	switch {
 	case view.form == walkedPoints:
-		return CodePointAt(nil, just, nothing, nil, index, view.text)
+		return CodePointAt(nil, nil, index, view.text)
 	case index < 0 || index >= view.Length():
-		return nothing
+		return 0, false
 	case view.form == asciiPoints:
-		return just(int32(view.text[index]))
+		return int32(view.text[index]), true
 	default:
-		return just(view.points[index])
+		return view.points[index], true
 	}
 }
 

@@ -92,26 +92,20 @@ func IntToNumber(n int) float64 {
 	return float64(n)
 }
 
-func IntFromNumber[R any](just func(int) R, nothing R, n float64) R {
+func IntFromNumber(n float64) (int32, bool) {
 	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n || n < math.MinInt32 || n > math.MaxInt32 {
-		return nothing
+		return 0, false
 	}
-	return just(int(n))
+	return int32(n), true
 }
 
-func IntFromStringAs[R any](just func(int32) R, nothing R, radix int32, s string) R {
+func IntFromStringAs(radix int32, s string) (int32, bool) {
 	if radix == 10 {
 		n, err := strconv.Atoi(s)
-		if err != nil || n != int(int32(n)) {
-			return nothing
-		}
-		return just(int32(n))
+		return int32(n), err == nil && n == int(int32(n))
 	}
 	n, err := strconv.ParseInt(s, int(radix), 32)
-	if err != nil {
-		return nothing
-	}
-	return just(int32(n))
+	return int32(n), err == nil
 }
 
 func EffectPure[A any](value A) func() A {

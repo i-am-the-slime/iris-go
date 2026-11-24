@@ -141,12 +141,9 @@ func CodeUnitDrop(n int32, s string) string {
 	return after
 }
 
-func CodeUnitIndexOf[R any](just func(int32) R, nothing R, pattern string, s string) R {
+func CodeUnitIndexOf(pattern string, s string) (int32, bool) {
 	index := codeUnitIndexOf(pattern, s)
-	if index < 0 {
-		return nothing
-	}
-	return just(index)
+	return index, index >= 0
 }
 
 func CodeUnitContains(pattern string, s string) bool {
@@ -160,7 +157,10 @@ func codeUnitIndexOf(pattern string, s string) int32 {
 	if index, decided := plainIndex(pattern, s); decided {
 		return index
 	}
-	return CodeUnitIndexOfStartingAt(func(index int32) int32 { return index }, -1, pattern, 0, s)
+	if index, found := CodeUnitIndexOfStartingAt(pattern, 0, s); found {
+		return index
+	}
+	return -1
 }
 
 func CharAt(i int32, s string) rune {
@@ -419,25 +419,17 @@ func StringToCharArray(s string) []rune {
 }
 
 // CodeUnitCharAt implements Data.String.CodeUnits._charAt.
-func CodeUnitCharAt[R any](just func(rune) R, nothing R, i int32, s string) R {
+func CodeUnitCharAt(i int32, s string) (rune, bool) {
 	if asciiThroughFirstOrSecond(s, i) {
-		return just(rune(s[i]))
+		return rune(s[i]), true
 	}
-	unit, ok := codeUnitAt(s, int(i))
-	if !ok {
-		return nothing
-	}
-	return just(unit)
+	return codeUnitAt(s, int(i))
 }
 
-// CodeUnitToChar implements Data.String.CodeUnits._toChar: Just only for a
+// CodeUnitToChar implements Data.String.CodeUnits._toChar: found only for a
 // string of exactly one code unit.
-func CodeUnitToChar[R any](just func(rune) R, nothing R, s string) R {
-	unit, ok := onlyCodeUnit(s)
-	if !ok {
-		return nothing
-	}
-	return just(unit)
+func CodeUnitToChar(s string) (rune, bool) {
+	return onlyCodeUnit(s)
 }
 
 // CodeUnitCountPrefix implements Data.String.CodeUnits.countPrefix.
@@ -466,66 +458,63 @@ func CodeUnitCountPrefix(p func(rune) bool, s string) int32 {
 // CodeUnitIndexOfStartingAt implements Data.String.CodeUnits._indexOfStartingAt
 // (String.prototype.indexOf with a start, Nothing when the start is out of
 // [0, length]).
-func CodeUnitIndexOfStartingAt[R any](just func(int32) R, nothing R, pattern string, startAt int32, s string) R {
+func CodeUnitIndexOfStartingAt(pattern string, startAt int32, s string) (int32, bool) {
 	if startAt < 0 {
-		return nothing
+		return 0, false
 	}
 	index, found, valid := codeUnitIndex(pattern, int(startAt), s)
 	if !valid {
-		return indexOfInCodeUnits(just, nothing, pattern, int(startAt), s)
+		return indexOfInCodeUnits(pattern, int(startAt), s)
 	}
-	if !found {
-		return nothing
-	}
-	return just(int32(index))
+	return int32(index), found
 }
 
 // indexOfInCodeUnits is CodeUnitIndexOfStartingAt over the converted code
 // units, for strings holding invalid UTF-8.
-func indexOfInCodeUnits[R any](just func(int32) R, nothing R, pattern string, startAt int, s string) R {
+func indexOfInCodeUnits(pattern string, startAt int, s string) (int32, bool) {
 	units := codeUnits(s)
 	if startAt < 0 || startAt > len(units) {
-		return nothing
+		return 0, false
 	}
 	needle := codeUnits(pattern)
 	for at := startAt; at+len(needle) <= len(units); at++ {
 		if codeUnitsMatchAt(units, needle, at) {
-			return just(int32(at))
+			return int32(at), true
 		}
 	}
-	return nothing
+	return 0, false
 }
 
 // CodeUnitLastIndexOf implements Data.String.CodeUnits._lastIndexOf.
-func CodeUnitLastIndexOf[R any](just func(int32) R, nothing R, pattern string, s string) R {
-	return lastIndexOfStartingAt(just, nothing, pattern, len(s), s)
+func CodeUnitLastIndexOf(pattern string, s string) (int32, bool) {
+	return lastIndexOfStartingAt(pattern, len(s), s)
 }
 
 // CodeUnitLastIndexOfStartingAt implements
 // Data.String.CodeUnits._lastIndexOfStartingAt (String.prototype.lastIndexOf
 // with a start, which clamps the start into [0, length]).
-func CodeUnitLastIndexOfStartingAt[R any](just func(int32) R, nothing R, pattern string, startAt int32, s string) R {
-	return lastIndexOfStartingAt(just, nothing, pattern, int(startAt), s)
+func CodeUnitLastIndexOfStartingAt(pattern string, startAt int32, s string) (int32, bool) {
+	return lastIndexOfStartingAt(pattern, int(startAt), s)
 }
 
-func lastIndexOfStartingAt[R any](just func(int32) R, nothing R, pattern string, startAt int, s string) R {
+func lastIndexOfStartingAt(pattern string, startAt int, s string) (int32, bool) {
 	if !utf8.ValidString(s) || !utf8.ValidString(pattern) {
 		units := codeUnits(s)
-		return lastIndexOfFrom(just, nothing, codeUnits(pattern), clampCodeUnit(startAt, len(units)), units)
+		return lastIndexOfFrom(codeUnits(pattern), clampCodeUnit(startAt, len(units)), units)
 	}
 	startAt = max(startAt, 0)
 	offset, split, _ := codeUnitBoundary(s, startAt)
 	if pattern == "" {
 		if offset < len(s) || split {
-			return just(int32(startAt))
+			return int32(startAt), true
 		}
-		return just(int32(codeUnitLength(s)))
+		return int32(codeUnitLength(s)), true
 	}
 	at := strings.LastIndex(s[:min(len(s), offset+len(pattern))], pattern)
 	if at < 0 {
-		return nothing
+		return 0, false
 	}
-	return just(int32(codeUnitLength(s[:at])))
+	return int32(codeUnitLength(s[:at])), true
 }
 
 // CodeUnitSlice implements Data.String.CodeUnits.slice (String.prototype.slice:
@@ -620,13 +609,13 @@ func codeUnitsMatchAt(units []uint16, needle []uint16, at int) bool {
 	return true
 }
 
-func lastIndexOfFrom[R any](just func(int32) R, nothing R, needle []uint16, startAt int, units []uint16) R {
+func lastIndexOfFrom(needle []uint16, startAt int, units []uint16) (int32, bool) {
 	for at := min(startAt, len(units)-len(needle)); at >= 0; at-- {
 		if codeUnitsMatchAt(units, needle, at) {
-			return just(int32(at))
+			return int32(at), true
 		}
 	}
-	return nothing
+	return 0, false
 }
 
 func clampCodeUnit(i int, length int) int {

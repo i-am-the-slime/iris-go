@@ -60,18 +60,18 @@ func CodePointLengthUpTo(limit int32, s string) int32 {
 }
 
 // CodePointAt implements Data.String.CodePoints._codePointAt.
-func CodePointAt[R any](_ any, just func(int32) R, nothing R, _ any, index int32, s string) R {
+func CodePointAt(_ any, _ any, index int32, s string) (int32, bool) {
 	if index < 0 {
-		return nothing
+		return 0, false
 	}
 	seen := int32(0)
 	for _, point := range prim.Characters(s) {
 		if seen == index {
-			return just(point)
+			return point, true
 		}
 		seen++
 	}
-	return nothing
+	return 0, false
 }
 
 // CodePointCountPrefix implements Data.String.CodePoints._countPrefix.

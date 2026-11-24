@@ -61,20 +61,13 @@ func CopyST[A any](m *struct {
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() *struct {
+}) *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
 } {
-	return func() *struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []A
-	} {
-		return out(of(m).clone())
-	}
+	return out(of(m).clone())
 }
 
 // RunST implements Foreign.Object.runST.
@@ -193,28 +186,29 @@ func Size[A any](m *struct {
 	return int32(len(m.Keys))
 }
 
-// Lookup implements Foreign.Object._lookup in the caller's Maybe
-// representation.
-func Lookup[A, Z any](no Z, yes func(A) Z, k string, m *struct {
+// Lookup implements Foreign.Object._lookup: the value at k, found when the
+// object holds k.
+func Lookup[A any](k string, m *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) Z {
+}) (A, bool) {
 	if i, ok := of(m).slot(k); ok {
-		return yes(m.Vals[i])
+		return m.Vals[i], true
 	}
-	return no
+	var zero A
+	return zero, false
 }
 
 // LookupST implements Foreign.Object._lookupST.
-func LookupST[A, Z any](no Z, yes func(A) Z, k string, m *struct {
+func LookupST[A any](k string, m *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() Z {
-	return func() Z { return Lookup(no, yes, k, m) }
+}) (A, bool) {
+	return Lookup(k, m)
 }
 
 // ToArrayWithKey implements Foreign.Object.toArrayWithKey.
@@ -263,30 +257,23 @@ func Keys[A any](m *struct {
 }
 
 // New implements Foreign.Object.ST.new.
-func New[A any]() func() *struct {
+func New[A any]() *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
 } {
-	return func() *struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []A
-	} {
-		return out(fresh[A](0))
-	}
+	return out(fresh[A](0))
 }
 
 // PeekImpl implements Foreign.Object.ST.peekImpl.
-func PeekImpl[A, B any](just func(A) B, nothing B, k string, m *struct {
+func PeekImpl[A any](k string, m *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() B {
-	return func() B { return Lookup(nothing, just, k, m) }
+}) (A, bool) {
+	return Lookup(k, m)
 }
 
 // Poke implements Foreign.Object.ST.poke: an existing key keeps its position.
@@ -295,21 +282,14 @@ func Poke[A any](k string, v A, m *struct {
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() *struct {
+}) *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
 } {
-	return func() *struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []A
-	} {
-		of(m).set(k, v)
-		return m
-	}
+	of(m).set(k, v)
+	return m
 }
 
 // Delete implements Foreign.Object.ST.delete.
@@ -318,21 +298,14 @@ func Delete[A any](k string, m *struct {
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() *struct {
+}) *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
 } {
-	return func() *struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []A
-	} {
-		of(m).remove(k)
-		return m
-	}
+	of(m).remove(k)
+	return m
 }
 
 // Insert implements Foreign.Object.insert: a copy of m with k set to v; an
@@ -446,20 +419,13 @@ func UnsafeFreeze[A any](m *struct {
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) func() *struct {
+}) *struct {
 	Index map[string]int
 	Ints  int
 	Keys  []string
 	Vals  []A
 } {
-	return func() *struct {
-		Index map[string]int
-		Ints  int
-		Keys  []string
-		Vals  []A
-	} {
-		return m
-	}
+	return m
 }
 
 // UnsafeIndex implements Foreign.Object.Unsafe.unsafeIndex.
