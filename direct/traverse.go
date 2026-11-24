@@ -18,6 +18,32 @@ func Appender[B any]() func([]B) func(B) []B {
 	}
 }
 
+// TraverseBalanced implements Data.Traversable.traverseArrayImpl as the
+// JavaScript foreign does: the array splits into a balanced tree whose leaves
+// gather one to three results and whose nodes concatenate two halves, so an
+// applicative sees the same applies, in the same order, as in JavaScript.
+// none builds `pure []` for an empty array.
+func TraverseBalanced[A, F, G any](xs []A, none func() F, one func(A) F, two func(A, A) F, three func(A, A, A) F, mapHalf func(F) G, joinHalves func(G, F) F) F {
+	if len(xs) == 0 {
+		return none()
+	}
+	var traverse func(bottom, top int) F
+	traverse = func(bottom, top int) F {
+		switch top - bottom {
+		case 1:
+			return one(xs[bottom])
+		case 2:
+			return two(xs[bottom], xs[bottom+1])
+		case 3:
+			return three(xs[bottom], xs[bottom+1], xs[bottom+2])
+		}
+		pivot := bottom + (top-bottom)/4*2
+		left := mapHalf(traverse(bottom, pivot))
+		return joinHalves(left, traverse(pivot, top))
+	}
+	return traverse(0, len(xs))
+}
+
 // FoldlEffect is the left fold of an array traversal whose applicative is
 // represented as an effect. A generated function returning an effect performs
 // it when fully applied, so each step is delayed into the effect it returns.
