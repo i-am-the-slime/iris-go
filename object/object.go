@@ -259,6 +259,9 @@ func Keys[A any](m *struct {
 	Vals  []A
 }) []string {
 	result := make([]string, 0, len(m.Keys))
+	if m.Ints < oneArrayIndex {
+		return append(result, m.Keys...)
+	}
 	of(m).each(func(k string, _ A) bool {
 		result = append(result, k)
 		return true
@@ -541,7 +544,7 @@ func (t *table[A]) set(k string, v A) {
 		t.Vals[i] = v
 		return
 	}
-	if _, ok := arrayIndex(k); ok {
+	if isArrayIndex(k) {
 		t.Ints += oneArrayIndex
 	}
 	t.Keys = append(t.Keys, k)
@@ -581,6 +584,16 @@ func (t *table[A]) order() []int {
 	return append(slots, others...)
 }
 
+// isArrayIndex tells whether JavaScript treats k as an array index, deciding
+// most keys by their first byte.
+func isArrayIndex(k string) bool {
+	if k == "" || k[0]-'0' > 9 {
+		return false
+	}
+	_, ok := arrayIndex(k)
+	return ok
+}
+
 // arrayIndex is the value of a key that JavaScript treats as an array index:
 // the canonical decimal form of an integer from 0 to 2^32 - 2.
 func arrayIndex(k string) (uint32, bool) {
@@ -606,7 +619,7 @@ func (t *table[A]) remove(k string) {
 	if !ok {
 		return
 	}
-	if _, ok := arrayIndex(k); ok {
+	if isArrayIndex(k) {
 		t.Ints -= oneArrayIndex
 	}
 	copy(t.Keys[i:], t.Keys[i+1:])
@@ -626,14 +639,18 @@ func (t *table[A]) remove(k string) {
 
 // each visits the entries in property order until yield returns false.
 func (t *table[A]) each(yield func(string, A) bool) {
-	if t.Ints < oneArrayIndex {
-		for i, k := range t.Keys {
-			if !yield(k, t.Vals[i]) {
-				return
-			}
-		}
+	if t.Ints >= oneArrayIndex {
+		t.eachInPropertyOrder(yield)
 		return
 	}
+	for i, k := range t.Keys {
+		if !yield(k, t.Vals[i]) {
+			return
+		}
+	}
+}
+
+func (t *table[A]) eachInPropertyOrder(yield func(string, A) bool) {
 	for _, slot := range t.order() {
 		if !yield(t.Keys[slot], t.Vals[slot]) {
 			return
