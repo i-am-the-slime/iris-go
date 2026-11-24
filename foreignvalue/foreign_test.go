@@ -140,3 +140,19 @@ func TestReadPropBuildsTheFailureOnlyWhenTheReadFails(t *testing.T) {
 		t.Fatalf("read of null = %q, failure built %d times", failed, built)
 	}
 }
+
+func TestShowErrorsWritesTheListAsPureScriptShowsIt(t *testing.T) {
+	cases := []struct {
+		shown []string
+		want  string
+	}{
+		{[]string{`(ForeignError "a")`}, `(NonEmptyList (NonEmpty (ForeignError "a") Nil))`},
+		{[]string{"x", "y"}, "(NonEmptyList (NonEmpty x (y : Nil)))"},
+		{[]string{"x", "y", "z"}, "(NonEmptyList (NonEmpty x (y : z : Nil)))"},
+	}
+	for _, c := range cases {
+		if got := ShowErrors(c.shown); got != c.want {
+			t.Errorf("ShowErrors(%q) = %q, want %q", c.shown, got, c.want)
+		}
+	}
+}

@@ -260,3 +260,24 @@ func dataFields(value any) ([]any, bool) {
 	}
 	return nil, false
 }
+
+// ShowErrors shows the NonEmptyList of errors a Yoga.JSON read fails with, as
+// PureScript's Show instances for NonEmptyList, NonEmpty and List do, from
+// each error already shown: `(NonEmptyList (NonEmpty e1 (e2 : e3 : Nil)))`.
+// It takes at least one error.
+func ShowErrors(shown []string) string {
+	var text strings.Builder
+	text.WriteString("(NonEmptyList (NonEmpty ")
+	text.WriteString(shown[0])
+	if len(shown) == 1 {
+		text.WriteString(" Nil))")
+		return text.String()
+	}
+	text.WriteString(" (")
+	for _, rest := range shown[1:] {
+		text.WriteString(rest)
+		text.WriteString(" : ")
+	}
+	text.WriteString("Nil)))")
+	return text.String()
+}
