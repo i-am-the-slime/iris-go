@@ -24,11 +24,8 @@ var One = big.NewInt(1)
 // `BigInt(string)`: surrounding whitespace is ignored, an empty string is 0, a
 // decimal literal may carry a sign, and 0x/0o/0b literals may not. A lone
 // sign is not a number.
-func FromString[R any](just func(*big.Int) R, nothing R, s string) R {
-	if n, ok := parseBigIntLiteral(s); ok {
-		return just(n)
-	}
-	return nothing
+func FromString(s string) (*big.Int, bool) {
+	return parseBigIntLiteral(s)
 }
 
 // FromTypeLevelInt implements JS.BigInt.fromTypeLevelInt.
@@ -79,7 +76,7 @@ func isJavaScriptSpace(r rune) bool {
 // FromStringAs implements JS.BigInt.fromStringAsImpl, including its
 // quirks: the digits are read in chunks of six with `parseInt`, which stops at
 // the first character that is not a digit of the radix.
-func FromStringAs[R any](just func(*big.Int) R, nothing R, radix int32, s string) R {
+func FromStringAs(radix int32, s string) (*big.Int, bool) {
 	units := utf16.Encode([]rune(s))
 	negative := len(units) > 0 && units[0] == '-'
 	if negative {
@@ -99,7 +96,7 @@ func FromStringAs[R any](just func(*big.Int) R, nothing R, radix int32, s string
 	for _, part := range parts {
 		n, ok := parseIntPrefix(part, int64(radix))
 		if !ok {
-			return nothing
+			return nil, false
 		}
 		accumulator.Mul(accumulator, factor)
 		accumulator.Add(accumulator, big.NewInt(n))
@@ -107,7 +104,7 @@ func FromStringAs[R any](just func(*big.Int) R, nothing R, radix int32, s string
 	if negative {
 		accumulator.Neg(accumulator)
 	}
-	return just(accumulator)
+	return accumulator, true
 }
 
 // parseIntPrefix is JavaScript's `parseInt(chunk, radix)` on a chunk short
@@ -153,12 +150,12 @@ func digitValue(r rune) int64 {
 
 // FromNumber implements JS.BigInt.fromNumberImpl: only integral, finite
 // numbers convert.
-func FromNumber[R any](just func(*big.Int) R, nothing R, n float64) R {
+func FromNumber(n float64) (*big.Int, bool) {
 	if math.IsNaN(n) || math.IsInf(n, 0) || n != math.Trunc(n) {
-		return nothing
+		return nil, false
 	}
 	integer, _ := big.NewFloat(n).Int(nil)
-	return just(integer)
+	return integer, true
 }
 
 // FromInt implements JS.BigInt.fromInt.

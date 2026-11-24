@@ -93,12 +93,8 @@ func (view *CodeUnitsView) Length() int32 {
 }
 
 // CharAt is CodeUnitCharAt.
-func (view *CodeUnitsView) CharAt[R any](just func(rune) R, nothing R, i int32) R {
-	unit, ok := view.unitAt(int(i))
-	if !ok {
-		return nothing
-	}
-	return just(unit)
+func (view *CodeUnitsView) CharAt(i int32) (rune, bool) {
+	return view.unitAt(int(i))
 }
 
 // UnsafeCharAt is CharAt, the code unit of Data.String.Unsafe.charAt.
@@ -152,39 +148,39 @@ func (view *CodeUnitsView) slice(begin32 int32, end32 int32) string {
 }
 
 // IndexOfStartingAt is CodeUnitIndexOfStartingAt.
-func (view *CodeUnitsView) IndexOfStartingAt[R any](just func(int32) R, nothing R, pattern string, startAt int32) R {
+func (view *CodeUnitsView) IndexOfStartingAt(pattern string, startAt int32) (int32, bool) {
 	if view.form == walkedForm || !utf8.ValidString(pattern) {
-		return CodeUnitIndexOfStartingAt(just, nothing, pattern, startAt, view.text)
+		return CodeUnitIndexOfStartingAt(pattern, startAt, view.text)
 	}
 	if startAt < 0 || startAt > view.length {
-		return nothing
+		return 0, false
 	}
 	if pattern == "" {
-		return just(startAt)
+		return startAt, true
 	}
 	_, after := view.cut(int(startAt))
 	at := strings.Index(view.text[after.offset:], pattern)
 	if at < 0 {
-		return nothing
+		return 0, false
 	}
-	return just(int32(view.unitStartingAt(after.offset + at)))
+	return int32(view.unitStartingAt(after.offset + at)), true
 }
 
 // LastIndexOfStartingAt is CodeUnitLastIndexOfStartingAt.
-func (view *CodeUnitsView) LastIndexOfStartingAt[R any](just func(int32) R, nothing R, pattern string, startAt int32) R {
+func (view *CodeUnitsView) LastIndexOfStartingAt(pattern string, startAt int32) (int32, bool) {
 	if view.form == walkedForm || !utf8.ValidString(pattern) {
-		return CodeUnitLastIndexOfStartingAt(just, nothing, pattern, startAt, view.text)
+		return CodeUnitLastIndexOfStartingAt(pattern, startAt, view.text)
 	}
 	from := clampCodeUnit(int(startAt), int(view.length))
 	if pattern == "" {
-		return just(int32(from))
+		return int32(from), true
 	}
 	offset := view.start(from)
 	at := strings.LastIndex(view.text[:min(len(view.text), offset+len(pattern))], pattern)
 	if at < 0 {
-		return nothing
+		return 0, false
 	}
-	return just(int32(view.unitStartingAt(at)))
+	return int32(view.unitStartingAt(at)), true
 }
 
 // The methods above rest on four readings of the view, for code unit

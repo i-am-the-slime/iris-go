@@ -208,9 +208,9 @@ func TestNumberFromStringIsJavaScriptParseFloat(t *testing.T) {
 		"1_000":    just(1),
 	}
 	for input, want := range cases {
-		got := NumberFromString(input, isFinite, just, nil)
-		if (got == nil) != (want == nil) || (got != nil && *got != *want) {
-			t.Errorf("NumberFromString(%q) = %v, want %v", input, got, want)
+		got, found := NumberFromString(input, isFinite)
+		if found != (want != nil) || (found && got != *want) {
+			t.Errorf("NumberFromString(%q) = %v, %v, want %v", input, got, found, want)
 		}
 	}
 }

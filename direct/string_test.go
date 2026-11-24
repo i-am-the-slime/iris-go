@@ -95,7 +95,12 @@ type maybePoint struct {
 	value int32
 }
 
-func justPoint(point int32) maybePoint { return maybePoint{just: true, value: point} }
+func foundPoint(point int32, found bool) maybePoint {
+	if !found {
+		return maybePoint{}
+	}
+	return maybePoint{just: true, value: point}
+}
 
 func TestCodePointWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 	for _, s := range codePointSamples() {
@@ -117,9 +122,9 @@ func TestCodePointWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			}
 			want := maybePoint{}
 			if index >= 0 && int(index) < len(points) {
-				want = justPoint(points[index])
+				want = maybePoint{just: true, value: points[index]}
 			}
-			if got := CodePointAt(nil, justPoint, maybePoint{}, nil, index, s); got != want {
+			if got := foundPoint(CodePointAt(nil, nil, index, s)); got != want {
 				t.Errorf("CodePointAt(%d, %q) = %v, want %v", index, s, got, want)
 			}
 			if got, want := CodePointTake(nil, index, s), wholeTake(index, s); got != want {

@@ -90,11 +90,16 @@ func attempt[A any](f func() A) (rendered string) {
 	return strings.TrimSuffix(encoded.String(), "\n")
 }
 
-func maybe(value *big.Int) string { return value.String() }
+func maybe(value *big.Int, found bool) string {
+	if !found {
+		return "Nothing"
+	}
+	return value.String()
+}
 
 func TestFromBaseMatchesBigInteger(t *testing.T) {
 	for _, recorded := range load(t).FromBase {
-		if got := FromBaseImpl(maybe, "Nothing", recorded.Base, recorded.Text); got != recorded.Result {
+		if got := maybe(FromBaseImpl(recorded.Base, recorded.Text)); got != recorded.Result {
 			t.Errorf("fromBase %d %q = %s, JavaScript %s", recorded.Base, recorded.Text, got, recorded.Result)
 		}
 	}
@@ -106,7 +111,7 @@ func TestFromNumberTruncates(t *testing.T) {
 		if recorded.Number != "-0" {
 			number, _ = strconv.ParseFloat(recorded.Number, 64)
 		}
-		if got := FromNumberImpl(maybe, "Nothing", number); got != recorded.Result {
+		if got := maybe(FromNumberImpl(number)); got != recorded.Result {
 			t.Errorf("fromNumber %s = %s, JavaScript %s", recorded.Number, got, recorded.Result)
 		}
 	}

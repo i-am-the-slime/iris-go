@@ -57,7 +57,7 @@ func wholeIndexOf(pattern string, startAt int32, s string) maybeInt {
 
 func wholeLastIndexOf(pattern string, startAt int32, s string) maybeInt {
 	units := codeUnits(s)
-	return lastIndexOfFrom(justInt, nothingInt, codeUnits(pattern), clampCodeUnit(int(startAt), len(units)), units)
+	return foundInt(lastIndexOfFrom(codeUnits(pattern), clampCodeUnit(int(startAt), len(units)), units))
 }
 
 func wholeSlice(begin int32, end int32, s string) string {
@@ -97,7 +97,7 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 		if len(units) == 1 {
 			wantChar = justChar(rune(units[0]))
 		}
-		if got := CodeUnitToChar(justChar, nothingChar, s); got != wantChar {
+		if got := maybeToChar(s); got != wantChar {
 			t.Errorf("CodeUnitToChar(%q) = %v, want %v", s, got, wantChar)
 		}
 		for stop := 0; stop <= len(units); stop++ {
@@ -115,14 +115,14 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			if i >= 0 && i < length {
 				want = justChar(rune(units[i]))
 			}
-			if got := CodeUnitCharAt(justChar, nothingChar, i, s); got != want {
+			if got := maybeCharAt(i, s); got != want {
 				t.Errorf("CodeUnitCharAt(%d, %q) = %v, want %v", i, s, got, want)
 			}
 			for _, pattern := range codeUnitPatterns {
-				if got, want := CodeUnitIndexOfStartingAt(justInt, nothingInt, pattern, i, s), wholeIndexOf(pattern, i, s); got != want {
+				if got, want := maybeIndexOfStartingAt(pattern, i, s), wholeIndexOf(pattern, i, s); got != want {
 					t.Errorf("CodeUnitIndexOfStartingAt(%q, %d, %q) = %v, want %v", pattern, i, s, got, want)
 				}
-				if got, want := CodeUnitLastIndexOfStartingAt(justInt, nothingInt, pattern, i, s), wholeLastIndexOf(pattern, i, s); got != want {
+				if got, want := maybeLastIndexOfStartingAt(pattern, i, s), wholeLastIndexOf(pattern, i, s); got != want {
 					t.Errorf("CodeUnitLastIndexOfStartingAt(%q, %d, %q) = %v, want %v", pattern, i, s, got, want)
 				}
 			}
@@ -133,13 +133,13 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			}
 		}
 		for _, pattern := range codeUnitPatterns {
-			if got, want := CodeUnitIndexOf(justInt, nothingInt, pattern, s), wholeIndexOf(pattern, 0, s); got != want {
+			if got, want := maybeIndexOf(pattern, s), wholeIndexOf(pattern, 0, s); got != want {
 				t.Errorf("CodeUnitIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
 			if got, want := CodeUnitContains(pattern, s), wholeIndexOf(pattern, 0, s) != nothingInt; got != want {
 				t.Errorf("CodeUnitContains(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
-			if got, want := CodeUnitLastIndexOf(justInt, nothingInt, pattern, s), wholeLastIndexOf(pattern, length, s); got != want {
+			if got, want := maybeLastIndexOf(pattern, s), wholeLastIndexOf(pattern, length, s); got != want {
 				t.Errorf("CodeUnitLastIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
 		}
@@ -180,7 +180,7 @@ func TestCodeUnitIndexOfAPlainPatternIsTheIndexInTheConvertedString(t *testing.T
 	patterns := []string{"ab", "b", "日", "😀", "é😀", "abc"}
 	for _, s := range texts {
 		for _, pattern := range patterns {
-			if got, want := CodeUnitIndexOf(justInt, nothingInt, pattern, s), wholeIndexOf(pattern, 0, s); got != want {
+			if got, want := maybeIndexOf(pattern, s), wholeIndexOf(pattern, 0, s); got != want {
 				t.Errorf("CodeUnitIndexOf(%q, %q) = %v, want %v", pattern, s, got, want)
 			}
 		}

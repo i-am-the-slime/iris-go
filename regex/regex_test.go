@@ -17,6 +17,14 @@ func mustCompile(t *testing.T, source string, flags string) *Regex {
 	return rx
 }
 
+// searched is String.prototype.search's result: -1 when nothing matches.
+func searched(index int32, found bool) int32 {
+	if !found {
+		return -1
+	}
+	return index
+}
+
 func TestReplaceFollowsStringPrototypeReplace(t *testing.T) {
 	cases := []struct{ source, flags, replacement, value, expected string }{
 		{"(hello|world)[0-9]+", "", "matched", "hello5world6", "matchedworld6"},
@@ -100,11 +108,10 @@ func TestMatchKeepsEmptyMatchesNextToAMatch(t *testing.T) {
 }
 
 func TestSearchCountsUTF16CodeUnits(t *testing.T) {
-	just := func(index int32) int32 { return index }
-	if got := Search(just, -1, mustCompile(t, "c", ""), "\U0001F600abc"); got != 4 {
-		t.Errorf("search = %d", got)
+	if got, found := Search(mustCompile(t, "c", ""), "\U0001F600abc"); !found || got != 4 {
+		t.Errorf("search = %d, %v", got, found)
 	}
-	if got := Search(just, -1, mustCompile(t, "b", "y"), "ab"); got != -1 {
+	if got, found := Search(mustCompile(t, "b", "y"), "ab"); found {
 		t.Errorf("sticky search = %d", got)
 	}
 }
@@ -136,7 +143,7 @@ func TestPatternsRE2CannotExpressBacktrackAsJavaScriptDoes(t *testing.T) {
 		if got := Split(mustCompile(t, c.source, unglobal), c.input); !reflect.DeepEqual(got, c.split) {
 			t.Errorf("%q.split(/%s/%s) = %q, want %q", c.input, c.source, unglobal, got, c.split)
 		}
-		if got := Search(func(i int32) int32 { return i }, -1, mustCompile(t, c.source, unglobal), c.input); got != c.search {
+		if got := searched(Search(mustCompile(t, c.source, unglobal), c.input)); got != c.search {
 			t.Errorf("%q.search(/%s/%s) = %d, want %d", c.input, c.source, unglobal, got, c.search)
 		}
 	}

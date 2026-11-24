@@ -78,8 +78,8 @@ func RegexFlags(rx RegexValue) struct {
 	}
 }
 
-func RegexSearch[R any](just func(int32) R, nothing R, rx RegexValue, value string) R {
-	return regex.Search(just, nothing, compiled(rx), value)
+func RegexSearch(rx RegexValue, value string) (int32, bool) {
+	return regex.Search(compiled(rx), value)
 }
 
 func RegexReplaceBy[M any](just func(string) M, nothing M, rx RegexValue, f func(string) func([]M) string, value string) string {

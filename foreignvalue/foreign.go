@@ -165,7 +165,10 @@ func keyText[K any](key K) string {
 // property is JS `value[key]`.
 func property[K any](value any, key K) any {
 	if table, ok := value.(objectTable); ok {
-		return object.Lookup[any, any](Undefined, func(v any) any { return v }, keyText(key), table)
+		if found, ok := object.Lookup(keyText(key), table); ok {
+			return found
+		}
+		return Undefined
 	}
 	switch elements := value.(type) {
 	case []any:

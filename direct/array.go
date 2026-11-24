@@ -30,11 +30,12 @@ func Uncons[A, B any](empty func(struct{}) B, nonEmpty func(A, []A) B, xs []A) B
 
 // SortBy implements Data.Array.sortByImpl with the JavaScript implementation's
 // own merge sort, so that a comparison that is not a total order (NaN in Ord
-// Number, say) puts the elements where JS puts them.
-func SortBy[A, O any](compare func(A, A) O, fromOrdering func(O) int32, xs []A) []A {
+// Number, say) puts the elements where JS puts them. Like slices.SortStableFunc,
+// compare returns a negative number, zero or a positive number.
+func SortBy[A any](xs []A, compare func(A, A) int) []A {
 	sorted := slices.Clone(xs)
 	if len(xs) >= 2 {
-		mergeFromTo(compare, fromOrdering, sorted, slices.Clone(xs), 0, len(xs))
+		mergeFromTo(compare, sorted, slices.Clone(xs), 0, len(xs))
 	}
 	return sorted
 }
@@ -42,17 +43,17 @@ func SortBy[A, O any](compare func(A, A) O, fromOrdering func(O) int32, xs []A) 
 // mergeFromTo is mergeFromTo of purescript-arrays' sortByImpl: it sorts
 // into[from:to] from scratch[from:to], swapping the roles of the two buffers
 // at each level.
-func mergeFromTo[A, O any](compare func(A, A) O, fromOrdering func(O) int32, into []A, scratch []A, from int, to int) {
+func mergeFromTo[A any](compare func(A, A) int, into []A, scratch []A, from int, to int) {
 	mid := from + (to-from)>>1
 	if mid-from > 1 {
-		mergeFromTo(compare, fromOrdering, scratch, into, from, mid)
+		mergeFromTo(compare, scratch, into, from, mid)
 	}
 	if to-mid > 1 {
-		mergeFromTo(compare, fromOrdering, scratch, into, mid, to)
+		mergeFromTo(compare, scratch, into, mid, to)
 	}
 	i, j, k := from, mid, from
 	for i < mid && j < to {
-		if fromOrdering(compare(scratch[i], scratch[j])) > 0 {
+		if compare(scratch[i], scratch[j]) > 0 {
 			into[k] = scratch[j]
 			j++
 		} else {
@@ -66,21 +67,11 @@ func mergeFromTo[A, O any](compare func(A, A) O, fromOrdering func(O) int32, int
 }
 
 // DeleteAt implements Data.Array._deleteAt.
-func DeleteAt[A, R any](just func([]A) R, nothing R, index int32, xs []A) R {
+func DeleteAt[A any](index int32, xs []A) ([]A, bool) {
 	if index < 0 || int(index) >= len(xs) {
-		return nothing
+		return nil, false
 	}
-	return just(slices.Delete(slices.Clone(xs), int(index), int(index)+1))
-}
-
-// UpdateAt implements Data.Array._updateAt.
-func UpdateAt[A, R any](just func([]A) R, nothing R, index int32, value A, xs []A) R {
-	if index < 0 || int(index) >= len(xs) {
-		return nothing
-	}
-	updated := slices.Clone(xs)
-	updated[index] = value
-	return just(updated)
+	return slices.Delete(slices.Clone(xs), int(index), int(index)+1), true
 }
 
 // MapWithIndex implements Data.FunctorWithIndex.mapWithIndexArray.
@@ -134,9 +125,9 @@ func CompareArray[A any](compare func(A, A) int32, xs []A, ys []A) int32 {
 }
 
 // SortByMutable implements Data.Array.ST.sortByImpl, sorting in place.
-func SortByMutable[A, O any](compare func(A, A) O, fromOrdering func(O) int32, xs *[]A) *[]A {
+func SortByMutable[A any](xs *[]A, compare func(A, A) int) *[]A {
 	if len(*xs) >= 2 {
-		mergeFromTo(compare, fromOrdering, *xs, slices.Clone(*xs), 0, len(*xs))
+		mergeFromTo(compare, *xs, slices.Clone(*xs), 0, len(*xs))
 	}
 	return xs
 }

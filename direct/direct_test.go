@@ -13,9 +13,8 @@ func TestSortByIsStable(t *testing.T) {
 		key   int32
 		label string
 	}
-	byKey := func(left pair, right pair) int32 { return left.key - right.key }
-	identity := func(ordering int32) int32 { return ordering }
-	sorted := SortBy(byKey, identity, []pair{{2, "a"}, {1, "b"}, {2, "c"}, {1, "d"}})
+	byKey := func(left pair, right pair) int { return int(left.key - right.key) }
+	sorted := SortBy([]pair{{2, "a"}, {1, "b"}, {2, "c"}, {1, "d"}}, byKey)
 	labels := []string{}
 	for _, element := range sorted {
 		labels = append(labels, element.label)
@@ -43,8 +42,7 @@ func TestCodePointsTreatSurrogatePairsAsOne(t *testing.T) {
 	if got := CodePointTake(nil, 2, text); got != "a😀" {
 		t.Fatalf("took %q", got)
 	}
-	just := func(point int32) int32 { return point }
-	if got := CodePointAt(nil, just, -1, nil, 1, text); got != 0x1F600 {
+	if got, _ := CodePointAt(nil, nil, 1, text); got != 0x1F600 {
 		t.Fatalf("code point at 1 is %x", got)
 	}
 }
@@ -90,7 +88,7 @@ func TestForeignRecordKeepsAssignmentOrder(t *testing.T) {
 // greater than everything and everything greater than it. The expected orders
 // are what purescript-arrays' JS merge sort produces.
 func TestSortByPlacesIncomparableElementsAsJavaScriptDoes(t *testing.T) {
-	compareNumber := func(x float64, y float64) int32 {
+	compareNumber := func(x float64, y float64) int {
 		switch {
 		case x < y:
 			return -1
@@ -99,7 +97,6 @@ func TestSortByPlacesIncomparableElementsAsJavaScriptDoes(t *testing.T) {
 		}
 		return 1
 	}
-	identity := func(o int32) int32 { return o }
 	nan := math.NaN()
 	cases := []struct{ input, want []float64 }{
 		{[]float64{nan, 1, 0, 0}, []float64{0, 0, 1, nan}},
@@ -108,11 +105,11 @@ func TestSortByPlacesIncomparableElementsAsJavaScriptDoes(t *testing.T) {
 	}
 	same := func(x float64, y float64) bool { return x == y || math.IsNaN(x) && math.IsNaN(y) }
 	for _, c := range cases {
-		if got := SortBy(compareNumber, identity, c.input); !slices.EqualFunc(got, c.want, same) {
+		if got := SortBy(c.input, compareNumber); !slices.EqualFunc(got, c.want, same) {
 			t.Errorf("SortBy(%v) = %v, want %v", c.input, got, c.want)
 		}
 		mutable := slices.Clone(c.input)
-		if got := *SortByMutable(compareNumber, identity, &mutable); !slices.EqualFunc(got, c.want, same) {
+		if got := *SortByMutable(&mutable, compareNumber); !slices.EqualFunc(got, c.want, same) {
 			t.Errorf("SortByMutable(%v) = %v, want %v", c.input, got, c.want)
 		}
 	}

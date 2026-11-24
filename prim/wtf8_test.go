@@ -89,10 +89,10 @@ func TestLoneSurrogatePatternsMatchHalvesOfPairs(t *testing.T) {
 	if got := StringReplaceAll("", "-", pair); got != "-"+loneLeading+"-"+loneTrailing+"-" {
 		t.Errorf("replaceAll \"\" = %q", got)
 	}
-	if got := CodeUnitIndexOf(justInt, nothingInt, loneTrailing, "a"+pair); got != justInt(2) {
+	if got := maybeIndexOf(loneTrailing, "a"+pair); got != justInt(2) {
 		t.Errorf("indexOf = %v", got)
 	}
-	if got := CodeUnitLastIndexOf(justInt, nothingInt, loneLeading, pair+pair); got != justInt(2) {
+	if got := maybeLastIndexOf(loneLeading, pair+pair); got != justInt(2) {
 		t.Errorf("lastIndexOf = %v", got)
 	}
 }

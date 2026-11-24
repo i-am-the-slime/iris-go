@@ -93,8 +93,12 @@ func TestIntDivAndModAreEuclideanAndWrapIntoAnInt(t *testing.T) {
 }
 
 func TestIntParsingRejectsValuesOutsideInt32(t *testing.T) {
-	just := func(n int32) *int32 { return &n }
-	parse := func(radix int32, s string) *int32 { return IntFromStringAs(just, nil, radix, s) }
+	parse := func(radix int32, s string) *int32 {
+		if n, found := IntFromStringAs(radix, s); found {
+			return &n
+		}
+		return nil
+	}
 	for _, s := range []string{"2147483648", "-2147483649"} {
 		if got := parse(10, s); got != nil {
 			t.Errorf("fromString %q = %d, want Nothing", s, *got)
@@ -116,8 +120,8 @@ func TestIntParsingRejectsValuesOutsideInt32(t *testing.T) {
 	if got := parse(16, "-80000000"); got == nil || *got != -2147483648 {
 		t.Errorf("fromStringAs 16 -80000000 = %v", got)
 	}
-	if got := IntFromNumber(func(n int) *int { return &n }, nil, 2147483648.0); got != nil {
-		t.Errorf("fromNumber 2^31 = %d, want Nothing", *got)
+	if got, found := IntFromNumber(2147483648.0); found {
+		t.Errorf("fromNumber 2^31 = %d, want Nothing", got)
 	}
 }
 

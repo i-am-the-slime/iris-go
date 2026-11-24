@@ -40,8 +40,8 @@ func FromTypeLevelInt(text string) *big.Int {
 }
 
 // FromBaseImpl implements Data.BigInt.fromBaseImpl, `bigInt(s, b)` or
-// nothing when it throws, in the caller's Maybe representation.
-func FromBaseImpl[M any](just func(*big.Int) M, nothing M, base int32, text string) M {
+// not found when it throws.
+func FromBaseImpl(base int32, text string) (*big.Int, bool) {
 	var value *big.Int
 	var failure *exception.Error
 	if base == 10 {
@@ -49,20 +49,13 @@ func FromBaseImpl[M any](just func(*big.Int) M, nothing M, base int32, text stri
 	} else {
 		value, failure = parseBase(text, int64(base))
 	}
-	if failure != nil {
-		return nothing
-	}
-	return just(value)
+	return value, failure == nil
 }
 
 // FromNumberImpl implements Data.BigInt.fromNumberImpl: the number truncated
-// toward zero, or nothing for NaN and the infinities.
-func FromNumberImpl[M any](just func(*big.Int) M, nothing M, n float64) M {
-	value, ok := integral(math.Trunc(n))
-	if !ok {
-		return nothing
-	}
-	return just(value)
+// toward zero, not found for NaN and the infinities.
+func FromNumberImpl(n float64) (*big.Int, bool) {
+	return integral(math.Trunc(n))
 }
 
 // integral is JavaScript's `BigInt(n)` of a Number, which only integers pass.

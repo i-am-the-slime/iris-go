@@ -201,11 +201,11 @@ func FromError(e exception.Error) any {
 
 // ToError implements Promise.Rejection._toError: Just the rejection when it
 // is an Error.
-func ToError[R any](just func(exception.Error) R, nothing R, reason any) R {
+func ToError(reason any) (exception.Error, bool) {
 	if e, ok := exception.AsError(reason); ok {
 		if _, isText := reason.(string); !isText {
-			return just(e)
+			return e, true
 		}
 	}
-	return nothing
+	return exception.Error{}, false
 }

@@ -105,12 +105,9 @@ func NumberSign(n float64) float64 {
 // NumberFromString is Data.Number.fromStringImpl, an `Fn4`: JS parseFloat —
 // the longest decimal-literal prefix after leading whitespace, or an
 // `Infinity` prefix — kept only when the caller's isFinite accepts it.
-func NumberFromString[R any](s string, isFinite func(float64) bool, just func(float64) R, nothing R) R {
+func NumberFromString(s string, isFinite func(float64) bool) (float64, bool) {
 	n := parseFloatPrefix(s)
-	if !isFinite(n) {
-		return nothing
-	}
-	return just(n)
+	return n, isFinite(n)
 }
 
 func parseFloatPrefix(s string) float64 {
