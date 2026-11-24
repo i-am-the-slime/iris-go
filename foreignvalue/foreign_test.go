@@ -10,7 +10,7 @@ import (
 func TestJSONRoundTripKeepsKeyOrderAndNumbers(t *testing.T) {
 	source := `{"b":1,"a":[true,null,"x\n"],"2":2.5,"1":{"n":-0.5}}`
 	parsed := ParseJSON(source)
-	if got := UnsafeStringify(parsed); got != source {
+	if got := UnsafeStringify(parsed); got != `{"1":{"n":-0.5},"2":2.5,"b":1,"a":[true,null,"x\n"]}` {
 		t.Fatalf("stringify = %s", got)
 	}
 	if TagOf(parsed) != "Object" || TypeOf(parsed) != "object" {

@@ -3,6 +3,7 @@ package object
 import (
 	"reflect"
 	"slices"
+	"strconv"
 	"testing"
 )
 
@@ -19,12 +20,46 @@ func build(entries ...string) *struct {
 	return m
 }
 
-func TestKeysEnumerateInInsertionOrderEvenWhenIntegerLike(t *testing.T) {
-	m := build("b", "10", "a", "2", "01", "4294967295", "4294967294")
+func TestKeysEnumerateArrayIndicesAscendingBeforeOtherKeysInInsertionOrder(t *testing.T) {
+	m := build("b", "10", "a", "2", "01", "4294967295", "4294967294", "-1", "0", "1.5")
 	got := Keys(m)
-	want := []string{"b", "10", "a", "2", "01", "4294967295", "4294967294"}
+	want := []string{"0", "2", "10", "4294967294", "b", "a", "01", "4294967295", "-1", "1.5"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Keys = %v, want %v", got, want)
+	}
+	for _, k := range want {
+		if value, _ := Lookup(k, m); value != k+"!" {
+			t.Fatalf("Lookup %s = %q", k, value)
+		}
+	}
+}
+
+func TestArrayIndexKeysKeepTheirOrderThroughEveryWrite(t *testing.T) {
+	small := FromEntries([]string{"b", "3", "1"}, []int{1, 2, 3})
+	inserted := Insert("2", 4, small)
+	if got := Keys(inserted); !reflect.DeepEqual(got, []string{"1", "2", "3", "b"}) {
+		t.Fatalf("Insert Keys = %v", got)
+	}
+	if got := Keys(small); !reflect.DeepEqual(got, []string{"1", "3", "b"}) {
+		t.Fatalf("source Keys = %v", got)
+	}
+	owned := Lend(inserted)
+	for i := 20; i > 4; i-- {
+		owned = InsertOwned(strconv.Itoa(i), i, owned)
+	}
+	owned = RemoveOwned("3", owned)
+	want := []string{"1", "2"}
+	for i := 5; i <= 20; i++ {
+		want = append(want, strconv.Itoa(i))
+	}
+	want = append(want, "b")
+	if got := Keys(owned); !reflect.DeepEqual(got, want) {
+		t.Fatalf("owned Keys = %v", got)
+	}
+	for i, k := range owned.Keys {
+		if slot, _ := Slot(owned, k); slot != i {
+			t.Fatalf("Slot %s = %d, want %d", k, slot, i)
+		}
 	}
 }
 
@@ -64,9 +99,9 @@ func TestEmptyAcceptsReadsAndWrites(t *testing.T) {
 	Poke("k", 1, CopyST(e))
 }
 
-func TestFromEntriesKeepsAssignmentOrder(t *testing.T) {
+func TestFromEntriesKeepsAssignmentOrderAfterArrayIndices(t *testing.T) {
 	m := FromEntries([]string{"zeta", "1", "alpha"}, []int{1, 2, 3})
-	if got := Keys(m); !reflect.DeepEqual(got, []string{"zeta", "1", "alpha"}) {
+	if got := Keys(m); !reflect.DeepEqual(got, []string{"1", "zeta", "alpha"}) {
 		t.Fatalf("Keys = %v", got)
 	}
 	if got, _ := Lookup("alpha", m); got != 3 {
