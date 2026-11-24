@@ -2,6 +2,7 @@ package foreignvalue
 
 import (
 	"math"
+	"math/big"
 	"testing"
 
 	"github.com/i-am-the-slime/iris-go/direct"
@@ -154,5 +155,30 @@ func TestShowErrorsWritesTheListAsPureScriptShowsIt(t *testing.T) {
 		if got := ShowErrors(c.shown); got != c.want {
 			t.Errorf("ShowErrors(%q) = %q, want %q", c.shown, got, c.want)
 		}
+	}
+}
+
+func TestNumbersReadFromEveryNumberRepresentation(t *testing.T) {
+	for _, value := range []any{int32(-200), -200, float64(-200)} {
+		if got := Number(value); got != -200 {
+			t.Errorf("Number(%T) = %v", value, got)
+		}
+		if got := Int(value); got != -200 {
+			t.Errorf("Int(%T) = %v", value, got)
+		}
+	}
+	if got := Char("a"); got != 'a' {
+		t.Errorf("Char = %q", got)
+	}
+}
+
+func TestBigIntsAreWrittenAsTheirDecimalStrings(t *testing.T) {
+	huge := new(big.Int).Lsh(big.NewInt(1), 70)
+	record := direct.ForeignRecord([]string{"big"}, []any{huge})
+	if got := UnsafeStringify(record); got != `{"big":"1180591620717411303424"}` {
+		t.Errorf("stringify = %s", got)
+	}
+	if TagOf(huge) != "BigInt" || TypeOf(huge) != "bigint" {
+		t.Errorf("tags %s %s", TagOf(huge), TypeOf(huge))
 	}
 }

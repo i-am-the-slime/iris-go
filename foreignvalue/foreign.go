@@ -4,7 +4,9 @@
 // A `Foreign` is a Go `any` holding a value in its own Go representation:
 //
 //   - nil for null and Undefined for undefined;
-//   - bool, float64, int32 or int for numbers, and string;
+//   - bool, float64, int32 or int for numbers, and string, which is also how
+//     a Char enters (a string of one code unit, as in JavaScript);
+//   - *big.Int for a BigInt;
 //   - []any for arrays, and []string, []float64, []int, []int32 and []bool,
 //     which hand-written foreign code may pass;
 //   - the go-support/object table of `any` (an `Object Foreign`) for objects;
@@ -16,10 +18,12 @@
 package foreignvalue
 
 import (
+	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/i-am-the-slime/iris-go/object"
+	"github.com/i-am-the-slime/iris-go/prim"
 )
 
 // undefinedText is the string that stands for JS undefined.
@@ -36,6 +40,49 @@ type objectTable = *struct {
 	Vals  []any
 }
 
+// Number reads a Foreign known to hold a number as a Number, whichever of
+// the number representations holds it.
+func Number(value any) float64 {
+	if number, ok := value.(float64); ok {
+		return number
+	}
+	return otherNumber(value)
+}
+
+func otherNumber(value any) float64 {
+	switch number := value.(type) {
+	case int32:
+		return float64(number)
+	case int:
+		return float64(number)
+	}
+	return value.(float64)
+}
+
+// Int reads a Foreign known to hold an integral number as an Int, whichever
+// of the number representations holds it.
+func Int(value any) int32 {
+	if number, ok := value.(int32); ok {
+		return number
+	}
+	return otherInt(value)
+}
+
+func otherInt(value any) int32 {
+	switch number := value.(type) {
+	case float64:
+		return int32(int64(number))
+	case int:
+		return int32(number)
+	}
+	return value.(int32)
+}
+
+// Char reads a Foreign known to hold a Char, a string of one code unit.
+func Char(value any) rune {
+	return prim.CharAt(0, value.(string))
+}
+
 func isUndefined(value any) bool {
 	text, ok := value.(string)
 	return ok && text == undefinedText
@@ -50,6 +97,8 @@ func TypeOf(value any) string {
 		return "boolean"
 	case int, int32, float64:
 		return "number"
+	case *big.Int:
+		return "bigint"
 	case string:
 		if isUndefined(v) {
 			return "undefined"
@@ -71,6 +120,8 @@ func TagOf(value any) string {
 		return "Boolean"
 	case int, int32, float64:
 		return "Number"
+	case *big.Int:
+		return "BigInt"
 	case string:
 		if isUndefined(v) {
 			return "Undefined"
