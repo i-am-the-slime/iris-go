@@ -6,13 +6,23 @@
 // insertion order, and Index maps each key to its slot. A table of at most
 // scanLimit keys may have no Index and is searched by scanning its keys,
 // which is faster for so few than hashing and saves building a map (JSON
-// documents hold many small objects). Every traversal visits entries in
-// insertion order. Ints is zero, except in a table that Lend made, which
-// shares its entries with another table until its first write.
+// documents hold many small objects). Ints counts the keys that are array
+// indices ("0" to "4294967294", written canonically) and marks a table that
+// Lend made, which shares its entries with another table until its first
+// write. Every traversal visits entries in JavaScript's property order: the
+// array-index keys by value, then the others in insertion order. Only a table
+// that holds array-index keys pays for sorting them.
 //
 // Immutable operations never mutate a table they did not allocate, so the
 // pure map functions share the key index with their source.
 package object
+
+import (
+	"cmp"
+	"iter"
+	"math"
+	"slices"
+)
 
 type table[A any] struct {
 	Index map[string]int
@@ -102,7 +112,7 @@ func FmapObject[A, B any](m *struct {
 	for i, v := range src.Vals {
 		vals[i] = f(v)
 	}
-	return out(&table[B]{Index: src.Index, Keys: src.Keys, Vals: vals})
+	return out(sharing(src, vals))
 }
 
 // MapWithKey implements Foreign.Object._mapWithKey.
@@ -122,7 +132,7 @@ func MapWithKey[A, B any](m *struct {
 	for i, v := range src.Vals {
 		vals[i] = f(src.Keys[i], v)
 	}
-	return out(&table[B]{Index: src.Index, Keys: src.Keys, Vals: vals})
+	return out(sharing(src, vals))
 }
 
 // FoldM implements Foreign.Object._foldM.
@@ -249,11 +259,24 @@ func Keys[A any](m *struct {
 	Vals  []A
 }) []string {
 	result := make([]string, 0, len(m.Keys))
+	if m.Ints < oneArrayIndex {
+		return append(result, m.Keys...)
+	}
 	of(m).each(func(k string, _ A) bool {
 		result = append(result, k)
 		return true
 	})
 	return result
+}
+
+// Entries ranges over m's keys and values in property order.
+func Entries[A any](m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) iter.Seq2[string, A] {
+	return of(m).each
 }
 
 // New implements Foreign.Object.ST.new.
@@ -326,7 +349,7 @@ func Insert[A any](k string, v A, m *struct {
 		vals := make([]A, len(src.Vals))
 		copy(vals, src.Vals)
 		vals[i] = v
-		return out(&table[A]{Index: src.Index, Keys: src.Keys, Vals: vals})
+		return out(sharing(src, vals))
 	}
 	c := src.clone()
 	c.set(k, v)
@@ -373,7 +396,7 @@ func Lend[A any](m *struct {
 	if m == nil {
 		return nil
 	}
-	return out(&table[A]{Index: m.Index, Ints: lent, Keys: m.Keys, Vals: m.Vals})
+	return out(&table[A]{Index: m.Index, Ints: m.Ints | lent, Keys: m.Keys, Vals: m.Vals})
 }
 
 // InsertOwned is Insert into an object that nothing else holds, which Lend
@@ -487,29 +510,42 @@ func (t *table[A]) clone() *table[A] {
 	for k, i := range t.Index {
 		c.Index[k] = i
 	}
+	c.Ints = t.Ints &^ lent
 	c.Keys = append(c.Keys, t.Keys...)
 	c.Vals = append(c.Vals, t.Vals...)
 	return c
 }
 
-// lent is the Ints of a table that Lend made, whose entries still belong to
-// the table it was lent from.
-const lent = 1
+// lent is the bit of Ints that marks a table Lend made, whose entries still
+// belong to the table it was lent from. The other bits count the table's
+// array-index keys, in steps of oneArrayIndex.
+const (
+	lent          = 1
+	oneArrayIndex = 2
+)
 
 // own gives a lent table entries of its own, so that writes to it leave the
 // table it was lent from unchanged.
 func (t *table[A]) own() *table[A] {
-	if t.Ints != lent {
+	if t.Ints&lent == 0 {
 		return t
 	}
 	*t = *t.clone()
 	return t
 }
 
+// sharing is a table with t's keys and the given values.
+func sharing[A, B any](t *table[A], vals []B) *table[B] {
+	return &table[B]{Index: t.Index, Ints: t.Ints &^ lent, Keys: t.Keys, Vals: vals}
+}
+
 func (t *table[A]) set(k string, v A) {
 	if i, ok := t.slot(k); ok {
 		t.Vals[i] = v
 		return
+	}
+	if isArrayIndex(k) {
+		t.Ints += oneArrayIndex
 	}
 	t.Keys = append(t.Keys, k)
 	t.Vals = append(t.Vals, v)
@@ -524,10 +560,67 @@ func (t *table[A]) set(k string, v A) {
 	}
 }
 
+// order is the slots of t in property order: the array-index keys by value,
+// then the other keys in insertion order.
+func (t *table[A]) order() []int {
+	type numbered struct {
+		index uint32
+		slot  int
+	}
+	indices := make([]numbered, 0, t.Ints/oneArrayIndex)
+	others := make([]int, 0, len(t.Keys)-cap(indices))
+	for slot, k := range t.Keys {
+		if index, ok := arrayIndex(k); ok {
+			indices = append(indices, numbered{index, slot})
+		} else {
+			others = append(others, slot)
+		}
+	}
+	slices.SortFunc(indices, func(a, b numbered) int { return cmp.Compare(a.index, b.index) })
+	slots := make([]int, 0, len(t.Keys))
+	for _, entry := range indices {
+		slots = append(slots, entry.slot)
+	}
+	return append(slots, others...)
+}
+
+// isArrayIndex tells whether JavaScript treats k as an array index, deciding
+// most keys by their first byte.
+func isArrayIndex(k string) bool {
+	if k == "" || k[0]-'0' > 9 {
+		return false
+	}
+	_, ok := arrayIndex(k)
+	return ok
+}
+
+// arrayIndex is the value of a key that JavaScript treats as an array index:
+// the canonical decimal form of an integer from 0 to 2^32 - 2.
+func arrayIndex(k string) (uint32, bool) {
+	if len(k) == 0 || len(k) > 10 || k[0] < '0' || k[0] > '9' || (k[0] == '0' && len(k) > 1) {
+		return 0, false
+	}
+	var value uint64
+	for i := 0; i < len(k); i++ {
+		digit := k[i] - '0'
+		if digit > 9 {
+			return 0, false
+		}
+		value = value*10 + uint64(digit)
+	}
+	if value > math.MaxUint32-1 {
+		return 0, false
+	}
+	return uint32(value), true
+}
+
 func (t *table[A]) remove(k string) {
 	i, ok := t.slot(k)
 	if !ok {
 		return
+	}
+	if isArrayIndex(k) {
+		t.Ints -= oneArrayIndex
 	}
 	copy(t.Keys[i:], t.Keys[i+1:])
 	t.Keys = t.Keys[:len(t.Keys)-1]
@@ -544,10 +637,22 @@ func (t *table[A]) remove(k string) {
 	}
 }
 
-// each visits the entries in insertion order until yield returns false.
+// each visits the entries in property order until yield returns false.
 func (t *table[A]) each(yield func(string, A) bool) {
+	if t.Ints >= oneArrayIndex {
+		t.eachInPropertyOrder(yield)
+		return
+	}
 	for i, k := range t.Keys {
 		if !yield(k, t.Vals[i]) {
+			return
+		}
+	}
+}
+
+func (t *table[A]) eachInPropertyOrder(yield func(string, A) bool) {
+	for _, slot := range t.order() {
+		if !yield(t.Keys[slot], t.Vals[slot]) {
 			return
 		}
 	}

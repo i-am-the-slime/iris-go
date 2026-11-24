@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
+	"github.com/i-am-the-slime/iris-go/object"
 	"github.com/i-am-the-slime/iris-go/prim"
 )
 
@@ -144,10 +145,10 @@ func (w *jsonWriter) object(table objectTable) {
 	w.out = append(w.out, '{')
 	w.depth++
 	written := 0
-	for i, key := range table.Keys {
+	for key, member := range object.Entries(table) {
 		before := len(w.out)
 		w.memberKey(written, key)
-		if !w.value(table.Vals[i]) {
+		if !w.value(member) {
 			w.out = w.out[:before]
 			continue
 		}

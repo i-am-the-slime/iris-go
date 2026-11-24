@@ -228,9 +228,10 @@ func StringSplit(separator string, s string) []string {
 }
 
 // StringReplace implements Data.String.Common.replace: the first occurrence
-// only, replaced by the literal replacement text.
+// only, replaced by the replacement text with its `$` patterns expanded, as
+// String.prototype.replace does for a string pattern.
 func StringReplace(pattern string, replacement string, s string) string {
-	if !utf8.ValidString(pattern) {
+	if !utf8.ValidString(pattern) || strings.IndexByte(replacement, '$') >= 0 {
 		return replaceInCodeUnits(pattern, replacement, s, false)
 	}
 	at := strings.Index(s, pattern)
@@ -242,10 +243,10 @@ func StringReplace(pattern string, replacement string, s string) string {
 }
 
 // StringReplaceAll implements Data.String.Common.replaceAll: every occurrence,
-// each replaced by the literal replacement text. An empty pattern matches
-// between every two code units.
+// each replaced by the replacement text with its `$` patterns expanded. An
+// empty pattern matches between every two code units.
 func StringReplaceAll(pattern string, replacement string, s string) string {
-	if !utf8.ValidString(pattern) || pattern == "" && !utf8.ValidString(s) || pattern == "" && hasAstral(s) || HasSurrogates(replacement) {
+	if !utf8.ValidString(pattern) || pattern == "" && !utf8.ValidString(s) || pattern == "" && hasAstral(s) || HasSurrogates(replacement) || strings.IndexByte(replacement, '$') >= 0 {
 		return replaceInCodeUnits(pattern, replacement, s, true)
 	}
 	if !HasSurrogates(s) {
@@ -303,7 +304,7 @@ func replaceInCodeUnits(pattern string, replacement string, s string, all bool) 
 		}
 		end := at + len(needle)
 		out.WriteString(text(last, at))
-		out.WriteString(replacement)
+		writeSubstitution(&out, replacement, units, at, end)
 		last = end
 		if !all {
 			break
@@ -320,6 +321,36 @@ func replaceInCodeUnits(pattern string, replacement string, s string, all bool) 
 	}
 	out.WriteString(text(last, len(units)))
 	return out.String()
+}
+
+// writeSubstitution writes the replacement for the match of units[at:end] as
+// ECMAScript's GetSubstitution does without captures: `$$` is a `$`, `$&` the
+// match, `` $` `` the text before it and `$'` the text after it. Every other
+// `$` stays as it is.
+func writeSubstitution(out *Builder, replacement string, units []uint16, at int, end int) {
+	for {
+		dollar := strings.IndexByte(replacement, '$')
+		if dollar < 0 || dollar+1 == len(replacement) {
+			out.WriteString(replacement)
+			return
+		}
+		out.WriteString(replacement[:dollar])
+		switch replacement[dollar+1] {
+		case '$':
+			out.WriteByte('$')
+		case '&':
+			out.WriteString(FromCodeUnits(units[at:end]))
+		case '`':
+			out.WriteString(FromCodeUnits(units[:at]))
+		case '\'':
+			out.WriteString(FromCodeUnits(units[end:]))
+		default:
+			out.WriteByte('$')
+			replacement = replacement[dollar+1:]
+			continue
+		}
+		replacement = replacement[dollar+2:]
+	}
 }
 
 // StringTrim implements Data.String.Common.trim (String.prototype.trim), whose

@@ -103,9 +103,9 @@ func TestJsonParserReportsTheOffsetInCodeUnits(t *testing.T) {
 	}
 }
 
-func TestObjectKeysKeepInsertionOrder(t *testing.T) {
+func TestObjectKeysEnumerateArrayIndicesFirstThenInsertionOrder(t *testing.T) {
 	text := `{"2":1,"1":2,"x":3,"01":4,"-1":5}`
-	if got := Stringify(parsed(t, text)); got != text {
+	if got := Stringify(parsed(t, text)); got != `{"1":2,"2":1,"x":3,"01":4,"-1":5}` {
 		t.Errorf("stringify = %s", got)
 	}
 }
