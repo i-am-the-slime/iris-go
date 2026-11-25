@@ -43,3 +43,10 @@ func FoldSCObject[A, Z, M any](m *struct {
 	}
 	return accumulator
 }
+
+// ForeignData reads a value of a foreign data type from an erased one. The type may be an
+// interface, whose nil (JSON's null) a plain type assertion would refuse.
+func ForeignData[T any](value any) T {
+	data, _ := value.(T)
+	return data
+}

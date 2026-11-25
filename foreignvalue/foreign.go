@@ -341,3 +341,37 @@ func ShowErrors(shown []string) string {
 	text.WriteString("Nil)))")
 	return text.String()
 }
+
+// Keys implements Foreign.Keys.unsafeKeys (`Object.keys`): an object's keys
+// in property order, an array's or a string's indices, and none otherwise.
+func Keys(value any) []string {
+	switch v := value.(type) {
+	case objectTable:
+		return object.Keys(v)
+	case string:
+		if !isUndefined(v) {
+			return indices(int(prim.CodeUnitLength(v)))
+		}
+	case []any:
+		return indices(len(v))
+	case []string:
+		return indices(len(v))
+	case []float64:
+		return indices(len(v))
+	case []int:
+		return indices(len(v))
+	case []int32:
+		return indices(len(v))
+	case []bool:
+		return indices(len(v))
+	}
+	return []string{}
+}
+
+func indices(count int) []string {
+	keys := make([]string, count)
+	for i := range keys {
+		keys[i] = strconv.Itoa(i)
+	}
+	return keys
+}

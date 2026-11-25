@@ -525,3 +525,13 @@ func Traverse1[M, A, B any](
 	}
 	return acc
 }
+
+// Extend implements Control.Extend.arrayExtend: f applied to every suffix of
+// xs. The suffixes share xs's elements and cannot grow into each other.
+func Extend[A, B any](f func([]A) B, xs []A) []B {
+	out := make([]B, len(xs))
+	for i := range xs {
+		out[i] = f(xs[i:len(xs):len(xs)])
+	}
+	return out
+}

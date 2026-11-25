@@ -671,3 +671,27 @@ func CodeUnitLengthUpTo(limit int32, s string) int32 {
 	length, _ := codeUnitLengthUpTo(s, int(limit))
 	return int32(min(length, int(limit)))
 }
+
+// StringTrimStart is JavaScript's String.prototype.trimStart.
+func StringTrimStart(s string) string {
+	start := 0
+	for start < len(s) && isASCIIWhitespace(s[start]) {
+		start++
+	}
+	if start < len(s) && s[start] >= utf8.RuneSelf {
+		return strings.TrimLeftFunc(s[start:], isJSWhitespace)
+	}
+	return s[start:]
+}
+
+// StringTrimEnd is JavaScript's String.prototype.trimEnd.
+func StringTrimEnd(s string) string {
+	end := len(s)
+	for end > 0 && isASCIIWhitespace(s[end-1]) {
+		end--
+	}
+	if end > 0 && s[end-1] >= utf8.RuneSelf {
+		return strings.TrimRightFunc(s[:end], isJSWhitespace)
+	}
+	return s[:end]
+}
