@@ -170,6 +170,32 @@ func TestParAltTakesTheFirstSuccess(t *testing.T) {
 	}
 }
 
+func TestATimedOutBracketOfParallelGoroutineResumptionsReachesTheEndOfItsUse(t *testing.T) {
+	for round := range 300 {
+		log := &trace{}
+		launch(func() struct{} {
+			log.add(ParAltDirect(attempted(func() string {
+				DelayDirect(nil, 2000)
+				panic(exception.Error{Message: "timed out"})
+			}), attempted(func() string {
+				bracket(log, func(int) struct{} {
+					parallelInOrder(append(
+						[]func(){func() { log.add("sync") }},
+						slices.Repeat([]func(){func() { resolvedOnAnotherGoroutine(1) }}, 20)...))
+					resolvedOnAnotherGoroutine(2)
+					panic(exception.Error{Message: "end of use"})
+				})
+				return "passed"
+			})))
+			return struct{}{}
+		})
+		eventloop.Await()
+		if log.String() != "sync,failed end of use,error end of use" {
+			t.Fatalf("round %d: %s", round, log)
+		}
+	}
+}
+
 func TestMakeAffResolvedFromAnotherGoroutine(t *testing.T) {
 	result := 0
 	launch(func() struct{} {
@@ -414,6 +440,40 @@ func fields[A any](f *Fiber) (
 		func(value A) outcome { return outcome{value: value} },
 		struct{}{},
 		func(struct{}) func(func(outcome)) { return func(func(outcome)) {} })
+}
+
+// attempted is `try` for an Aff whose result shows as a string.
+func attempted(action func() string) func() string {
+	return func() string {
+		return direct.CatchError(action, func(e exception.Error) string { return "error " + e.Message })
+	}
+}
+
+// parallelInOrder is `parSequence_` as `foldr (*>)` over ParAff applications.
+func parallelInOrder(actions []func()) {
+	if len(actions) == 0 {
+		return
+	}
+	ParApplyDirect(func() func(struct{}) struct{} {
+		actions[0]()
+		return func(struct{}) struct{} { return struct{}{} }
+	}, func() struct{} {
+		parallelInOrder(actions[1:])
+		return struct{}{}
+	})
+}
+
+// resolvedOnAnotherGoroutine is an Aff that a goroutine of its own resolves after taking a turn,
+// as a Go HTTP client resolves its request while the server's handlers take turns.
+func resolvedOnAnotherGoroutine(value int) int {
+	return makeAff(func(k func(outcome)) {
+		done := eventloop.Hold()
+		go func() {
+			eventloop.Turn(func() {})
+			k(outcome{value: value})
+			done()
+		}()
+	})
 }
 
 func sleepThen(value int, milliseconds float64) int {
