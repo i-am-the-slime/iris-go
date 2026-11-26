@@ -30,4 +30,13 @@ for (let i = 0; i < 200; i++) instants.push(Math.floor((random() * 2 - 1) * 8.64
 for (const t of instants) {
   cases.toDateTimes.push({ instant: number(t), parts: instant.toDateTimeImpl((a) => (b) => (c) => (d) => (e) => (f) => (g) => [a, b, c, d, e, f, g])(t).map(number) });
 }
+cases.adjusts = [];
+const offsets = [0, -0, 1, -1, 0.5, -0.5, 1.7, -1.7, 86400000, -86400000, 8.64e15, -8.64e15, 1.728e16, -1.728e16, NaN, Infinity, -Infinity];
+for (let i = 0; i < 400; i++) {
+  const record = { year: pick(years), month: 1 + Math.floor(random() * 12), day: 1 + Math.floor(random() * 31), hour: Math.floor(random() * 24),
+    minute: Math.floor(random() * 60), second: Math.floor(random() * 60), millisecond: Math.floor(random() * 1000) };
+  const offset = random() < 0.3 ? pick(offsets) : (random() * 2 - 1) * Math.pow(10, Math.floor(random() * 17));
+  const adjusted = dateTime.adjustImpl((value) => [value])(null)(offset)(record);
+  cases.adjusts.push({ record, offset: number(offset), adjusted: adjusted && adjusted[0] });
+}
 console.log(JSON.stringify(cases));

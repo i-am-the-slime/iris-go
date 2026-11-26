@@ -33,3 +33,18 @@ func CalcDiffDateTime(
 	return createUTC(year1, month1-1, day1, hour1, minute1, second1, millisecond1) -
 		createUTC(year2, month2-1, day2, hour2, minute2, second2, millisecond2)
 }
+
+// AdjustImpl implements Data.DateTime.adjustImpl: the record's time value
+// moved by the offset in milliseconds, as `new Date(t + offset)` truncates
+// it, and its fields ordered by label (day, hour, millisecond, minute, month,
+// second, year), and false where the Date would be invalid.
+func AdjustImpl(offset float64, day, hour, millisecond, minute, month, second, year int32) (int32, int32, int32, int32, int32, int32, int32, bool) {
+	t := timeClip(createUTC(year, month-1, day, hour, minute, second, millisecond) + offset)
+	if math.IsNaN(t) {
+		return 0, 0, 0, 0, 0, 0, 0, false
+	}
+	within := int64(t) - dayOf(t)*millisecondsPerDay
+	adjustedYear, adjustedMonth, adjustedDay := components(t)
+	return adjustedDay, int32(within / 3600000), int32(within % 1000), int32(within / 60000 % 60),
+		adjustedMonth, int32(within / 1000 % 60), adjustedYear, true
+}

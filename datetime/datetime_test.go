@@ -28,6 +28,11 @@ type cases struct {
 		Instant string
 		Parts   []string
 	}
+	Adjusts []struct {
+		Record   record
+		Offset   string
+		Adjusted *record
+	}
 }
 
 type record struct {
@@ -113,6 +118,21 @@ func TestDifferencesMatchJavaScript(t *testing.T) {
 			b.Day, b.Hour, b.Millisecond, b.Minute, b.Month, b.Second, b.Year)
 		if !sameNumber(t, got, c.Diff) {
 			t.Errorf("DateTime calcDiff %+v %+v = %v, JavaScript %s", a, b, got, c.Diff)
+		}
+	}
+}
+
+func TestAdjustmentsMatchJavaScript(t *testing.T) {
+	for _, c := range load(t).Adjusts {
+		r := c.Record
+		day, hour, millisecond, minute, month, second, year, found := AdjustImpl(number(t, c.Offset),
+			r.Day, r.Hour, r.Millisecond, r.Minute, r.Month, r.Second, r.Year)
+		got := &record{year, month, day, hour, minute, second, millisecond}
+		if !found {
+			got = nil
+		}
+		if (got == nil) != (c.Adjusted == nil) || got != nil && *got != *c.Adjusted {
+			t.Errorf("adjust %s %+v = %+v, JavaScript %+v", c.Offset, r, got, c.Adjusted)
 		}
 	}
 }
