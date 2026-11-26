@@ -2,6 +2,7 @@ package foreignvalue
 
 import (
 	"math"
+	"strconv"
 	"testing"
 )
 
@@ -52,7 +53,7 @@ func TestDecodeReadsMembersInAnyOrderAndSkipsUnknownOnes(t *testing.T) {
 
 func TestDecodeRefusesTextOfAnotherType(t *testing.T) {
 	for _, text := range []string{
-		`{"x":1.5}`, `{"x":2147483648}`, `{"x":"1"}`, `{}`, `[1]`, `null`,
+		`{"x":1.5}`, `{"x":9223372036854775808}`, `{"x":"1"}`, `{}`, `[1]`, `null`,
 		`{"x":1,"tags":[1]}`, `{"x":1} 2`, `{"x":1,"skip":[1,]}`, `{"x":01}`, ``,
 	} {
 		if p, ok := Decode(text, decodePoint); ok {
@@ -111,5 +112,15 @@ func TestEncodeMembersTakeACommaOnlyAfterTheFirst(t *testing.T) {
 	}, 0)
 	if text != `{"a":1,"b":2}` {
 		t.Fatalf("got %s", text)
+	}
+}
+
+func TestEncoderWritesEveryDigitOfAnInt(t *testing.T) {
+	for _, n := range []int{0, 7, -7, 2147483648, math.MaxInt, math.MinInt} {
+		var e Encoder
+		e.Int(n)
+		if got, want := string(e.out), strconv.Itoa(n); got != want {
+			t.Errorf("Int(%d) wrote %q, want %q", n, got, want)
+		}
 	}
 }

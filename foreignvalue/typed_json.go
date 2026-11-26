@@ -2,6 +2,7 @@ package foreignvalue
 
 import (
 	"math"
+	"strconv"
 	"unsafe"
 )
 
@@ -142,7 +143,7 @@ func (d *Decoder) Number() float64 {
 // Int is Foreign.readInt: a Number that Data.Int.fromNumber accepts.
 func (d *Decoder) Int() int {
 	number := d.Number()
-	if number != math.Trunc(number) || number < math.MinInt32 || number > math.MaxInt32 {
+	if number != math.Trunc(number) || number < math.MinInt || number >= -math.MinInt {
 		d.Fail()
 	}
 	return int(number)
@@ -217,7 +218,7 @@ func (e *Encoder) Number(n float64) {
 
 // Int writes an Int.
 func (e *Encoder) Int(i int) {
-	e.out = appendInt32(e.out, i)
+	e.out = appendInt(e.out, i)
 }
 
 // Boolean writes true or false.
@@ -229,25 +230,9 @@ func (e *Encoder) Boolean(b bool) {
 	}
 }
 
-func appendInt32(out []byte, i int) []byte {
+func appendInt(out []byte, i int) []byte {
 	if 0 <= i && i < 10 {
 		return append(out, byte('0'+i))
 	}
-	var digits [11]byte
-	at := len(digits)
-	n := int64(i)
-	negative := n < 0
-	if negative {
-		n = -n
-	}
-	for n > 0 {
-		at--
-		digits[at] = byte('0' + n%10)
-		n /= 10
-	}
-	if negative {
-		at--
-		digits[at] = '-'
-	}
-	return append(out, digits[at:]...)
+	return strconv.AppendInt(out, int64(i), 10)
 }
