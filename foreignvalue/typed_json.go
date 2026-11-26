@@ -140,12 +140,12 @@ func (d *Decoder) Number() float64 {
 }
 
 // Int is Foreign.readInt: a Number that Data.Int.fromNumber accepts.
-func (d *Decoder) Int() int32 {
+func (d *Decoder) Int() int {
 	number := d.Number()
 	if number != math.Trunc(number) || number < math.MinInt32 || number > math.MaxInt32 {
 		d.Fail()
 	}
-	return int32(number)
+	return int(number)
 }
 
 // Boolean is Foreign.readBoolean.
@@ -216,7 +216,7 @@ func (e *Encoder) Number(n float64) {
 }
 
 // Int writes an Int.
-func (e *Encoder) Int(i int32) {
+func (e *Encoder) Int(i int) {
 	e.out = appendInt32(e.out, i)
 }
 
@@ -229,7 +229,7 @@ func (e *Encoder) Boolean(b bool) {
 	}
 }
 
-func appendInt32(out []byte, i int32) []byte {
+func appendInt32(out []byte, i int) []byte {
 	if 0 <= i && i < 10 {
 		return append(out, byte('0'+i))
 	}

@@ -89,7 +89,7 @@ func (rx *Regex) replaced(s string) [][]int {
 
 // Search implements Data.String.Regex._search, String.prototype.search: the
 // UTF-16 index of the first match, from the start whatever lastIndex is.
-func Search(rx *Regex, s string) (int32, bool) {
+func Search(rx *Regex, s string) (int, bool) {
 	var match []int
 	if rx.sticky {
 		match = rx.matchAt(s, 0)
@@ -99,7 +99,7 @@ func Search(rx *Regex, s string) (int32, bool) {
 	if match == nil {
 		return 0, false
 	}
-	return int32(codeUnitLength(s[:match[0]])), true
+	return int(codeUnitLength(s[:match[0]])), true
 }
 
 // Split implements Data.String.Regex.split, String.prototype.split with a

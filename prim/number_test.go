@@ -61,7 +61,7 @@ func TestShowNumberAppendsPointZeroOnlyToPlainIntegers(t *testing.T) {
 
 func TestNumberToFixedRoundsExactValueHalfAwayFromZero(t *testing.T) {
 	cases := []struct {
-		digits int32
+		digits int
 		n      float64
 		want   string
 	}{
@@ -90,7 +90,7 @@ func TestNumberToFixedRoundsExactValueHalfAwayFromZero(t *testing.T) {
 
 func TestNumberToPrecisionSwitchesNotationLikeJavaScript(t *testing.T) {
 	cases := []struct {
-		precision int32
+		precision int
 		n         float64
 		want      string
 	}{
@@ -114,7 +114,7 @@ func TestNumberToPrecisionSwitchesNotationLikeJavaScript(t *testing.T) {
 
 func TestNumberToExponentialAlwaysUsesExponent(t *testing.T) {
 	cases := []struct {
-		digits int32
+		digits int
 		n      float64
 		want   string
 	}{
@@ -215,34 +215,34 @@ func TestNumberFromStringIsJavaScriptParseFloat(t *testing.T) {
 	}
 }
 
-func TestIntQuotRemPowFollowJavaScriptInt32Semantics(t *testing.T) {
+func TestIntQuotRemPowWrapAtGosIntWidth(t *testing.T) {
 	cases := []struct {
 		name string
-		got  int32
-		want int32
+		got  int
+		want int
 	}{
 		{"quot 7 2", IntQuot(7, 2), 3},
 		{"quot -7 2", IntQuot(-7, 2), -3},
 		{"quot 7 -2", IntQuot(7, -2), -3},
 		{"quot 7 0", IntQuot(7, 0), 0},
-		{"quot bottom -1 wraps", IntQuot(-2147483648, -1), -2147483648},
+		{"quot bottom -1 wraps", IntQuot(math.MinInt, -1), math.MinInt},
 		{"rem 7 2", IntRem(7, 2), 1},
 		{"rem -7 2", IntRem(-7, 2), -1},
 		{"rem 7 -2", IntRem(7, -2), 1},
 		{"rem 7 0", IntRem(7, 0), 0},
 		{"pow 2 10", IntPow(2, 10), 1024},
-		{"pow 2 31 wraps", IntPow(2, 31), -2147483648},
-		{"pow 10 10 wraps", IntPow(10, 10), 1410065408},
+		{"pow 2 31 stays positive", IntPow(2, 31), 2147483648},
+		{"pow 10 10", IntPow(10, 10), 10000000000},
 		{"pow 2 -1", IntPow(2, -1), 0},
 		{"pow -1 -3", IntPow(-1, -3), -1},
 		{"pow 0 -1", IntPow(0, -1), 0},
 		{"pow 0 0", IntPow(0, 0), 1},
-		{"pow 3 40 wraps", IntPow(3, 40), 689956897},
+		{"pow 2 63 wraps", IntPow(2, 63), math.MinInt},
 		{"pow -1 -4", IntPow(-1, -4), 1},
 		{"pow 1 -5", IntPow(1, -5), 1},
-		{"pow -2 31 wraps", IntPow(-2, 31), -2147483648},
+		{"pow -2 63", IntPow(-2, 63), math.MinInt},
 		{"degree -5", IntDegree(-5), 5},
-		{"degree bottom", IntDegree(-2147483648), 2147483647},
+		{"degree bottom", IntDegree(math.MinInt), math.MaxInt},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
@@ -253,8 +253,8 @@ func TestIntQuotRemPowFollowJavaScriptInt32Semantics(t *testing.T) {
 
 func TestIntToStringAsCoversRadixBounds(t *testing.T) {
 	cases := []struct {
-		radix int32
-		n     int32
+		radix int
+		n     int
 		want  string
 	}{
 		{2, 255, "11111111"},

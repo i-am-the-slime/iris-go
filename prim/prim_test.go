@@ -1,6 +1,7 @@
 package prim
 
 import (
+	"math"
 	"reflect"
 	"strconv"
 	"testing"
@@ -33,8 +34,8 @@ func TestStringCommonFollowsJavaScript(t *testing.T) {
 	}
 }
 
-func TestIntArithmeticWrapsLikeJavaScriptInt32(t *testing.T) {
-	top, bottom := 2147483647, -2147483648
+func TestIntArithmeticWrapsAtGosIntWidth(t *testing.T) {
+	top, bottom := math.MaxInt, math.MinInt
 	cases := []struct {
 		name string
 		got  int
@@ -45,12 +46,9 @@ func TestIntArithmeticWrapsLikeJavaScriptInt32(t *testing.T) {
 		{"top + top", IntAdd(top, top), -2},
 		{"bottom + bottom", IntAdd(bottom, bottom), 0},
 		{"bottom * -1", IntMul(bottom, -1), bottom},
-		{"-65536 * 65536", IntMul(-65536, 65536), 0},
-		{"exact product below 2^53", IntMul(94906267, 94906267), 261134296},
-		{"top * top rounds as a double", IntMul(top, top), 0},
-		{"rounded product", IntMul(123456789, 987654321), -67153024},
-		{"rounded product near 4e16", IntMul(200000000, 199999999), -1290256896},
-		{"zshr result times int32", IntMul(4294967295, -3), 3},
+		{"past 32 bits, no JavaScript wrap", IntAdd(2147483647, 1), 2147483648},
+		{"a product is exact, not rounded as a double", IntMul(123456789, 987654321), 121932631112635269},
+		{"top * top", IntMul(top, top), 1},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
@@ -60,13 +58,13 @@ func TestIntArithmeticWrapsLikeJavaScriptInt32(t *testing.T) {
 }
 
 func TestIntDivAndModAreEuclideanAndWrapIntoAnInt(t *testing.T) {
-	const top, bottom int32 = 2147483647, -2147483648
+	const top, bottom int = math.MaxInt, math.MinInt
 	cases := []struct {
 		name string
-		got  int32
-		want int32
+		got  int
+		want int
 	}{
-		{"div bottom -1, 2147483648 in JS, wraps", IntDiv(bottom, -1), bottom},
+		{"div bottom -1 wraps", IntDiv(bottom, -1), bottom},
 		{"div bottom 1", IntDiv(bottom, 1), bottom},
 		{"div top -1", IntDiv(top, -1), -top},
 		{"div bottom bottom", IntDiv(bottom, bottom), 1},
@@ -75,15 +73,17 @@ func TestIntDivAndModAreEuclideanAndWrapIntoAnInt(t *testing.T) {
 		{"div -7 2 floors", IntDiv(-7, 2), -4},
 		{"div 7 -2", IntDiv(7, -2), -3},
 		{"div by zero", IntDiv(5, 0), 0},
+		{"div past 32 bits", IntDiv(-1<<40, 3), -366503875926},
 		{"mod -7 4", IntMod(-7, 4), 1},
 		{"mod bottom -1", IntMod(bottom, -1), 0},
-		{"mod -5 bottom", IntMod(-5, bottom), 2147483643},
+		{"mod -5 bottom", IntMod(-5, bottom), top - 4},
 		{"mod bottom bottom", IntMod(bottom, bottom), 0},
 		{"mod top bottom", IntMod(top, bottom), top},
 		{"mod by zero", IntMod(5, 0), 0},
 		{"mod -8 4 is zero", IntMod(-8, 4), 0},
 		{"mod 7 -3", IntMod(7, -3), 1},
 		{"mod -7 -3", IntMod(-7, -3), 2},
+		{"mod past 32 bits", IntMod(-1<<40, 3), 2},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
@@ -92,14 +92,14 @@ func TestIntDivAndModAreEuclideanAndWrapIntoAnInt(t *testing.T) {
 	}
 }
 
-func TestIntParsingRejectsValuesOutsideInt32(t *testing.T) {
-	parse := func(radix int32, s string) *int32 {
+func TestIntParsingRejectsValuesOutsideInt(t *testing.T) {
+	parse := func(radix int, s string) *int {
 		if n, found := IntFromStringAs(radix, s); found {
 			return &n
 		}
 		return nil
 	}
-	for _, s := range []string{"2147483648", "-2147483649"} {
+	for _, s := range []string{"9223372036854775808", "-9223372036854775809"} {
 		if got := parse(10, s); got != nil {
 			t.Errorf("fromString %q = %d, want Nothing", s, *got)
 		}
@@ -109,42 +109,52 @@ func TestIntParsingRejectsValuesOutsideInt32(t *testing.T) {
 			t.Errorf("fromString %q = %d, want Nothing", s, *got)
 		}
 	}
-	for s, want := range map[string]int32{"0": 0, "-0": 0, "+7": 7, "007": 7, "2147483647": 2147483647, "-2147483648": -2147483648} {
+	for s, want := range map[string]int{"0": 0, "-0": 0, "+7": 7, "007": 7, "2147483648": 2147483648, "9223372036854775807": math.MaxInt, "-9223372036854775808": math.MinInt} {
 		if got := parse(10, s); got == nil || *got != want {
 			t.Errorf("fromString %q = %v, want %d", s, got, want)
 		}
 	}
-	if got := parse(16, "ffffffff"); got != nil {
-		t.Errorf("fromStringAs 16 ffffffff = %d, want Nothing", *got)
+	if got := parse(16, "ffffffff"); got == nil || *got != 4294967295 {
+		t.Errorf("fromStringAs 16 ffffffff = %v", got)
 	}
-	if got := parse(16, "-80000000"); got == nil || *got != -2147483648 {
-		t.Errorf("fromStringAs 16 -80000000 = %v", got)
+	if got := parse(16, "8000000000000000"); got != nil {
+		t.Errorf("fromStringAs 16 8000000000000000 = %d, want Nothing", *got)
 	}
-	if got, found := IntFromNumber(2147483648.0); found {
-		t.Errorf("fromNumber 2^31 = %d, want Nothing", got)
+	if got := parse(16, "-8000000000000000"); got == nil || *got != math.MinInt {
+		t.Errorf("fromStringAs 16 -8000000000000000 = %v", got)
+	}
+	if got, found := IntFromNumber(2147483648.0); !found || got != 2147483648 {
+		t.Errorf("fromNumber 2^31 = %d, %v", got, found)
+	}
+	if got, found := IntFromNumber(-9223372036854775808.0); !found || got != math.MinInt {
+		t.Errorf("fromNumber -2^63 = %d, %v", got, found)
+	}
+	if got, found := IntFromNumber(9223372036854775808.0); found {
+		t.Errorf("fromNumber 2^63 = %d, want Nothing", got)
 	}
 }
 
-func TestIntBitsFollowJavaScriptOperators(t *testing.T) {
+func TestIntBitsWorkOnGosIntWidth(t *testing.T) {
 	cases := []struct {
 		name string
 		got  int
 		want int
 	}{
-		{"1 << 31", IntShl(1, 31), -2147483648},
-		{"1 << 32 masks the count", IntShl(1, 32), 1},
-		{"1 << 33", IntShl(1, 33), 2},
-		{"5 << -1", IntShl(5, -1), -2147483648},
-		{"-1 >> 31", IntShr(-1, 31), -1},
-		{"-8 >> 33", IntShr(-8, 33), -4},
-		{"zshr result >> 1 is ToInt32 first", IntShr(4294967295, 1), -1},
-		{"-1 >>> 0 is unsigned", IntZshr(-1, 0), 4294967295},
-		{"-1 >>> 1", IntZshr(-1, 1), 2147483647},
-		{"-8 >>> 32", IntZshr(-8, 32), 4294967288},
-		{"~top", IntComplement(2147483647), -2147483648},
-		{"zshr result & -1", IntAnd(4294967295, -1), -1},
-		{"zshr result | 0", IntOr(4294967295, 0), -1},
-		{"top ^ bottom", IntXor(2147483647, -2147483648), -1},
+		{"1 << 31 stays positive", IntShl(1, 31), 2147483648},
+		{"1 << 63", IntShl(1, 63), math.MinInt},
+		{"1 << 64 masks the count", IntShl(1, 64), 1},
+		{"1 << 65", IntShl(1, 65), 2},
+		{"5 << -1", IntShl(5, -1), math.MinInt},
+		{"-1 >> 63", IntShr(-1, 63), -1},
+		{"-8 >> 65", IntShr(-8, 65), -4},
+		{"-1 >>> 0 is all ones", IntZshr(-1, 0), -1},
+		{"-1 >>> 1", IntZshr(-1, 1), math.MaxInt},
+		{"-8 >>> 32", IntZshr(-8, 32), 4294967295},
+		{"~top", IntComplement(math.MaxInt), math.MinInt},
+		{"~0", IntComplement(0), -1},
+		{"4294967295 & -1", IntAnd(4294967295, -1), 4294967295},
+		{"4294967295 | 0", IntOr(4294967295, 0), 4294967295},
+		{"top ^ bottom", IntXor(math.MaxInt, math.MinInt), -1},
 	}
 	for _, c := range cases {
 		if c.got != c.want {
@@ -179,19 +189,3 @@ func TestExistsCaseDispatchesOnThePayloadWitness(t *testing.T) {
 	}
 }
 
-func TestMultiplyInt32WrapsLikeInt32(t *testing.T) {
-	cases := []struct{ x, y, want int32 }{
-		{123456789, 987654321, -67153019},
-		{2147483647, 2147483647, 1},
-		{99999999, 99999999, 1674919425},
-		{-2147483648, -2147483648, 0},
-		{-2147483648, 3, -2147483648},
-		{46341, 46341, -2147479015},
-		{-7, 6, -42},
-	}
-	for _, c := range cases {
-		if got := MultiplyInt32(c.x, c.y); got != c.want {
-			t.Errorf("MultiplyInt32(%d, %d) = %d, want %d", c.x, c.y, got, c.want)
-		}
-	}
-}

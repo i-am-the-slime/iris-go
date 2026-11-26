@@ -76,7 +76,7 @@ func isJavaScriptSpace(r rune) bool {
 // FromStringAs implements JS.BigInt.fromStringAsImpl, including its
 // quirks: the digits are read in chunks of six with `parseInt`, which stops at
 // the first character that is not a digit of the radix.
-func FromStringAs(radix int32, s string) (*big.Int, bool) {
+func FromStringAs(radix int, s string) (*big.Int, bool) {
 	units := utf16.Encode([]rune(s))
 	negative := len(units) > 0 && units[0] == '-'
 	if negative {
@@ -159,7 +159,7 @@ func FromNumber(n float64) (*big.Int, bool) {
 }
 
 // FromInt implements JS.BigInt.fromInt.
-func FromInt(n int32) *big.Int {
+func FromInt(n int) *big.Int {
 	return big.NewInt(int64(n))
 }
 
@@ -205,8 +205,8 @@ func Div(x *big.Int, y *big.Int) *big.Int {
 }
 
 // Degree implements JS.BigInt.biDegree, the absolute value as an Int.
-func Degree(x *big.Int) int32 {
-	return int32(new(big.Int).Abs(x).Int64())
+func Degree(x *big.Int) int {
+	return int(new(big.Int).Abs(x).Int64())
 }
 
 // Pow implements JS.BigInt.pow: 0 for a negative exponent.
@@ -258,8 +258,8 @@ func Equals(x *big.Int, y *big.Int) bool {
 }
 
 // Compare implements JS.BigInt.biCompare.
-func Compare(x *big.Int, y *big.Int) int32 {
-	return int32(x.Cmp(y))
+func Compare(x *big.Int, y *big.Int) int {
+	return int(x.Cmp(y))
 }
 
 // ToString implements JS.BigInt.toString.
@@ -268,13 +268,13 @@ func ToString(x *big.Int) string {
 }
 
 // ToStringAs implements JS.BigInt.toStringAs.
-func ToStringAs(radix int32, x *big.Int) string {
+func ToStringAs(radix int, x *big.Int) string {
 	return x.Text(int(radix))
 }
 
 // AsIntN implements JS.BigInt.asIntN: x modulo 2^bits as a signed
 // two's complement value.
-func AsIntN(bits int32, x *big.Int) *big.Int {
+func AsIntN(bits int, x *big.Int) *big.Int {
 	wrapped := AsUintN(bits, x)
 	if bits > 0 && wrapped.Bit(int(bits)-1) == 1 {
 		wrapped.Sub(wrapped, new(big.Int).Lsh(One, uint(bits)))
@@ -283,6 +283,6 @@ func AsIntN(bits int32, x *big.Int) *big.Int {
 }
 
 // AsUintN implements JS.BigInt.asUintN: x modulo 2^bits.
-func AsUintN(bits int32, x *big.Int) *big.Int {
+func AsUintN(bits int, x *big.Int) *big.Int {
 	return new(big.Int).Mod(x, new(big.Int).Lsh(One, uint(bits)))
 }

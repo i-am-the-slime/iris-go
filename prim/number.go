@@ -303,7 +303,7 @@ func exponentialNotation(digits string, exponent int) string {
 // NumberToFixed is Number.prototype.toFixed: exactly `digits` fraction digits,
 // ties rounded away from zero on the exact binary value; |n| >= 1e21 falls
 // back to toString. Out-of-range digits throw a RangeError in JS.
-func NumberToFixed(digits int32, n float64) string {
+func NumberToFixed(digits int, n float64) string {
 	return toFixed(int(digits), n)
 }
 
@@ -330,7 +330,7 @@ func toFixed(digits int, n float64) string {
 // NumberToPrecision is Number.prototype.toPrecision: `precision` significant
 // digits (ties away from zero), exponential notation when the decimal exponent
 // is below -6 or at least `precision`.
-func NumberToPrecision(precision int32, n float64) string {
+func NumberToPrecision(precision int, n float64) string {
 	return toPrecision(int(precision), n)
 }
 
@@ -366,7 +366,7 @@ func formatPrecision(digits string, exponent int) string {
 
 // NumberToExponential is Number.prototype.toExponential: one integer digit and
 // `digits` fraction digits (ties away from zero), always exponential notation.
-func NumberToExponential(digits int32, n float64) string {
+func NumberToExponential(digits int, n float64) string {
 	return toExponential(int(digits), n)
 }
 
@@ -440,39 +440,41 @@ func exactDigits(n float64) (string, int) {
 }
 
 // Data.Int foreigns. quot and pow spell out JS `| 0` (ToInt32) in the
-// PureScript FFI; on int32 operands it is the wrap of Go's own arithmetic.
+// PureScript FFI; here they wrap at int's width, as Go's own arithmetic does.
 
 // IntFloor, IntCeil, IntTrunc and IntRound are Data.Int's floor, ceil,
 // trunc and round: the Number rounded, then `unsafeClamp`ed into an Int,
 // where NaN and ±Infinity become 0 and anything else outside the Int range
 // its nearest bound.
-func IntFloor(n float64) int32 { return unsafeClamp(math.Floor(n)) }
+func IntFloor(n float64) int { return unsafeClamp(math.Floor(n)) }
 
-func IntCeil(n float64) int32 { return unsafeClamp(math.Ceil(n)) }
+func IntCeil(n float64) int { return unsafeClamp(math.Ceil(n)) }
 
-func IntTrunc(n float64) int32 { return unsafeClamp(math.Trunc(n)) }
+func IntTrunc(n float64) int { return unsafeClamp(math.Trunc(n)) }
 
 // IntRound rounds as NumberRound does; its sign and infinities do not matter
 // here, as a zero is 0 either way and an infinite fraction is NaN, which
 // clamps to 0 as the infinity itself would.
-func IntRound(n float64) int32 {
+func IntRound(n float64) int {
 	floor := math.Floor(n)
 	return unsafeClamp(floor + min(math.Floor(2*(n-floor)), 1))
 }
 
 // unsafeClamp tests finiteness once: n - n is 0 for every finite n and NaN
 // for NaN and both infinities.
-func unsafeClamp(n float64) int32 {
+func unsafeClamp(n float64) int {
 	if n-n != 0 {
 		return 0
 	}
-	return int32(min(max(n, math.MinInt32), math.MaxInt32))
+	if n >= -math.MinInt {
+		return math.MaxInt
+	}
+	return int(max(n, math.MinInt))
 }
 
 // IntQuot is `x / y | 0`: truncating division, 0 for a zero divisor.
-// `bottom / -1` is 2147483648 in JS, which `| 0` wraps to -2147483648, as
-// Go's `/` does.
-func IntQuot(x int32, y int32) int32 {
+// `bottom / -1` wraps to bottom, as `| 0` makes it in JS.
+func IntQuot(x int, y int) int {
 	if y == 0 {
 		return 0
 	}
@@ -481,17 +483,17 @@ func IntQuot(x int32, y int32) int32 {
 
 // IntRem is JS `x % y` (the dividend's sign). JS yields NaN for a zero
 // divisor, which no Int can hold; 0 matches the `| 0` reading of NaN.
-func IntRem(x int32, y int32) int32 {
+func IntRem(x int, y int) int {
 	if y == 0 {
 		return 0
 	}
 	return x % y
 }
 
-// IntPow is Data.Int.pow: exponentiation by squaring in int32, which wraps
-// modulo 2^32 like every Int product. A negative exponent gives 1 / x^-y
+// IntPow is Data.Int.pow: exponentiation by squaring in int, which wraps
+// at int's width like every Int product. A negative exponent gives 1 / x^-y
 // truncated: 0, except for the bases 1 and -1.
-func IntPow(x int32, y int32) int32 {
+func IntPow(x int, y int) int {
 	if y < 0 {
 		switch x {
 		case 1:
@@ -504,7 +506,7 @@ func IntPow(x int32, y int32) int32 {
 		}
 		return 0
 	}
-	result := int32(1)
+	result := int(1)
 	for ; y > 0; y >>= 1 {
 		if y&1 == 1 {
 			result *= x
@@ -516,12 +518,15 @@ func IntPow(x int32, y int32) int32 {
 
 // IntToStringAs is `i.toString(radix)` for a Radix in 2..36: lower-case
 // digits with a leading `-` for negatives.
-func IntToStringAs(radix int32, i int32) string {
+func IntToStringAs(radix int, i int) string {
 	return strconv.FormatInt(int64(i), int(radix))
 }
 
-// IntDegree is Data.EuclideanRing.intDegree: `min(|x|, 2147483647)`, which
-// is 2147483647 for -2147483648, whose absolute value is no Int.
-func IntDegree(x int32) int32 {
-	return int32(min(max(int(x), -int(x)), math.MaxInt32))
+// IntDegree is Data.EuclideanRing.intDegree: `min(|x|, top)`, which is top
+// for bottom, whose absolute value is no Int.
+func IntDegree(x int) int {
+	if x == math.MinInt {
+		return math.MaxInt
+	}
+	return max(x, -x)
 }

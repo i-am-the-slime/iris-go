@@ -4,7 +4,7 @@
 // A `Foreign` is a Go `any` holding a value in its own Go representation:
 //
 //   - nil for null and Undefined for undefined;
-//   - bool, float64, int32 or int for numbers, and string, which is also how
+//   - bool, float64, int (an Int) or int32 for numbers, and string, which is also how
 //     a Char enters (a string of one code unit, as in JavaScript);
 //   - *big.Int for a BigInt;
 //   - []any for arrays, and []string, []float64, []int, []int32 and []bool,
@@ -67,21 +67,21 @@ func otherNumber(value any) float64 {
 
 // Int reads a Foreign known to hold an integral number as an Int, whichever
 // of the number representations holds it.
-func Int(value any) int32 {
-	if number, ok := value.(int32); ok {
+func Int(value any) int {
+	if number, ok := value.(int); ok {
 		return number
 	}
 	return otherInt(value)
 }
 
-func otherInt(value any) int32 {
+func otherInt(value any) int {
 	switch number := value.(type) {
 	case float64:
-		return int32(int64(number))
-	case int:
-		return int32(number)
+		return int(number)
+	case int32:
+		return int(number)
 	}
-	return value.(int32)
+	return value.(int)
 }
 
 // Char reads a Foreign known to hold a Char, a string of one code unit.

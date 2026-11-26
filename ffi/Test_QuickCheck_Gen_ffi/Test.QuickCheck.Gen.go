@@ -5,10 +5,10 @@ package Test_QuickCheck_Gen_ffi
 
 import "math"
 
-func Float32ToInt32(n float64) int32 {
+func Float32ToInt32(n float64) int {
 	if math.IsNaN(n) {
 		// A Float32Array stores every NaN as the canonical quiet NaN.
 		return 0x7fc00000
 	}
-	return int32(math.Float32bits(float32(n)))
+	return int(int32(math.Float32bits(float32(n))))
 }

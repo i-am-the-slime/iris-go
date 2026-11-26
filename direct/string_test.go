@@ -31,36 +31,36 @@ func wtf8Units(s string) []uint16 {
 	return units
 }
 
-func wtf8String(points []int32) string {
+func wtf8String(points []int) string {
 	out := []byte{}
 	for _, point := range points {
-		if utf16.IsSurrogate(point) {
+		if utf16.IsSurrogate(rune(point)) {
 			out = append(out, 0xED, byte(0xA0+(point-0xD800)>>6), byte(0x80+point&0x3F))
 			continue
 		}
-		out = utf8.AppendRune(out, point)
+		out = utf8.AppendRune(out, rune(point))
 	}
 	return string(out)
 }
 
-func wholeCodePoints(s string) []int32 {
+func wholeCodePoints(s string) []int {
 	units := wtf8Units(s)
-	points := make([]int32, 0, len(units))
+	points := make([]int, 0, len(units))
 	for index := 0; index < len(units); index++ {
 		unit := units[index]
 		if utf16.IsSurrogate(rune(unit)) && index+1 < len(units) {
 			if pair := utf16.DecodeRune(rune(unit), rune(units[index+1])); pair != 0xFFFD {
-				points = append(points, int32(pair))
+				points = append(points, int(pair))
 				index++
 				continue
 			}
 		}
-		points = append(points, int32(unit))
+		points = append(points, int(unit))
 	}
 	return points
 }
 
-func wholeTake(count int32, s string) string {
+func wholeTake(count int, s string) string {
 	points := wholeCodePoints(s)
 	count = max(count, 0)
 	if int(count) >= len(points) {
@@ -92,10 +92,10 @@ func codePointSamples() []string {
 
 type maybePoint struct {
 	just  bool
-	value int32
+	value int
 }
 
-func foundPoint(point int32, found bool) maybePoint {
+func foundPoint(point int, found bool) maybePoint {
 	if !found {
 		return maybePoint{}
 	}
@@ -108,7 +108,7 @@ func TestCodePointWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 		if got := ToCodePointArray(nil, nil, s); !slices.Equal(got, points) {
 			t.Errorf("ToCodePointArray(%q) = %x, want %x", s, got, points)
 		}
-		if got := CodePointLength(s); got != int32(len(points)) {
+		if got := CodePointLength(s); got != int(len(points)) {
 			t.Errorf("CodePointLength(%q) = %d, want %d", s, got, len(points))
 		}
 		if len(points) > 0 {
@@ -116,8 +116,8 @@ func TestCodePointWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 				t.Errorf("CodePointAt0(%q) = %x, want %x", s, got, points[0])
 			}
 		}
-		for index := int32(-2); index <= int32(len(points))+2; index++ {
-			if got := CodePointLengthUpTo(index, s); got != max(0, min(index, int32(len(points)))) {
+		for index := int(-2); index <= int(len(points))+2; index++ {
+			if got := CodePointLengthUpTo(index, s); got != max(0, min(index, int(len(points)))) {
 				t.Errorf("CodePointLengthUpTo(%d, %q) = %d", index, s, got)
 			}
 			want := maybePoint{}
@@ -132,8 +132,8 @@ func TestCodePointWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 			}
 		}
 		for stop := range len(points) + 1 {
-			predicate := func(point int32) bool { return stop == len(points) || point != points[stop] }
-			want := int32(0)
+			predicate := func(point int) bool { return stop == len(points) || point != points[stop] }
+			want := int(0)
 			for int(want) < len(points) && predicate(points[want]) {
 				want++
 			}

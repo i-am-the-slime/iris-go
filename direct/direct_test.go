@@ -10,7 +10,7 @@ import (
 
 func TestSortByIsStable(t *testing.T) {
 	type pair struct {
-		key   int32
+		key   int
 		label string
 	}
 	byKey := func(left pair, right pair) int { return int(left.key - right.key) }
@@ -25,18 +25,18 @@ func TestSortByIsStable(t *testing.T) {
 }
 
 func TestCompareArrayInvertsLengthLikeJavaScript(t *testing.T) {
-	equal := func(left int32, right int32) int32 { return 0 }
-	if got := CompareArray(equal, []int32{1, 2, 3}, []int32{1, 2}); got != -1 {
+	equal := func(left int, right int) int { return 0 }
+	if got := CompareArray(equal, []int{1, 2, 3}, []int{1, 2}); got != -1 {
 		t.Fatalf("longer array compared as %d", got)
 	}
-	if got := CompareArray(equal, []int32{1}, []int32{1, 2}); got != 1 {
+	if got := CompareArray(equal, []int{1}, []int{1, 2}); got != 1 {
 		t.Fatalf("shorter array compared as %d", got)
 	}
 }
 
 func TestCodePointsTreatSurrogatePairsAsOne(t *testing.T) {
 	text := "a😀b"
-	if got := ToCodePointArray(nil, nil, text); !slices.Equal(got, []int32{'a', 0x1F600, 'b'}) {
+	if got := ToCodePointArray(nil, nil, text); !slices.Equal(got, []int{'a', 0x1F600, 'b'}) {
 		t.Fatalf("code points %v", got)
 	}
 	if got := CodePointTake(nil, 2, text); got != "a😀" {
@@ -58,18 +58,18 @@ func TestCatchExceptionHandlesThrownErrors(t *testing.T) {
 }
 
 func TestPartitionReturnsFieldsByLabel(t *testing.T) {
-	no, yes := Partition(func(x int32) bool { return x > 1 }, []int32{1, 2, 3})
-	if !slices.Equal(no, []int32{1}) || !slices.Equal(yes, []int32{2, 3}) {
+	no, yes := Partition(func(x int) bool { return x > 1 }, []int{1, 2, 3})
+	if !slices.Equal(no, []int{1}) || !slices.Equal(yes, []int{2, 3}) {
 		t.Fatalf("no %v yes %v", no, yes)
 	}
 }
 
 func TestAppenderNeverAliasesReusedAccumulators(t *testing.T) {
-	snoc := Appender[int32]()
+	snoc := Appender[int]()
 	shared := snoc(snoc(nil)(1))(2)
 	left := snoc(shared)(3)
 	right := snoc(shared)(4)
-	if !slices.Equal(left, []int32{1, 2, 3}) || !slices.Equal(right, []int32{1, 2, 4}) {
+	if !slices.Equal(left, []int{1, 2, 3}) || !slices.Equal(right, []int{1, 2, 4}) {
 		t.Fatalf("appended %v and %v", left, right)
 	}
 }

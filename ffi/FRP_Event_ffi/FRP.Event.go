@@ -27,21 +27,21 @@ type ObjHackType[A any] struct{ table *subscribers[A] }
 type subscribers[A any] struct {
 	running bool
 	queue   []func()
-	levels  []map[int32]A
+	levels  []map[int]A
 }
 
 func ObjHack[A any]() ObjHackType[A] {
-	return ObjHackType[A]{&subscribers[A]{levels: []map[int32]A{{}}}}
+	return ObjHackType[A]{&subscribers[A]{levels: []map[int]A{{}}}}
 }
 
-func InsertObjHack[A any](key int32, value A, table ObjHackType[A]) {
+func InsertObjHack[A any](key int, value A, table ObjHackType[A]) {
 	object := table.table
 	object.levels[len(object.levels)-1][key] = value
 }
 
 // DeleteObjHack removes the key from the first level only: JavaScript's `delete` reports success
 // whether or not the key was present, so the loop in Event.js stops after the first map.
-func DeleteObjHack[A any](key int32, table ObjHackType[A]) {
+func DeleteObjHack[A any](key int, table ObjHackType[A]) {
 	object := table.table
 	if len(object.levels) > 0 {
 		delete(object.levels[0], key)
@@ -58,23 +58,23 @@ func foreachSubscriber[A any](object *subscribers[A], f func(A)) {
 		return
 	}
 	object.running = true
-	merged := map[int32]A{}
+	merged := map[int]A{}
 	var run func(level int)
 	run = func(level int) {
-		object.levels = append(object.levels, map[int32]A{})
+		object.levels = append(object.levels, map[int]A{})
 		for _, entry := range sortedEntries(object.levels[level]) {
 			key, value := entry.key, entry.value
 			f(value)
 			if len(object.levels[level+1]) > 0 {
 				run(level + 1)
 			}
-			object.levels[level+1] = map[int32]A{}
+			object.levels[level+1] = map[int]A{}
 			object.levels = object.levels[:level+2]
 			merged[key] = value
 		}
 	}
 	run(0)
-	object.levels = []map[int32]A{merged}
+	object.levels = []map[int]A{merged}
 	object.running = false
 	for len(object.queue) > 0 {
 		next := object.queue[0]
@@ -86,11 +86,11 @@ func foreachSubscriber[A any](object *subscribers[A], f func(A)) {
 // entry is one key-subscriber pair of a level, taken before its subscribers run: like
 // `Object.entries` in Event.js, a subscriber removed by an earlier one in the same push still runs.
 type entry[A any] struct {
-	key   int32
+	key   int
 	value A
 }
 
-func sortedEntries[A any](level map[int32]A) []entry[A] {
+func sortedEntries[A any](level map[int]A) []entry[A] {
 	entries := make([]entry[A], 0, len(level))
 	for key, value := range level {
 		entries = append(entries, entry[A]{key, value})

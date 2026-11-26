@@ -18,7 +18,7 @@ func Stringify(value Json) string {
 // StringifyWithIndent implements Data.Argonaut.Core.stringifyWithIndent,
 // `JSON.stringify(j, null, i)`: an indent of at most ten spaces, none below
 // one.
-func StringifyWithIndent(spaces int32, value Json) string {
+func StringifyWithIndent(spaces int, value Json) string {
 	var out strings.Builder
 	writer := writer{out: &out, indent: strings.Repeat(" ", int(max(0, min(spaces, 10))))}
 	writer.value(value, "")

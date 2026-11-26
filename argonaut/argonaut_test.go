@@ -76,7 +76,7 @@ func TestJsonParserAcceptsWhatJavaScriptAccepts(t *testing.T) {
 		if got, want := Stringify(value), *recorded.Compact; !sameUpToKeyOrder(got, want) {
 			t.Errorf("stringify (parse %q) = %q, JavaScript %q", recorded.Input, got, want)
 		}
-		for index, indent := range []int32{-1, 1, 2, 11} {
+		for index, indent := range []int{-1, 1, 2, 11} {
 			got := StringifyWithIndent(indent, value)
 			if want := recorded.Indented[index]; !sameUpToKeyOrder(got, want) {
 				t.Errorf("stringifyWithIndent %d (parse %q) = %q, JavaScript %q", indent, recorded.Input, got, want)

@@ -14,7 +14,7 @@ import (
 
 // The grammar's postprocessors (the JavaScript between {% and %} in dhall/grammar.ne), ported one
 // by one. They build JavaScript values, which here are nil for null, string, float64 for a
-// number, int32 for a number Dhall.Parser reads as an Int, []any for an array and *node for an
+// number, int for a number Dhall.Parser reads as an Int, []any for an array and *node for an
 // object. Arrays are never changed in place, since several parses share them; the one object a
 // postprocessor changes, an http import, is shared by pointer, as in JavaScript.
 
@@ -240,7 +240,7 @@ func unionType(d []any) any { return &node{"Union", concat([]any{d[0]}, d[1])} }
 func variable(d []any) any {
 	index := passOf(2, d[1])
 	if !truthy(index) {
-		return &node{"Var", []any{d[0], int32(0)}}
+		return &node{"Var", []any{d[0], int(0)}}
 	}
 	return &node{"Var", []any{d[0], toInt32(stringToNumber(index.(string)))}}
 }
@@ -249,7 +249,7 @@ func builtinIdentifier(d []any) any { return &node{d[0].(string), []any{}} }
 
 func withClause(d []any) any { return []any{concat([]any{d[0]}, mapped(d[1], 3)), d[5]} }
 
-func punnedEntry(d []any) any { return []any{d[0], &node{"Var", []any{d[0], int32(0)}}} }
+func punnedEntry(d []any) any { return []any{d[0], &node{"Var", []any{d[0], int(0)}}} }
 
 // partialTime is `[d[0], d[2], d[4] + (d[5] ? d[5][0] : "")]`: the fraction's first code unit
 // only, its point, since d[5] is the fraction itself.
@@ -486,7 +486,7 @@ func truthy(value any) bool {
 		return value != ""
 	case float64:
 		return value != 0 && !math.IsNaN(value)
-	case int32:
+	case int:
 		return value != 0
 	}
 	return true
@@ -501,7 +501,7 @@ func toString(value any) string {
 		return value
 	case float64:
 		return prim.NumberToString(value)
-	case int32:
+	case int:
 		return strconv.Itoa(int(value))
 	case []any:
 		return join(value, ",")
@@ -559,11 +559,11 @@ func stringToNumber(text string) float64 {
 }
 
 // toInt32 is JavaScript's `value | 0`.
-func toInt32(value float64) int32 {
+func toInt32(value float64) int {
 	if math.IsInf(value, 0) || math.IsNaN(value) {
 		return 0
 	}
-	return int32(uint32(int64(math.Mod(math.Trunc(value), 1<<32))))
+	return int(int32(uint32(int64(math.Mod(math.Trunc(value), 1<<32)))))
 }
 
 // hexadecimal is `parseInt(text, 16)` of the hexadecimal digits of a Unicode escape.

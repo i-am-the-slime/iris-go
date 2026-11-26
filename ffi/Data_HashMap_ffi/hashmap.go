@@ -14,11 +14,11 @@ func Empty[K, V any]() HashMap[K, V] {
 	return HashMap[K, V]{&trie[K, V]{}}
 }
 
-func Singleton[K, V any](key K, keyHash int32, value V) HashMap[K, V] {
+func Singleton[K, V any](key K, keyHash int, value V) HashMap[K, V] {
 	return HashMap[K, V]{singletonAt(key, keyHash, value)}
 }
 
-func singletonAt[K, V any](key K, keyHash int32, value V) *trie[K, V] {
+func singletonAt[K, V any](key K, keyHash int, value V) *trie[K, V] {
 	return &trie[K, V]{datamap: 1 << (uint32(keyHash) & 31), keys: []K{key}, values: []V{value}}
 }
 
@@ -27,7 +27,7 @@ func Lookup[K, V, R any](
 	just func(V) R,
 	equal func(K, K) bool,
 	key K,
-	keyHash int32,
+	keyHash int,
 	m HashMap[K, V],
 ) R {
 	if value, ok := m.root.lookup(equal, key, keyHash, 0); ok {
@@ -38,7 +38,7 @@ func Lookup[K, V, R any](
 
 func Insert[K, V any](
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	key K,
 	value V,
 	m HashMap[K, V],
@@ -48,7 +48,7 @@ func Insert[K, V any](
 
 func InsertWith[K, V any](
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(V, V) V,
 	key K,
 	value V,
@@ -57,13 +57,13 @@ func InsertWith[K, V any](
 	return HashMap[K, V]{m.root.insertWith(equal, hash, combine, key, hash(key), value, 0)}
 }
 
-func Delete[K, V any](equal func(K, K) bool, key K, keyHash int32, m HashMap[K, V]) HashMap[K, V] {
+func Delete[K, V any](equal func(K, K) bool, key K, keyHash int, m HashMap[K, V]) HashMap[K, V] {
 	return HashMap[K, V]{m.root.delete(equal, key, keyHash, 0)}
 }
 
 func FromArray[A, K, V any](
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	keyOf func(A) K,
 	valueOf func(A) V,
 	elements []A,
@@ -89,13 +89,13 @@ func IsEmpty[K, V any](m HashMap[K, V]) bool {
 	return m.root.isEmpty()
 }
 
-func Size[K, V any](m HashMap[K, V]) int32 {
-	return int32(m.root.size())
+func Size[K, V any](m HashMap[K, V]) int {
+	return int(m.root.size())
 }
 
 func UnionWith[K, V any](
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(V, V) V,
 	left HashMap[K, V],
 	right HashMap[K, V],
@@ -107,7 +107,7 @@ func IntersectionWith[K, A, B, C any](
 	_ any,
 	_ any,
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(A, B) C,
 	left HashMap[K, A],
 	right HashMap[K, B],
@@ -128,8 +128,8 @@ func Equal[K, V any](
 	return left.root.equal(equalKeys, equalValues, right.root)
 }
 
-func Hash[K, V any](hashValue func(V) int32, m HashMap[K, V]) int32 {
-	return int32(m.root.hash(hashValue))
+func Hash[K, V any](hashValue func(V) int, m HashMap[K, V]) int {
+	return int(m.root.hash(hashValue))
 }
 
 func MapWithIndex[K, V, W any](f func(K, V) W, m HashMap[K, V]) HashMap[K, W] {
@@ -155,7 +155,7 @@ func Any[K, V any](predicate func(V) bool, m HashMap[K, V]) bool {
 }
 
 // NubHash is Data.HashMap.nubHash: the first of each run of equal elements, in order.
-func NubHash[A any](_ any, _ any, equal func(A, A) bool, hash func(A) int32, elements []A) []A {
+func NubHash[A any](_ any, _ any, equal func(A, A) bool, hash func(A) int, elements []A) []A {
 	seen := &trie[A, struct{}]{}
 	result := []A{}
 	for _, element := range elements {
@@ -171,33 +171,33 @@ func NubHash[A any](_ any, _ any, equal func(A, A) bool, hash func(A) int32, ele
 
 // HashString is Data.Hashable's hashString: 31 times the hash so far plus each UTF-16 code unit,
 // wrapped into an Int.
-func HashString(s string) int32 {
-	var h int32
+func HashString(s string) int {
+	var h int
 	for i := 0; i < len(s); i++ {
 		if s[i] >= 0x80 {
 			return hashCodeUnits(h, s[i:])
 		}
-		h = 31*h + int32(s[i])
+		h = 31*h + int(s[i])
 	}
 	return h
 }
 
-func hashCodeUnits(h int32, s string) int32 {
+func hashCodeUnits(h int, s string) int {
 	for _, r := range prim.Characters(s) {
 		if r >= 0x10000 {
 			r -= 0x10000
-			h = 31*h + (0xD800 + r>>10)
-			h = 31*h + (0xDC00 + r&0x3FF)
+			h = 31*h + int(0xD800+r>>10)
+			h = 31*h + int(0xDC00+r&0x3FF)
 			continue
 		}
-		h = 31*h + r
+		h = 31*h + int(r)
 	}
 	return h
 }
 
 // HashNumber is Data.Hashable's hashNumber, which mixes the bits of a Number the JavaScript way:
 // through ToInt32 of the number and of its multiples and quotients by 2^32 - 1.
-func HashNumber(n float64) int32 {
+func HashNumber(n float64) int {
 	if math.IsNaN(n) || math.IsInf(n, 1) {
 		return 0
 	}
@@ -212,9 +212,9 @@ func HashNumber(n float64) int32 {
 	return h
 }
 
-func toInt32(n float64) int32 {
+func toInt32(n float64) int {
 	if math.IsNaN(n) || math.IsInf(n, 0) {
 		return 0
 	}
-	return int32(uint32(int64(math.Mod(math.Trunc(n), 4294967296))))
+	return int(int32(uint32(int64(math.Mod(math.Trunc(n), 4294967296)))))
 }

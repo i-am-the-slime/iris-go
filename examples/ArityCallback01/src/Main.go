@@ -1,6 +1,6 @@
 package Main_ffi
 
-func FoldPairs(f func(int32) func(int32) int32, initial int32, xs []int32) int32 {
+func FoldPairs(f func(int) func(int) int, initial int, xs []int) int {
 	accumulator := initial
 	for _, x := range xs {
 		accumulator = f(accumulator)(x)

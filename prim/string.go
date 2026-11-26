@@ -71,12 +71,12 @@ func compareOrdered[T int | byte | rune](x T, y T) int {
 var BottomChar rune = 0
 var TopChar rune = 0xffff
 
-func ToCharCode(c rune) int32 {
-	return c
+func ToCharCode(c rune) int {
+	return int(c)
 }
 
-func FromCharCode(i int32) rune {
-	return i
+func FromCharCode(i int) rune {
+	return rune(i)
 }
 
 // The CodePoints foreigns receive a compiled-PureScript fallback as their
@@ -118,14 +118,14 @@ func CharSingleton(c rune) string {
 	return RuneString(c)
 }
 
-// The Data.String.CodeUnits foreigns take and return Ints as int32, and
+// The Data.String.CodeUnits foreigns take and return Ints as int, and
 // convert to Go's int inside, where a position meets len and slicing.
 
-func CodeUnitLength(s string) int32 {
-	return int32(codeUnitLength(s))
+func CodeUnitLength(s string) int {
+	return int(codeUnitLength(s))
 }
 
-func CodeUnitTake(n int32, s string) string {
+func CodeUnitTake(n int, s string) string {
 	if asciiThroughFirstOrSecond(s, n-1) {
 		return s[:n]
 	}
@@ -133,7 +133,7 @@ func CodeUnitTake(n int32, s string) string {
 	return before
 }
 
-func CodeUnitDrop(n int32, s string) string {
+func CodeUnitDrop(n int, s string) string {
 	if asciiThroughFirstOrSecond(s, n-1) {
 		return s[n:]
 	}
@@ -141,7 +141,7 @@ func CodeUnitDrop(n int32, s string) string {
 	return after
 }
 
-func CodeUnitIndexOf(pattern string, s string) (int32, bool) {
+func CodeUnitIndexOf(pattern string, s string) (int, bool) {
 	index := codeUnitIndexOf(pattern, s)
 	return index, index >= 0
 }
@@ -153,7 +153,7 @@ func CodeUnitContains(pattern string, s string) bool {
 	return codeUnitIndexOf(pattern, s) >= 0
 }
 
-func codeUnitIndexOf(pattern string, s string) int32 {
+func codeUnitIndexOf(pattern string, s string) int {
 	if index, decided := plainIndex(pattern, s); decided {
 		return index
 	}
@@ -163,7 +163,7 @@ func codeUnitIndexOf(pattern string, s string) int32 {
 	return -1
 }
 
-func CharAt(i int32, s string) rune {
+func CharAt(i int, s string) rune {
 	if asciiThroughFirstOrSecond(s, i) {
 		return rune(s[i])
 	}
@@ -450,7 +450,7 @@ func StringToCharArray(s string) []rune {
 }
 
 // CodeUnitCharAt implements Data.String.CodeUnits._charAt.
-func CodeUnitCharAt(i int32, s string) (rune, bool) {
+func CodeUnitCharAt(i int, s string) (rune, bool) {
 	if asciiThroughFirstOrSecond(s, i) {
 		return rune(s[i]), true
 	}
@@ -464,8 +464,8 @@ func CodeUnitToChar(s string) (rune, bool) {
 }
 
 // CodeUnitCountPrefix implements Data.String.CodeUnits.countPrefix.
-func CodeUnitCountPrefix(p func(rune) bool, s string) int32 {
-	count := int32(0)
+func CodeUnitCountPrefix(p func(rune) bool, s string) int {
+	count := int(0)
 	for _, r := range Characters(s) {
 		if codeUnitCount(r) == 1 {
 			if !p(r) {
@@ -489,7 +489,7 @@ func CodeUnitCountPrefix(p func(rune) bool, s string) int32 {
 // CodeUnitIndexOfStartingAt implements Data.String.CodeUnits._indexOfStartingAt
 // (String.prototype.indexOf with a start, Nothing when the start is out of
 // [0, length]).
-func CodeUnitIndexOfStartingAt(pattern string, startAt int32, s string) (int32, bool) {
+func CodeUnitIndexOfStartingAt(pattern string, startAt int, s string) (int, bool) {
 	if startAt < 0 {
 		return 0, false
 	}
@@ -497,12 +497,12 @@ func CodeUnitIndexOfStartingAt(pattern string, startAt int32, s string) (int32, 
 	if !valid {
 		return indexOfInCodeUnits(pattern, int(startAt), s)
 	}
-	return int32(index), found
+	return int(index), found
 }
 
 // indexOfInCodeUnits is CodeUnitIndexOfStartingAt over the converted code
 // units, for strings holding invalid UTF-8.
-func indexOfInCodeUnits(pattern string, startAt int, s string) (int32, bool) {
+func indexOfInCodeUnits(pattern string, startAt int, s string) (int, bool) {
 	units := codeUnits(s)
 	if startAt < 0 || startAt > len(units) {
 		return 0, false
@@ -510,25 +510,25 @@ func indexOfInCodeUnits(pattern string, startAt int, s string) (int32, bool) {
 	needle := codeUnits(pattern)
 	for at := startAt; at+len(needle) <= len(units); at++ {
 		if codeUnitsMatchAt(units, needle, at) {
-			return int32(at), true
+			return int(at), true
 		}
 	}
 	return 0, false
 }
 
 // CodeUnitLastIndexOf implements Data.String.CodeUnits._lastIndexOf.
-func CodeUnitLastIndexOf(pattern string, s string) (int32, bool) {
+func CodeUnitLastIndexOf(pattern string, s string) (int, bool) {
 	return lastIndexOfStartingAt(pattern, len(s), s)
 }
 
 // CodeUnitLastIndexOfStartingAt implements
 // Data.String.CodeUnits._lastIndexOfStartingAt (String.prototype.lastIndexOf
 // with a start, which clamps the start into [0, length]).
-func CodeUnitLastIndexOfStartingAt(pattern string, startAt int32, s string) (int32, bool) {
+func CodeUnitLastIndexOfStartingAt(pattern string, startAt int, s string) (int, bool) {
 	return lastIndexOfStartingAt(pattern, int(startAt), s)
 }
 
-func lastIndexOfStartingAt(pattern string, startAt int, s string) (int32, bool) {
+func lastIndexOfStartingAt(pattern string, startAt int, s string) (int, bool) {
 	if !utf8.ValidString(s) || !utf8.ValidString(pattern) {
 		units := codeUnits(s)
 		return lastIndexOfFrom(codeUnits(pattern), clampCodeUnit(startAt, len(units)), units)
@@ -537,20 +537,20 @@ func lastIndexOfStartingAt(pattern string, startAt int, s string) (int32, bool) 
 	offset, split, _ := codeUnitBoundary(s, startAt)
 	if pattern == "" {
 		if offset < len(s) || split {
-			return int32(startAt), true
+			return int(startAt), true
 		}
-		return int32(codeUnitLength(s)), true
+		return int(codeUnitLength(s)), true
 	}
 	at := strings.LastIndex(s[:min(len(s), offset+len(pattern))], pattern)
 	if at < 0 {
 		return 0, false
 	}
-	return int32(codeUnitLength(s[:at])), true
+	return int(codeUnitLength(s[:at])), true
 }
 
 // CodeUnitSlice implements Data.String.CodeUnits.slice (String.prototype.slice:
 // negative indices count from the end).
-func CodeUnitSlice(begin int32, end int32, s string) string {
+func CodeUnitSlice(begin int, end int, s string) string {
 	return sliceCodeUnits(int(begin), int(end), s)
 }
 
@@ -569,7 +569,7 @@ func sliceCodeUnits(begin int, end int, s string) string {
 
 // CodeUnitSplitAt implements Data.String.CodeUnits.splitAt (two
 // String.prototype.substring calls, which clamp the index into [0, length]).
-func CodeUnitSplitAt(i int32, s string) struct {
+func CodeUnitSplitAt(i int, s string) struct {
 	After  string
 	Before string
 } {
@@ -640,10 +640,10 @@ func codeUnitsMatchAt(units []uint16, needle []uint16, at int) bool {
 	return true
 }
 
-func lastIndexOfFrom(needle []uint16, startAt int, units []uint16) (int32, bool) {
+func lastIndexOfFrom(needle []uint16, startAt int, units []uint16) (int, bool) {
 	for at := min(startAt, len(units)-len(needle)); at >= 0; at-- {
 		if codeUnitsMatchAt(units, needle, at) {
-			return int32(at), true
+			return int(at), true
 		}
 	}
 	return 0, false
@@ -663,13 +663,13 @@ func sliceIndex(i int, length int) int {
 // CodeUnitLengthUpTo is min(CodeUnitLength(s), limit), counting no further
 // than limit: the compiler uses it where the length is only compared with
 // integers below limit, so a check like `length s == 0` does not walk s.
-func CodeUnitLengthUpTo(limit int32, s string) int32 {
-	counted := int32(min(int(limit), len(s)))
+func CodeUnitLengthUpTo(limit int, s string) int {
+	counted := int(min(int(limit), len(s)))
 	if counted == 0 && limit >= 0 || asciiThroughFirstOrSecond(s, counted-1) {
 		return counted
 	}
 	length, _ := codeUnitLengthUpTo(s, int(limit))
-	return int32(min(length, int(limit)))
+	return int(min(length, int(limit)))
 }
 
 // StringTrimStart is JavaScript's String.prototype.trimStart.

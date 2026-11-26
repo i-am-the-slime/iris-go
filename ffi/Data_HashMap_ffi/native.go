@@ -8,7 +8,7 @@ import (
 
 // Key is the Go type of an Int, Char or String key, which Go's `==` compares the way the key's
 // Eq instance does.
-type Key interface{ int32 | string }
+type Key interface{ int | string }
 
 // Native is Data.HashMap's `HashMap k v` for an Int, Char or String key: a Go map, read with one
 // hash probe. A map is never written once anything else can hold it, so every version stays
@@ -39,11 +39,11 @@ func equalKeys[K Key](a K, b K) bool {
 	return a == b
 }
 
-func hashKey[K Key](key K) int32 {
+func hashKey[K Key](key K) int {
 	if text, ok := any(key).(string); ok {
 		return HashString(text)
 	}
-	return any(key).(int32)
+	return any(key).(int)
 }
 
 func (m Native[K, V]) source() *table[K, V] {
@@ -187,8 +187,8 @@ func NativeIsEmpty[K Key, V any](m Native[K, V]) bool {
 	return m.size() == 0
 }
 
-func NativeSize[K Key, V any](m Native[K, V]) int32 {
-	return int32(m.size())
+func NativeSize[K Key, V any](m Native[K, V]) int {
+	return int(m.size())
 }
 
 // lopsided tells whether one map of a union is so much smaller than the other that writing its
@@ -282,8 +282,8 @@ func NativeEqual[K Key, V any](_ any, equalValues func(V, V) bool, left Native[K
 	return equal
 }
 
-func NativeHash[K Key, V any](hashValue func(V) int32, m Native[K, V]) int32 {
-	return int32(m.persistent().hash(hashValue))
+func NativeHash[K Key, V any](hashValue func(V) int, m Native[K, V]) int {
+	return int(m.persistent().hash(hashValue))
 }
 
 func NativeMapWithIndex[K Key, V, W any](f func(K, V) W, m Native[K, V]) Native[K, W] {

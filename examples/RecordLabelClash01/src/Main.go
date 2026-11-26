@@ -6,12 +6,12 @@ package Main_ffi
 import "strconv"
 
 type Pair struct {
-	A_ int32 `purescript:"A"`
-	A  int32
+	A_ int `purescript:"A"`
+	A  int
 }
 
 type Triple struct {
-	A_ int32 `purescript:"A"`
+	A_ int `purescript:"A"`
 	A  string
 	A2 float64
 }
@@ -33,6 +33,6 @@ func DescribeHeader(header Header) string {
 	return "Content_type2=" + header.Content_type2 + " Content_type=" + header.Content_type
 }
 
-func MakePair(upper int32, lower int32) Pair {
+func MakePair(upper int, lower int) Pair {
 	return Pair{A_: upper, A: lower}
 }

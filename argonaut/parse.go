@@ -27,7 +27,7 @@ type parser struct {
 	position int
 }
 
-func parse(text string) (value Json, offset int32, ok bool) {
+func parse(text string) (value Json, offset int, ok bool) {
 	p := &parser{input: text}
 	defer func() {
 		if failure := recover(); failure != nil {

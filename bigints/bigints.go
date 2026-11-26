@@ -25,7 +25,7 @@ var (
 )
 
 // FromInt implements Data.BigInt.fromInt.
-func FromInt(n int32) *big.Int {
+func FromInt(n int) *big.Int {
 	return big.NewInt(int64(n))
 }
 
@@ -41,7 +41,7 @@ func FromTypeLevelInt(text string) *big.Int {
 
 // FromBaseImpl implements Data.BigInt.fromBaseImpl, `bigInt(s, b)` or
 // not found when it throws.
-func FromBaseImpl(base int32, text string) (*big.Int, bool) {
+func FromBaseImpl(base int, text string) (*big.Int, bool) {
 	var value *big.Int
 	var failure *exception.Error
 	if base == 10 {
@@ -75,7 +75,7 @@ func ToNumber(x *big.Int) float64 {
 }
 
 // ToBase implements Data.BigInt.toBase.
-func ToBase(base int32, x *big.Int) string {
+func ToBase(base int, x *big.Int) string {
 	if base == 10 {
 		return x.String()
 	}
@@ -105,11 +105,11 @@ func appendDigit(out []byte, digit int64) []byte {
 
 // DigitsInBase implements Data.BigInt.digitsInBase, `x.toArray(radix)`, as
 // the fields of its `{ isNegative, value }` record.
-func DigitsInBase(radix int32, x *big.Int) (bool, []int32) {
+func DigitsInBase(radix int, x *big.Int) (bool, []int) {
 	digits, negative := toBase(x, int64(radix))
-	values := make([]int32, len(digits))
+	values := make([]int, len(digits))
 	for index, digit := range digits {
-		values[index] = int32(digit)
+		values[index] = int(digit)
 	}
 	return negative, values
 }
@@ -268,7 +268,7 @@ func shiftAmount(n float64) float64 {
 func BiEquals(x *big.Int, y *big.Int) bool { return x.Cmp(y) == 0 }
 
 // BiCompare implements Data.BigInt.biCompare.
-func BiCompare(x *big.Int, y *big.Int) int32 { return int32(x.Cmp(y)) }
+func BiCompare(x *big.Int, y *big.Int) int { return int(x.Cmp(y)) }
 
 // BiAdd implements Data.BigInt.biAdd.
 func BiAdd(x *big.Int, y *big.Int) *big.Int { return new(big.Int).Add(x, y) }

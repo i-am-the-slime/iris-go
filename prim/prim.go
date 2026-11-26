@@ -7,6 +7,7 @@ package prim
 
 import (
 	"math"
+	"math/bits"
 	"strconv"
 	"strings"
 )
@@ -92,20 +93,20 @@ func IntToNumber(n int) float64 {
 	return float64(n)
 }
 
-func IntFromNumber(n float64) (int32, bool) {
-	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n || n < math.MinInt32 || n > math.MaxInt32 {
+func IntFromNumber(n float64) (int, bool) {
+	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n || n < math.MinInt || n >= -math.MinInt {
 		return 0, false
 	}
-	return int32(n), true
+	return int(n), true
 }
 
-func IntFromStringAs(radix int32, s string) (int32, bool) {
+func IntFromStringAs(radix int, s string) (int, bool) {
 	if radix == 10 {
 		n, err := strconv.Atoi(s)
-		return int32(n), err == nil && n == int(int32(n))
+		return n, err == nil
 	}
-	n, err := strconv.ParseInt(s, int(radix), 32)
-	return int32(n), err == nil
+	n, err := strconv.ParseInt(s, radix, strconv.IntSize)
+	return int(n), err == nil
 }
 
 func EffectPure[A any](value A) func() A {
@@ -131,8 +132,8 @@ func MkEffectFn1[A, R any](f func(A) func() R) func(A) R {
 	}
 }
 
-func ShowInt(n int32) string {
-	return strconv.Itoa(int(n))
+func ShowInt(n int) string {
+	return strconv.Itoa(n)
 }
 
 // ShowString mirrors Data.Show.showStringImpl: the string wrapped in double
@@ -235,62 +236,54 @@ func UnsafeCoerce[A, B any](a A) B {
 	return any(a).(B)
 }
 
-// The Data.Semiring / Data.Ring scalar foreigns. Int is stored in Go's int
-// but follows the JS FFI's 32-bit `x + y | 0` semantics: results wrap.
+// The Data.Semiring / Data.Ring scalar foreigns. PureScript's Int is Go's
+// int, so results wrap at the platform's width (64 bits on 64-bit targets),
+// not at JavaScript's 32.
 func IntAdd(x int, y int) int {
-	return int(int32(x + y))
+	return x + y
 }
 
-// IntMul is JS `x * y | 0`: the product is a double, exact below 2^53 and
-// rounded beyond it (`top * top` is 0, not 1). Every double from 2^53 up is
-// an integer, so converting to int64 is exact and ToInt32 keeps its low 32
-// bits. An Int stays below 2^32 in magnitude (only `zshr` and `div` reach past
-// int32), so the product only passes 2^63 for two such out-of-range values.
 func IntMul(x int, y int) int {
-	return int(int32(int64(float64(x) * float64(y))))
-}
-
-// MultiplyInt32 is Data.Semiring's intMul: int32 multiplication, which wraps
-// modulo 2^32. JavaScript's `x * y | 0` rounds a product beyond 2^53 to a
-// double first and so loses its low bits; PureScript's Int doesn't ask for that.
-func MultiplyInt32(x int32, y int32) int32 {
 	return x * y
 }
 
 func IntSub(x int, y int) int {
-	return int(int32(x - y))
+	return x - y
 }
 
-// The Data.Int.Bits foreigns: JS bitwise operators, which apply ToInt32 to
-// their operands and take shift counts modulo 32. `>>>` returns the uint32
-// value, so IntZshr(-1, 0) is 4294967295.
+// The Data.Int.Bits foreigns at Go's int width: shift counts are taken modulo
+// the width, as JavaScript takes them modulo 32, and `zshr` shifts the
+// unsigned bits: IntZshr(-1, 1) is math.MaxInt, where JavaScript gives 2^31 - 1.
 func IntAnd(x int, y int) int {
-	return int(int32(x & y))
+	return x & y
 }
 
 func IntOr(x int, y int) int {
-	return int(int32(x | y))
+	return x | y
 }
 
 func IntXor(x int, y int) int {
-	return int(int32(x ^ y))
+	return x ^ y
 }
 
 func IntShl(x int, n int) int {
-	return int(int32(x << (n & 31)))
+	return x << (n & signShift)
 }
 
 func IntShr(x int, n int) int {
-	return int(int32(x)) >> (n & 31)
+	return x >> (n & signShift)
 }
 
 func IntZshr(x int, n int) int {
-	return int(uint32(x) >> (n & 31))
+	return int(uint(x) >> (n & signShift))
 }
 
 func IntComplement(x int) int {
-	return int(int32(^x))
+	return ^x
 }
+
+// signShift is the shift that leaves an int's sign bit alone: its width less one.
+const signShift = bits.UintSize - 1
 
 func NumAdd(x float64, y float64) float64 {
 	return x + y
@@ -308,41 +301,41 @@ func NumSub(x float64, y float64) float64 {
 // division by zero yields 0 and the modulo is always non-negative. Go's
 // truncating `/` and `%` are corrected without a branch: a negative
 // remainder moves up by |y| and the quotient one step away from y's sign.
-// JS (`-Math.floor(x / -y)`, no `| 0`) makes `bottom / -1` 2147483648,
-// which is no Int; Go's `/` wraps it to -2147483648. Both bodies are small
+// Go's `/` wraps `bottom / -1` to bottom. Both bodies are small
 // enough to inline, so a constant divisor folds into a multiply.
-func IntDiv(x int32, y int32) int32 {
+func IntDiv(x int, y int) int {
 	if y == 0 {
 		return 0
 	}
-	sign := y>>31 | 1
-	return x/y - (x%y)>>31&sign
+	sign := y>>signShift | 1
+	return x/y - (x%y)>>signShift&sign
 }
 
-func IntMod(x int32, y int32) int32 {
+func IntMod(x int, y int) int {
 	if y == 0 {
 		return 0
 	}
 	remainder := x % y
-	magnitude := (y ^ y>>31) - y>>31
-	return remainder + remainder>>31&magnitude
+	magnitude := (y ^ y>>signShift) - y>>signShift
+	return remainder + remainder>>signShift&magnitude
 }
 
 // IntDivPositive and IntModPositive are IntDiv and IntMod for a divisor the
 // compiler knows to be a positive constant: Go divides by it with a multiply
 // and the Euclidean correction is one shift and add.
-func IntDivPositive(x int32, divisor int32) int32 {
-	return x/divisor + (x%divisor)>>31
+func IntDivPositive(x int, divisor int) int {
+	return x/divisor + (x%divisor)>>signShift
 }
 
-func IntModPositive(x int32, divisor int32) int32 {
+func IntModPositive(x int, divisor int) int {
 	remainder := x % divisor
-	return remainder + remainder>>31&divisor
+	return remainder + remainder>>signShift&divisor
 }
 
-// PureScript Int is a 32-bit integer; its Bounded instance pins the JS range.
-var TopInt = 2147483647
-var BottomInt = -2147483648
+// PureScript Int is Go's int, so its Bounded instance is int's range: 64 bits on
+// 64-bit targets, where JavaScript has 32.
+const TopInt = math.MaxInt
+const BottomInt = math.MinInt
 
 var TopNumber = math.Inf(1)
 var BottomNumber = math.Inf(-1)

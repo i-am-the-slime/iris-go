@@ -30,16 +30,16 @@ func ReadKey() string               { Unsupported("the terminal player"); return
 
 // Tauri.Native.TerminalGraphics.
 
-func TerminalGraphicsInspectSize() (int32, int32, int32, int32) {
+func TerminalGraphicsInspectSize() (int, int, int, int) {
 	Unsupported("terminal graphics")
 	return 0, 0, 0, 0
 }
 func TerminalGraphicsOpen() { Unsupported("terminal graphics") }
-func TerminalGraphicsSize() (int32, int32, int32, int32) {
+func TerminalGraphicsSize() (int, int, int, int) {
 	Unsupported("terminal graphics")
 	return 0, 0, 0, 0
 }
-func TerminalGraphicsPresent(_ any, _, _ int32) { Unsupported("terminal graphics") }
+func TerminalGraphicsPresent(_ any, _, _ int) { Unsupported("terminal graphics") }
 func TerminalGraphicsReadKey() string           { Unsupported("terminal graphics"); return "" }
 func TerminalGraphicsClose()                    {}
 
@@ -66,7 +66,7 @@ func Canvas(_ ...any) any {
 
 // SharedFrameInfo is Tauri.Native.SharedFrame.info (record fields byteLength,
 // height, id, name, width).
-func SharedFrameInfo(_ any) (int32, int32, int32, string, int32) {
+func SharedFrameInfo(_ any) (int, int, int, string, int) {
 	Unsupported("the shared-frame renderer")
 	return 0, 0, 0, "", 0
 }

@@ -18,29 +18,29 @@ const (
 
 // CanonicalDateImpl implements Data.Date.canonicalDateImpl: the date that
 // JavaScript normalises the year, month (1 to 12) and day to.
-func CanonicalDateImpl[D any](date func(int32, int32, int32) D, year, month, day int32) D {
+func CanonicalDateImpl[D any](date func(int, int, int) D, year, month, day int) D {
 	return date(components(createUTC(year, month-1, day, 0, 0, 0, 0)))
 }
 
 // CalcWeekday implements Data.Date.calcWeekday, the day of the week from
 // Sunday (0).
-func CalcWeekday(year, month, day int32) int32 {
+func CalcWeekday(year, month, day int) int {
 	t := createUTC(year, month-1, day, 0, 0, 0, 0)
 	if math.IsNaN(t) {
 		return 0
 	}
-	return int32(modulo(dayOf(t)+4, 7))
+	return int(modulo(dayOf(t)+4, 7))
 }
 
 // CalcDiff implements Data.Date.calcDiff, in milliseconds.
-func CalcDiff(year1, month1, day1, year2, month2, day2 int32) float64 {
+func CalcDiff(year1, month1, day1, year2, month2, day2 int) float64 {
 	return createUTC(year1, month1-1, day1, 0, 0, 0, 0) - createUTC(year2, month2-1, day2, 0, 0, 0, 0)
 }
 
 // createUTC is datetime's createUTC (createDate, createDateTime): the time
 // value of `Date.UTC` with the month counted from 0, and the years 0 to 99
 // taken literally.
-func createUTC(year, month, day, hour, minute, second, millisecond int32) float64 {
+func createUTC(year, month, day, hour, minute, second, millisecond int) float64 {
 	shifted := int64(year)
 	if 0 <= year && year < 100 {
 		shifted += 1900
@@ -60,7 +60,7 @@ func setUTCFullYear(t float64, year int64) float64 {
 	return timeClip(makeDate(day, t-float64(dayOf(t))*millisecondsPerDay))
 }
 
-func makeTime(hour, minute, second, millisecond int32) float64 {
+func makeTime(hour, minute, second, millisecond int) float64 {
 	return float64(hour)*3600000 + float64(minute)*60000 + float64(second)*1000 + float64(millisecond)
 }
 
@@ -125,12 +125,12 @@ func dayOf(t float64) int64 {
 // components reads a time value as getUTCFullYear, getUTCMonth + 1 and
 // getUTCDate do. On an invalid Date they are NaN, which an Int cannot hold,
 // so they are zero.
-func components(t float64) (int32, int32, int32) {
+func components(t float64) (int, int, int) {
 	if math.IsNaN(t) {
 		return 0, 0, 0
 	}
 	year, month, day := civilFromDays(dayOf(t))
-	return int32(year), int32(month), int32(day)
+	return int(year), int(month), int(day)
 }
 
 func floorDivide(a, b int64) int64 {

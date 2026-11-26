@@ -39,49 +39,49 @@ func IsLong_(value any) bool {
 }
 
 // fromBits concatenates the low and the high 32 bits.
-func fromBits[T Long](low int32, high int32) T {
+func fromBits[T Long](low int, high int) T {
 	return T(int64(high)<<32 | int64(uint32(low)))
 }
 
-func FromBits_Int64(low int32, high int32, _ bool) int64 { return fromBits[int64](low, high) }
+func FromBits_Int64(low int, high int, _ bool) int64 { return fromBits[int64](low, high) }
 
-func FromBits_UInt64(low int32, high int32, _ bool) uint64 { return fromBits[uint64](low, high) }
+func FromBits_UInt64(low int, high int, _ bool) uint64 { return fromBits[uint64](low, high) }
 
-func fromBytes[T Long](bytes []int32, littleEndian bool) T {
+func fromBytes[T Long](bytes []int, littleEndian bool) T {
 	if littleEndian {
 		return fromBytesLE[T](bytes)
 	}
 	return fromBytesBE[T](bytes)
 }
 
-func FromBytes_Int64(bytes []int32, _ bool, littleEndian bool) int64 {
+func FromBytes_Int64(bytes []int, _ bool, littleEndian bool) int64 {
 	return fromBytes[int64](bytes, littleEndian)
 }
 
-func FromBytes_UInt64(bytes []int32, _ bool, littleEndian bool) uint64 {
+func FromBytes_UInt64(bytes []int, _ bool, littleEndian bool) uint64 {
 	return fromBytes[uint64](bytes, littleEndian)
 }
 
 // fromBytesLE ORs the bytes into place as long.js does, with JavaScript's 32-bit `|` and `<<`.
-func fromBytesLE[T Long](b []int32) T {
+func fromBytesLE[T Long](b []int) T {
 	low := b[0] | b[1]<<8 | b[2]<<16 | b[3]<<24
 	high := b[4] | b[5]<<8 | b[6]<<16 | b[7]<<24
 	return fromBits[T](low, high)
 }
 
-func fromBytesBE[T Long](b []int32) T {
+func fromBytesBE[T Long](b []int) T {
 	low := b[4]<<24 | b[5]<<16 | b[6]<<8 | b[7]
 	high := b[0]<<24 | b[1]<<16 | b[2]<<8 | b[3]
 	return fromBits[T](low, high)
 }
 
-func FromBytesLE_Int64(bytes []int32, _ bool) int64 { return fromBytesLE[int64](bytes) }
+func FromBytesLE_Int64(bytes []int, _ bool) int64 { return fromBytesLE[int64](bytes) }
 
-func FromBytesLE_UInt64(bytes []int32, _ bool) uint64 { return fromBytesLE[uint64](bytes) }
+func FromBytesLE_UInt64(bytes []int, _ bool) uint64 { return fromBytesLE[uint64](bytes) }
 
-func FromBytesBE_Int64(bytes []int32, _ bool) int64 { return fromBytesBE[int64](bytes) }
+func FromBytesBE_Int64(bytes []int, _ bool) int64 { return fromBytesBE[int64](bytes) }
 
-func FromBytesBE_UInt64(bytes []int32, _ bool) uint64 { return fromBytesBE[uint64](bytes) }
+func FromBytesBE_UInt64(bytes []int, _ bool) uint64 { return fromBytesBE[uint64](bytes) }
 
 // FromNumber_Int64 truncates towards zero and saturates at the bounds; NaN is zero.
 func FromNumber_Int64(value float64, _ bool) int64 {
@@ -110,7 +110,7 @@ func FromNumber_UInt64(value float64, _ bool) uint64 {
 // radix outside 2 to 36, and reads "NaN" and the infinities as zero. Its digits wrap like the
 // multiplications and additions long.js builds the value from. A character that is not a digit of
 // the radix throws, where long.js passes it to parseInt (see documentation/go-output.md).
-func fromString[T Long](text string, radix int32) T {
+func fromString[T Long](text string, radix int) T {
 	if text == "" {
 		throw("empty string")
 	}
@@ -136,11 +136,11 @@ func fromString[T Long](text string, radix int32) T {
 	return T(value)
 }
 
-func FromString_Int64(text string, _ bool, radix int32) int64 {
+func FromString_Int64(text string, _ bool, radix int) int64 {
 	return fromString[int64](text, radix)
 }
 
-func FromString_UInt64(text string, _ bool, radix int32) uint64 {
+func FromString_UInt64(text string, _ bool, radix int) uint64 {
 	return fromString[uint64](text, radix)
 }
 
@@ -168,15 +168,15 @@ func FromValue_Int64(value any, _ bool) int64 { return fromValue(value, FromNumb
 
 func FromValue_UInt64(value any, _ bool) uint64 { return fromValue(value, FromNumber_UInt64) }
 
-func bitsField(value any, field string) int32 {
-	return foreignvalue.UnsafeReadPropImpl(func() int32 { return 0 }, func(bits any) int32 {
+func bitsField(value any, field string) int {
+	return foreignvalue.UnsafeReadPropImpl(func() int { return 0 }, func(bits any) int {
 		switch bits := bits.(type) {
 		case float64:
 			return toInt32(bits)
 		case int32:
-			return bits
+			return int(bits)
 		case int:
-			return int32(bits)
+			return bits
 		}
 		return 0
 	}, field, value)
@@ -211,7 +211,7 @@ func Modulo_[T Long](l T, divisor T) T {
 }
 
 // Compare_ is -1, 0 or 1.
-func Compare_[T Long](l T, other T) int32 {
+func Compare_[T Long](l T, other T) int {
 	switch {
 	case l < other:
 		return -1
@@ -222,28 +222,28 @@ func Compare_[T Long](l T, other T) int32 {
 }
 
 // GetNumBitsAbs is the number of bits of the absolute value, at least one.
-func GetNumBitsAbs[T Long](l T) int32 {
+func GetNumBitsAbs[T Long](l T) int {
 	magnitude := uint64(l)
 	if l < 0 {
 		magnitude = -magnitude
 	}
-	return int32(max(bits.Len64(magnitude), 1))
+	return int(max(bits.Len64(magnitude), 1))
 }
 
-func ToBytes_[T Long](l T, littleEndian bool) []int32 {
-	bytes := make([]int32, 8)
+func ToBytes_[T Long](l T, littleEndian bool) []int {
+	bytes := make([]int, 8)
 	for index := range bytes {
 		shift := 8 * index
 		if !littleEndian {
 			shift = 56 - shift
 		}
-		bytes[index] = int32(uint64(l) >> shift & 0xff)
+		bytes[index] = int(uint64(l) >> shift & 0xff)
 	}
 	return bytes
 }
 
 // ToString_ writes lowercase digits and a leading "-" for a negative signed Long.
-func ToString_[T Long](l T, radix int32) string {
+func ToString_[T Long](l T, radix int) string {
 	if radix < 2 || radix > 36 {
 		throwRange("radix")
 	}
@@ -256,23 +256,23 @@ func ToString_[T Long](l T, radix int32) string {
 // The PureScript-side helpers.
 
 // NumberBitsToInt is JavaScript's `x | 0`.
-func NumberBitsToInt(x float64) int32 { return toInt32(x) }
+func NumberBitsToInt(x float64) int { return toInt32(x) }
 
 func IsWholeNumber_(n float64) bool {
 	return !math.IsInf(n, 0) && !math.IsNaN(n) && n == math.Trunc(n)
 }
 
-func SafeReadLong_Int64(text string, _ bool, radix int32) *int64 {
+func SafeReadLong_Int64(text string, _ bool, radix int) *int64 {
 	return safeReadLong[int64](text, radix)
 }
 
-func SafeReadLong_UInt64(text string, _ bool, radix int32) *uint64 {
+func SafeReadLong_UInt64(text string, _ bool, radix int) *uint64 {
 	return safeReadLong[uint64](text, radix)
 }
 
 // safeReadLong reads an optionally signed number in the radix and is null unless it is in range.
 // A sign "-" is only allowed for a signed Long or zero, and leading zeros are skipped.
-func safeReadLong[T Long](text string, radix int32) *T {
+func safeReadLong[T Long](text string, radix int) *T {
 	unsigned := isUnsigned[T]()
 	negative := strings.HasPrefix(text, "-")
 	digits := text
@@ -305,7 +305,7 @@ func safeReadLong[T Long](text string, radix int32) *T {
 	return nil
 }
 
-func validDigits(digits string, radix int32) bool {
+func validDigits(digits string, radix int) bool {
 	for index := 0; index < len(digits); index++ {
 		if _, ok := digitValue(digits[index], radix); !ok {
 			return false
@@ -314,27 +314,27 @@ func validDigits(digits string, radix int32) bool {
 	return true
 }
 
-func digitValue(character byte, radix int32) (int32, bool) {
-	var digit int32
+func digitValue(character byte, radix int) (int, bool) {
+	var digit int
 	switch {
 	case '0' <= character && character <= '9':
-		digit = int32(character - '0')
+		digit = int(character - '0')
 	case 'a' <= character && character <= 'z':
-		digit = int32(character-'a') + 10
+		digit = int(character-'a') + 10
 	case 'A' <= character && character <= 'Z':
-		digit = int32(character-'A') + 10
+		digit = int(character-'A') + 10
 	default:
 		return 0, false
 	}
 	return digit, digit < radix
 }
 
-// toInt32 is ECMAScript ToInt32: truncate, then wrap modulo 2^32.
-func toInt32(n float64) int32 {
+// toInt32 is ECMAScript ToInt32: truncate, then wrap modulo 2^32, into an Int.
+func toInt32(n float64) int {
 	if math.IsNaN(n) || math.IsInf(n, 0) {
 		return 0
 	}
-	return int32(uint32(int64(math.Mod(math.Trunc(n), 1<<32))))
+	return int(int32(uint32(int64(math.Mod(math.Trunc(n), 1<<32)))))
 }
 
 func throw(message string) {

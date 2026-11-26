@@ -16,7 +16,7 @@ func Write(text string) {
 }
 
 // Exit implements Test.Spec.Runner.exit, `process.exit(code)`.
-func Exit(code int32) {
+func Exit(code int) {
 	os.Exit(int(code))
 }
 

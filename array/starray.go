@@ -39,13 +39,13 @@ func Freeze[A any](arr *[]A) []A {
 }
 
 // Length implements Data.Array.ST.lengthImpl.
-func Length[A any](arr *[]A) int32 {
-	return int32(len(*arr))
+func Length[A any](arr *[]A) int {
+	return int(len(*arr))
 }
 
 // Peek implements Data.Array.ST.peekImpl: the element at i, found when i is
 // in bounds.
-func Peek[A any](i int32, arr *[]A) (A, bool) {
+func Peek[A any](i int, arr *[]A) (A, bool) {
 	if i < 0 || int(i) >= len(*arr) {
 		var zero A
 		return zero, false
@@ -54,7 +54,7 @@ func Peek[A any](i int32, arr *[]A) (A, bool) {
 }
 
 // Poke implements Data.Array.ST.pokeImpl — reports whether i was in bounds.
-func Poke[A any](i int32, value A, arr *[]A) bool {
+func Poke[A any](i int, value A, arr *[]A) bool {
 	if i < 0 || int(i) >= len(*arr) {
 		return false
 	}
@@ -91,29 +91,26 @@ func Shift[A any](arr *[]A) (A, bool) {
 
 // PushAll implements Data.Array.ST.pushAllImpl — append, yielding the new
 // length.
-func PushAll[A any](values []A, arr *[]A) int32 {
-	room(len(*arr), len(values))
+func PushAll[A any](values []A, arr *[]A) int {
 	*arr = append(*arr, values...)
-	return int32(len(*arr))
+	return int(len(*arr))
 }
 
 // UnshiftAll implements Data.Array.ST.unshiftAllImpl — prepend, yielding the
 // new length.
-func UnshiftAll[A any](values []A, arr *[]A) int32 {
-	room(len(*arr), len(values))
+func UnshiftAll[A any](values []A, arr *[]A) int {
 	*arr = slices.Insert(*arr, 0, values...)
-	return int32(len(*arr))
+	return int(len(*arr))
 }
 
 // Splice implements Data.Array.ST.spliceImpl with JS Array.prototype.splice
 // semantics: a negative start counts from the end, both bounds clamp, and the
 // removed elements are returned.
-func Splice[A any](start int32, howMany int32, inserted []A, arr *[]A) []A {
+func Splice[A any](start int, howMany int, inserted []A, arr *[]A) []A {
 	n := len(*arr)
 	from := clampSpliceStart(int(start), n)
 	count := min(max(int(howMany), 0), n-from)
 	removed := copyOf((*arr)[from : from+count])
-	room(n-count, len(inserted))
 	*arr = slices.Replace(*arr, from, from+count, inserted...)
 	return removed
 }
@@ -127,13 +124,13 @@ func clampSpliceStart(start int, n int) int {
 
 // PeekUnsafe implements Data.Array.ST.Partial.peekImpl — the caller promised
 // i is in bounds.
-func PeekUnsafe[A any](i int32, arr *[]A) A {
+func PeekUnsafe[A any](i int, arr *[]A) A {
 	return (*arr)[i]
 }
 
 // PokeUnsafe implements Data.Array.ST.Partial.pokeImpl — the caller promised
 // i is in bounds.
-func PokeUnsafe[A any](i int32, value A, arr *[]A) {
+func PokeUnsafe[A any](i int, value A, arr *[]A) {
 	(*arr)[i] = value
 }
 

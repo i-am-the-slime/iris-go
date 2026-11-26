@@ -10,46 +10,46 @@ import (
 // without native code point support; generated code passes nil for it.
 
 // CodePointSingleton implements Data.String.CodePoints._singleton.
-func CodePointSingleton(_ any, codePoint int32) string {
-	return prim.RuneString(codePoint)
+func CodePointSingleton(_ any, codePoint int) string {
+	return prim.RuneString(rune(codePoint))
 }
 
 // CodePointsFromArray implements Data.String.CodePoints._fromCodePointArray.
-func CodePointsFromArray(_ any, codePoints []int32) string {
+func CodePointsFromArray(_ any, codePoints []int) string {
 	out := make([]byte, 0, len(codePoints))
 	for _, codePoint := range codePoints {
-		out = prim.AppendRune(out, codePoint)
+		out = prim.AppendRune(out, rune(codePoint))
 	}
 	return string(out)
 }
 
 // ToCodePointArray implements Data.String.CodePoints._toCodePointArray.
-func ToCodePointArray(_ any, _ any, s string) []int32 {
+func ToCodePointArray(_ any, _ any, s string) []int {
 	if prim.HasSurrogates(s) {
-		points := []int32{}
+		points := []int{}
 		for _, point := range prim.Characters(s) {
-			points = append(points, point)
+			points = append(points, int(point))
 		}
 		return points
 	}
-	points := make([]int32, 0, utf8.RuneCountInString(s))
+	points := make([]int, 0, utf8.RuneCountInString(s))
 	for _, point := range s {
-		points = append(points, point)
+		points = append(points, int(point))
 	}
 	return points
 }
 
 // CodePointLength is Data.String.CodePoints.length, which the compiler emits
 // in place of the length of _toCodePointArray's result.
-func CodePointLength(s string) int32 {
-	return int32(prim.CountCodePoints(s))
+func CodePointLength(s string) int {
+	return prim.CountCodePoints(s)
 }
 
 // CodePointLengthUpTo is min(CodePointLength(s), limit), counting no further
 // than limit: the compiler uses it where the length is only compared with
 // integers below limit.
-func CodePointLengthUpTo(limit int32, s string) int32 {
-	count := int32(0)
+func CodePointLengthUpTo(limit int, s string) int {
+	count := 0
 	for range prim.Characters(s) {
 		if count >= limit {
 			break
@@ -60,14 +60,14 @@ func CodePointLengthUpTo(limit int32, s string) int32 {
 }
 
 // CodePointAt implements Data.String.CodePoints._codePointAt.
-func CodePointAt(_ any, _ any, index int32, s string) (int32, bool) {
+func CodePointAt(_ any, _ any, index int, s string) (int, bool) {
 	if index < 0 {
 		return 0, false
 	}
-	seen := int32(0)
+	seen := 0
 	for _, point := range prim.Characters(s) {
 		if seen == index {
-			return point, true
+			return int(point), true
 		}
 		seen++
 	}
@@ -75,10 +75,10 @@ func CodePointAt(_ any, _ any, index int32, s string) (int32, bool) {
 }
 
 // CodePointCountPrefix implements Data.String.CodePoints._countPrefix.
-func CodePointCountPrefix(_ any, _ any, predicate func(int32) bool, s string) int32 {
-	count := int32(0)
+func CodePointCountPrefix(_ any, _ any, predicate func(int) bool, s string) int {
+	count := 0
 	for _, point := range prim.Characters(s) {
-		if !predicate(point) {
+		if !predicate(int(point)) {
 			break
 		}
 		count++
@@ -87,8 +87,8 @@ func CodePointCountPrefix(_ any, _ any, predicate func(int32) bool, s string) in
 }
 
 // CodePointTake implements Data.String.CodePoints._take.
-func CodePointTake(_ any, count int32, s string) string {
-	seen := int32(0)
+func CodePointTake(_ any, count int, s string) string {
+	seen := 0
 	for offset := range prim.Characters(s) {
 		if seen >= count {
 			return validPrefix(s[:offset])
@@ -99,12 +99,12 @@ func CodePointTake(_ any, count int32, s string) string {
 }
 
 // CodePointAt0 implements Data.String.CodePoints._unsafeCodePointAt0.
-func CodePointAt0(_ any, s string) int32 {
+func CodePointAt0(_ any, s string) int {
 	if s == "" {
 		panic("Data.String.CodePoints.unsafeCodePointAt0: empty string")
 	}
 	point, _ := prim.DecodeRune(s)
-	return point
+	return int(point)
 }
 
 // The functions above walk a string as JavaScript iterates one, by code
@@ -127,7 +127,7 @@ func validPrefix(prefix string) string {
 
 // SplitAt implements Data.String.CodeUnits.splitAt, returning the record fields
 // `after` and `before`. The index is clamped like String.prototype.substring.
-func SplitAt(index int32, s string) (string, string) {
+func SplitAt(index int, s string) (string, string) {
 	split := prim.CodeUnitSplitAt(index, s)
 	return split.After, split.Before
 }

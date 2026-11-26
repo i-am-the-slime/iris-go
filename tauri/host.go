@@ -192,7 +192,7 @@ func Platform() string {
 }
 
 // SleepMilliseconds implements Tauri.Native.sleepMilliseconds.
-func SleepMilliseconds(milliseconds int32) {
+func SleepMilliseconds(milliseconds int) {
 	if milliseconds < 0 {
 		throw("sleep duration must not be negative")
 	}
@@ -201,7 +201,7 @@ func SleepMilliseconds(milliseconds int32) {
 
 // TerminalSize implements Tauri.Native.terminalSize as the record fields
 // height and width: the controlling terminal's cells, or zero without one.
-func TerminalSize() (height int32, width int32) {
+func TerminalSize() (height int, width int) {
 	if !isTerminal(os.Stdin) && !isTerminal(os.Stdout) {
 		return 0, 0
 	}
@@ -209,7 +209,7 @@ func TerminalSize() (height int32, width int32) {
 	if err != nil {
 		throwIO(err)
 	}
-	return int32(rows), int32(columns)
+	return int(rows), int(columns)
 }
 
 // validUTF8 mirrors read_to_string, which rejects invalid UTF-8.

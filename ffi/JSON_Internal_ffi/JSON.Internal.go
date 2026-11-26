@@ -35,7 +35,7 @@ func X_parse[F any](left func(any) F, right func(any) F, text string) (result F)
 	return right(foreignvalue.ParseJSON(text))
 }
 
-func X_fromNumberWithDefault(fallback int32, n float64) any {
+func X_fromNumberWithDefault(fallback int, n float64) any {
 	if math.IsNaN(n) || math.IsInf(n, 0) {
 		return float64(fallback)
 	}
@@ -149,9 +149,9 @@ func X_lookup[F any](nothing F, just func(any) F, key string, target JObject) F 
 
 var Empty []any = []any{}
 
-func Length(array []any) int32 { return int32(len(array)) }
+func Length(array []any) int { return len(array) }
 
-func X_index[F any](nothing F, just func(any) F, index int32, array []any) F {
+func X_index[F any](nothing F, just func(any) F, index int, array []any) F {
 	if index >= 0 && int(index) < len(array) {
 		return just(array[index])
 	}

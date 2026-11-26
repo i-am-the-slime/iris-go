@@ -13,18 +13,18 @@ import (
 // configured sibling application with literal arguments in its own process
 // group, deliver the optional source on stdin, inherit output and wait. The
 // result is the ProcessResult fields code, stderr and success.
-func RunApplicationImpl(arguments []string, source *string) (int32, string, bool) {
+func RunApplicationImpl(arguments []string, source *string) (int, string, bool) {
 	return runApplication(arguments, source, false)
 }
 
 // RunApplicationTaskImpl implements Tauri.Native.runApplicationTaskImpl: like
 // RunApplicationImpl, but the task owns its process group, which is
 // terminated once the leader exits.
-func RunApplicationTaskImpl(arguments []string, source *string) (int32, string, bool) {
+func RunApplicationTaskImpl(arguments []string, source *string) (int, string, bool) {
 	return runApplication(arguments, source, true)
 }
 
-func runApplication(arguments []string, source *string, task bool) (int32, string, bool) {
+func runApplication(arguments []string, source *string, task bool) (int, string, bool) {
 	executable := applicationPath()
 	command := exec.Command(executable, arguments...)
 	command.Stdout = os.Stdout
@@ -45,7 +45,7 @@ func runApplication(arguments []string, source *string, task bool) (int32, strin
 		throw("waiting for " + executable + ": " + rustIOMessage(err))
 	}
 	state := command.ProcessState
-	code := int32(state.ExitCode())
+	code := int(state.ExitCode())
 	return code, "", state.Success()
 }
 

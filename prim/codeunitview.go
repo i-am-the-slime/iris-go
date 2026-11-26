@@ -20,12 +20,12 @@ import (
 // walked by those operations, so that their reading of it stays the only one.
 type CodeUnitsView struct {
 	text        string
-	asciiLength uint32
+	asciiLength uint
 	form        viewForm
 	// The code units of text, which a walk counts once, when the view is
-	// built. It wraps like int32(CodeUnitLength(text)) for text too long for
+	// built. It is CodeUnitLength(text), also for text too long for
 	// int32 offsets, where no method but Length reads it.
-	length int32
+	length int
 	// For wide text, the code units, and for each the byte offset of the
 	// character it belongs to, followed by len(text).
 	units  []uint16
@@ -48,12 +48,12 @@ func UTF16(text string) CodeUnitsView {
 	length, valid := codeUnitLengthUpTo(text, len(text))
 	switch {
 	case !valid || len(text) > math.MaxInt32 || HasSurrogates(text):
-		return CodeUnitsView{text: text, form: walkedForm, length: int32(length)}
+		return CodeUnitsView{text: text, form: walkedForm, length: int(length)}
 	case length == len(text):
-		return CodeUnitsView{text: text, asciiLength: uint32(length), form: asciiForm, length: int32(length)}
+		return CodeUnitsView{text: text, asciiLength: uint(length), form: asciiForm, length: int(length)}
 	}
 	units, starts := wideCodeUnits(text, length)
-	return CodeUnitsView{text: text, form: wideForm, length: int32(length), units: units, starts: starts}
+	return CodeUnitsView{text: text, form: wideForm, length: int(length), units: units, starts: starts}
 }
 
 // scalarWideCodeUnits is the code units of valid UTF-8 text holding length of
@@ -88,17 +88,17 @@ func (view *CodeUnitsView) ASCII() string {
 }
 
 // Length is CodeUnitLength.
-func (view *CodeUnitsView) Length() int32 {
+func (view *CodeUnitsView) Length() int {
 	return view.length
 }
 
 // CharAt is CodeUnitCharAt.
-func (view *CodeUnitsView) CharAt(i int32) (rune, bool) {
+func (view *CodeUnitsView) CharAt(i int) (rune, bool) {
 	return view.unitAt(int(i))
 }
 
 // UnsafeCharAt is CharAt, the code unit of Data.String.Unsafe.charAt.
-func (view *CodeUnitsView) UnsafeCharAt(i int32) rune {
+func (view *CodeUnitsView) UnsafeCharAt(i int) rune {
 	unit, ok := view.unitAt(int(i))
 	if !ok {
 		panic("Data.String.Unsafe.charAt: Invalid index.")
@@ -107,26 +107,26 @@ func (view *CodeUnitsView) UnsafeCharAt(i int32) rune {
 }
 
 // Take is CodeUnitTake.
-func (view *CodeUnitsView) Take(n int32) string {
+func (view *CodeUnitsView) Take(n int) string {
 	before, _ := view.split(int(n))
 	return before
 }
 
 // Drop is CodeUnitDrop.
-func (view *CodeUnitsView) Drop(n int32) string {
+func (view *CodeUnitsView) Drop(n int) string {
 	_, after := view.split(int(n))
 	return after
 }
 
 // Slice is CodeUnitSlice: Drop(begin, Take(end, text)), read off the view.
-func (view *CodeUnitsView) Slice(begin int32, end int32) string {
-	if uint32(begin) <= uint32(end) && uint32(end) <= view.asciiLength {
+func (view *CodeUnitsView) Slice(begin int, end int) string {
+	if uint(begin) <= uint(end) && uint(end) <= view.asciiLength {
 		return view.text[begin:end]
 	}
 	return view.slice(begin, end)
 }
 
-func (view *CodeUnitsView) slice(begin32 int32, end32 int32) string {
+func (view *CodeUnitsView) slice(begin32 int, end32 int) string {
 	begin, end := int(begin32), int(end32)
 	if view.form == walkedForm {
 		return sliceCodeUnits(begin, end, view.text)
@@ -148,7 +148,7 @@ func (view *CodeUnitsView) slice(begin32 int32, end32 int32) string {
 }
 
 // IndexOfStartingAt is CodeUnitIndexOfStartingAt.
-func (view *CodeUnitsView) IndexOfStartingAt(pattern string, startAt int32) (int32, bool) {
+func (view *CodeUnitsView) IndexOfStartingAt(pattern string, startAt int) (int, bool) {
 	if view.form == walkedForm || !utf8.ValidString(pattern) {
 		return CodeUnitIndexOfStartingAt(pattern, startAt, view.text)
 	}
@@ -163,24 +163,24 @@ func (view *CodeUnitsView) IndexOfStartingAt(pattern string, startAt int32) (int
 	if at < 0 {
 		return 0, false
 	}
-	return int32(view.unitStartingAt(after.offset + at)), true
+	return int(view.unitStartingAt(after.offset + at)), true
 }
 
 // LastIndexOfStartingAt is CodeUnitLastIndexOfStartingAt.
-func (view *CodeUnitsView) LastIndexOfStartingAt(pattern string, startAt int32) (int32, bool) {
+func (view *CodeUnitsView) LastIndexOfStartingAt(pattern string, startAt int) (int, bool) {
 	if view.form == walkedForm || !utf8.ValidString(pattern) {
 		return CodeUnitLastIndexOfStartingAt(pattern, startAt, view.text)
 	}
 	from := clampCodeUnit(int(startAt), int(view.length))
 	if pattern == "" {
-		return int32(from), true
+		return int(from), true
 	}
 	offset := view.start(from)
 	at := strings.LastIndex(view.text[:min(len(view.text), offset+len(pattern))], pattern)
 	if at < 0 {
 		return 0, false
 	}
-	return int32(view.unitStartingAt(at)), true
+	return int(view.unitStartingAt(at)), true
 }
 
 // The methods above rest on four readings of the view, for code unit

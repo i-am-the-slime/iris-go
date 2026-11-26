@@ -21,7 +21,7 @@ func TestCodeUnitsViewAgreesWithTheWalkingOperations(t *testing.T) {
 		if got := view.Length(); got != length {
 			t.Errorf("Length(%q) = %d, want %d", s, got, length)
 		}
-		for n := int32(-2); n <= length+2; n++ {
+		for n := int(-2); n <= length+2; n++ {
 			if got, want := maybeViewCharAt(view, n), maybeCharAt(n, s); got != want {
 				t.Errorf("CharAt(%d, %q) = %v, want %v", n, s, got, want)
 			}
@@ -54,11 +54,11 @@ func TestCodeUnitsViewAgreesWithTheWalkingOperations(t *testing.T) {
 func TestCodeUnitsViewUnsafeCharAtReadsSurrogatesAndPanicsOutOfRange(t *testing.T) {
 	view := UTF16(astral)
 	for i, want := range []rune{'a', 0xD83D, 0xDE00, 'b'} {
-		if got := view.UnsafeCharAt(int32(i)); got != want || got != CharAt(int32(i), astral) {
+		if got := view.UnsafeCharAt(int(i)); got != want || got != CharAt(int(i), astral) {
 			t.Errorf("UnsafeCharAt(%d) = %x, want %x", i, got, want)
 		}
 	}
-	for _, i := range []int32{-1, 4} {
+	for _, i := range []int{-1, 4} {
 		func() {
 			defer func() {
 				if recover() != "Data.String.Unsafe.charAt: Invalid index." {
@@ -99,7 +99,7 @@ func TestCodeUnitsViewASCIIIsTheTextOfBytesBelow0x80(t *testing.T) {
 			t.Errorf("ASCII(%q) = %q, want %q", s, ascii, want)
 		}
 		for i := 0; i < len(ascii); i++ {
-			if got, want := justChar(rune(ascii[i])), maybeViewCharAt(view, int32(i)); got != want {
+			if got, want := justChar(rune(ascii[i])), maybeViewCharAt(view, int(i)); got != want {
 				t.Errorf("ASCII(%q)[%d] = %v, CharAt gives %v", s, i, got, want)
 			}
 		}

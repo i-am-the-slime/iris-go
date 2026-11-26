@@ -20,7 +20,7 @@ func Reverse[T any](xs []T) []T {
 }
 
 // Replicate constructs an array containing n copies of value.
-func Replicate[T any](n int32, value T) []T {
+func Replicate[T any](n int, value T) []T {
 	if n <= 0 {
 		return []T{}
 	}
@@ -35,21 +35,19 @@ func Replicate[T any](n int32, value T) []T {
 // Range implements Data.Array.rangeImpl: every Int from start to end
 // inclusive, counting down when start exceeds end.
 func Range(start int, end int) []int {
-	step := 1
-	if start > end {
-		step = -1
+	step, count := RangeSteps(start, end)
+	out := make([]int, count)
+	value := start
+	for index := range out {
+		out[index] = value
+		value += step
 	}
-	out := make([]int, 0, Size(step*(end-start)+1))
-	for i := start; i != end; i += step {
-		out = append(out, i)
-	}
-	return append(out, end)
+	return out
 }
 
 // Snoc returns a new array with value appended, preserving PureScript array
 // immutability even when xs has spare capacity.
 func Snoc[T any](xs []T, value T) []T {
-	room(len(xs), 1)
 	out := make([]T, len(xs)+1)
 	copy(out, xs)
 	out[len(xs)] = value
@@ -127,14 +125,13 @@ func Bind[A, B any](xs []A, f func(A) []B) []B {
 	for _, x := range xs {
 		out = append(out, f(x)...)
 	}
-	return Bounded(out)
+	return out
 }
 
 // Concat implements Data.Array.concat (flatten one level).
 func Concat[T any](xss [][]T) []T {
 	total := 0
 	for _, xs := range xss {
-		room(total, len(xs))
 		total += len(xs)
 	}
 	out := make([]T, 0, total)
@@ -179,7 +176,6 @@ func GroupBy[T any](equal func(T, T) bool, xs []T) [][]T {
 // Append implements Data.Semigroup.concatArray — the `<>` on arrays, which
 // `cons` (`[x] <> xs`) also lowers to.
 func Append[T any](xs []T, ys []T) []T {
-	room(len(xs), len(ys))
 	out := make([]T, 0, len(xs)+len(ys))
 	out = append(out, xs...)
 	out = append(out, ys...)
@@ -237,12 +233,11 @@ func SortBy[T, O any](xs []T, comp func(T, T) O, isLess func(O) bool) []T {
 
 // InsertAt implements Data.Array._insertAt: a copy of xs with value at index,
 // found when index is within [0, len(xs)].
-func InsertAt[A any](index int32, value A, xs []A) ([]A, bool) {
+func InsertAt[A any](index int, value A, xs []A) ([]A, bool) {
 	at := int(index)
 	if at < 0 || at > len(xs) {
 		return nil, false
 	}
-	room(len(xs), 1)
 	result := make([]A, len(xs)+1)
 	copy(result, xs[:at])
 	result[at] = value
@@ -268,10 +263,9 @@ func UnsafeFreeze[A any](arr *[]A) []A {
 }
 
 // Push implements Data.Array.ST.pushImpl — append, yielding the new length.
-func Push[A any](x A, arr *[]A) int32 {
-	room(len(*arr), 1)
+func Push[A any](x A, arr *[]A) int {
 	*arr = append(*arr, x)
-	return int32(len(*arr))
+	return int(len(*arr))
 }
 
 // Slice implements Data.Array.sliceImpl start end xs, which is
@@ -279,7 +273,7 @@ func Push[A any](x A, arr *[]A) int32 {
 // [start, end) are shared with xs rather than copied, so take, drop, init and
 // the like take constant time. The view's capacity ends where it does, so an
 // append to it copies instead of writing into xs.
-func Slice[T any](start int32, end int32, xs []T) []T {
+func Slice[T any](start int, end int, xs []T) []T {
 	from, to := sliceIndex(start, len(xs)), sliceIndex(end, len(xs))
 	if from >= to {
 		return []T{}
@@ -294,7 +288,7 @@ func Tail[T any](xs []T) []T {
 }
 
 // sliceIndex resolves an Array.prototype.slice index against a length.
-func sliceIndex(index int32, length int) int {
+func sliceIndex(index int, length int) int {
 	if index < 0 {
 		return max(length+int(index), 0)
 	}
@@ -350,7 +344,6 @@ func Appender[B any]() func([]B, B) []B {
 		if len(bs) != len(last) || cap(bs) != cap(last) || (len(bs) > 0 && &bs[0] != &last[0]) {
 			bs = bs[:len(bs):len(bs)]
 		}
-		room(len(bs), 1)
 		last = append(bs, b)
 		return last
 	}
@@ -397,17 +390,16 @@ func Unfoldr[M, T, A, B any](
 			return out
 		}
 		pair := fromJust(next)
-		room(len(out), 1)
 		out = append(out, fst(pair))
 		seed = snd(pair)
 	}
 }
 
 // FindIndex implements Data.Array.findIndexImpl: the first matching index.
-func FindIndex[A any](predicate func(A) bool, xs []A) (int32, bool) {
+func FindIndex[A any](predicate func(A) bool, xs []A) (int, bool) {
 	for i, x := range xs {
 		if predicate(x) {
-			return int32(i), true
+			return int(i), true
 		}
 	}
 	return 0, false
@@ -426,10 +418,10 @@ func Find[A any](predicate func(A) bool, xs []A) (A, bool) {
 
 // FindLastIndex implements Data.Array.findLastIndexImpl: the last matching
 // index.
-func FindLastIndex[A any](predicate func(A) bool, xs []A) (int32, bool) {
+func FindLastIndex[A any](predicate func(A) bool, xs []A) (int, bool) {
 	for i := len(xs) - 1; i >= 0; i-- {
 		if predicate(xs[i]) {
-			return int32(i), true
+			return int(i), true
 		}
 	}
 	return 0, false

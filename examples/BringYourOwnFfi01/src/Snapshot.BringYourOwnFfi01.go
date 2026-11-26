@@ -4,8 +4,8 @@
 package Snapshot_BringYourOwnFfi01_ffi
 
 // TripleSum implements `foreign import tripleSum :: Array Int -> Int`.
-func TripleSum(xs []int32) int32 {
-	var s int32
+func TripleSum(xs []int) int {
+	var s int
 	for _, x := range xs {
 		s += x
 	}

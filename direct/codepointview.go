@@ -21,7 +21,7 @@ type CodePointsView struct {
 	valid bool
 	// For wide text, the code points, and the byte offset at which each
 	// starts.
-	points []int32
+	points []rune
 	starts []int32
 }
 
@@ -46,7 +46,7 @@ func CodePoints(text string) CodePointsView {
 	}
 	count := utf8.RuneCountInString(text)
 	valid := utf8.ValidString(text)
-	points := make([]int32, 0, count)
+	points := make([]rune, 0, count)
 	starts := make([]int32, 0, count)
 	for offset, point := range text {
 		points = append(points, point)
@@ -56,33 +56,33 @@ func CodePoints(text string) CodePointsView {
 }
 
 // Length is CodePointLength.
-func (view *CodePointsView) Length() int32 {
+func (view *CodePointsView) Length() int {
 	switch view.form {
 	case asciiPoints:
-		return int32(len(view.text))
+		return len(view.text)
 	case widePoints:
-		return int32(len(view.points))
+		return len(view.points)
 	default:
 		return CodePointLength(view.text)
 	}
 }
 
 // CodePointAt is CodePointAt.
-func (view *CodePointsView) CodePointAt(index int32) (int32, bool) {
+func (view *CodePointsView) CodePointAt(index int) (int, bool) {
 	switch {
 	case view.form == walkedPoints:
 		return CodePointAt(nil, nil, index, view.text)
 	case index < 0 || index >= view.Length():
 		return 0, false
 	case view.form == asciiPoints:
-		return int32(view.text[index]), true
+		return int(view.text[index]), true
 	default:
-		return view.points[index], true
+		return int(view.points[index]), true
 	}
 }
 
 // Take is CodePointTake.
-func (view *CodePointsView) Take(count int32) string {
+func (view *CodePointsView) Take(count int) string {
 	switch {
 	case view.form == walkedPoints:
 		return CodePointTake(nil, count, view.text)

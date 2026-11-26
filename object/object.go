@@ -192,8 +192,8 @@ func Size[A any](m *struct {
 	Ints  int
 	Keys  []string
 	Vals  []A
-}) int32 {
-	return int32(len(m.Keys))
+}) int {
+	return int(len(m.Keys))
 }
 
 // Lookup implements Foreign.Object._lookup: the value at k, found when the

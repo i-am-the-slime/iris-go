@@ -44,7 +44,6 @@ func Unfoldr1[M, T, A, B any](
 	out := []A{}
 	for {
 		pair := produce(seed)
-		room(len(out), 1)
 		out = append(out, fst(pair))
 		next := snd(pair)
 		if isNothing(next) {

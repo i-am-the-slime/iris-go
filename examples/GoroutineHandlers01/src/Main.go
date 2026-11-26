@@ -15,21 +15,21 @@ func OnTheEventLoop[A any](effect func() A) A {
 	return value
 }
 
-func ForEach(values []int32, each func(int32)) {
+func ForEach(values []int, each func(int)) {
 	for _, value := range values {
 		each(value)
 	}
 }
 
-func SortWith(compare func(int32) func(int32) int32, values []int32) []int32 {
+func SortWith(compare func(int) func(int) int, values []int) []int {
 	sorted := slices.Clone(values)
-	slices.SortFunc(sorted, func(a, b int32) int { return int(compare(a)(b)) })
+	slices.SortFunc(sorted, func(a, b int) int { return compare(a)(b) })
 	return sorted
 }
 
 func FanOut(
-	workers int32,
-	calls int32,
+	workers int,
+	calls int,
 	handler func(),
 	_ func(exception.Error),
 	succeeded func(struct{}),

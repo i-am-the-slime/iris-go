@@ -41,7 +41,7 @@ func codeUnitSamples() []string {
 
 var codeUnitPatterns = []string{"", "o", "oo", "a", "é", "日", "\U0001F600", "�", "\xff", "o\U0001F600", "ab", "\U0001F600a", "zz", "\xed\xa0\x80", "\xed\xb0\x80", "\xed\xa0\xbd", "\xed\xb8\x80a"}
 
-func wholeIndexOf(pattern string, startAt int32, s string) maybeInt {
+func wholeIndexOf(pattern string, startAt int, s string) maybeInt {
 	units := codeUnits(s)
 	if startAt < 0 || int(startAt) > len(units) {
 		return nothingInt
@@ -49,18 +49,18 @@ func wholeIndexOf(pattern string, startAt int32, s string) maybeInt {
 	needle := codeUnits(pattern)
 	for at := int(startAt); at+len(needle) <= len(units); at++ {
 		if codeUnitsMatchAt(units, needle, at) {
-			return justInt(int32(at))
+			return justInt(int(at))
 		}
 	}
 	return nothingInt
 }
 
-func wholeLastIndexOf(pattern string, startAt int32, s string) maybeInt {
+func wholeLastIndexOf(pattern string, startAt int, s string) maybeInt {
 	units := codeUnits(s)
 	return foundInt(lastIndexOfFrom(codeUnits(pattern), clampCodeUnit(int(startAt), len(units)), units))
 }
 
-func wholeSlice(begin int32, end int32, s string) string {
+func wholeSlice(begin int, end int, s string) string {
 	units := codeUnits(s)
 	from := sliceIndex(int(begin), len(units))
 	to := sliceIndex(int(end), len(units))
@@ -73,11 +73,11 @@ func wholeSlice(begin int32, end int32, s string) string {
 func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 	for _, s := range codeUnitSamples() {
 		units := codeUnits(s)
-		length := int32(len(units))
+		length := int(len(units))
 		if got := CodeUnitLength(s); got != length {
 			t.Errorf("CodeUnitLength(%q) = %d, want %d", s, got, len(units))
 		}
-		for limit := int32(0); limit <= length+1; limit++ {
+		for limit := int(0); limit <= length+1; limit++ {
 			if got := CodeUnitLengthUpTo(limit, s); got != min(length, limit) {
 				t.Errorf("CodeUnitLengthUpTo(%d, %q) = %d", limit, s, got)
 			}
@@ -102,7 +102,7 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 		}
 		for stop := 0; stop <= len(units); stop++ {
 			predicate := func(unit rune) bool { return unit != rune(units[min(stop, len(units)-1)]) || stop == len(units) }
-			want := int32(0)
+			want := int(0)
 			for want < length && predicate(rune(units[want])) {
 				want++
 			}
@@ -110,7 +110,7 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 				t.Errorf("CodeUnitCountPrefix(stop %d, %q) = %d, want %d", stop, s, got, want)
 			}
 		}
-		for i := int32(-2); i <= length+2; i++ {
+		for i := int(-2); i <= length+2; i++ {
 			want := nothingChar
 			if i >= 0 && i < length {
 				want = justChar(rune(units[i]))
@@ -126,7 +126,7 @@ func TestCodeUnitWalksAgreeWithTheWholeStringConversion(t *testing.T) {
 					t.Errorf("CodeUnitLastIndexOfStartingAt(%q, %d, %q) = %v, want %v", pattern, i, s, got, want)
 				}
 			}
-			for j := int32(-2); j <= length+2; j++ {
+			for j := int(-2); j <= length+2; j++ {
 				if got, want := CodeUnitSlice(i, j, s), wholeSlice(i, j, s); got != want {
 					t.Errorf("CodeUnitSlice(%d, %d, %q) = %q, want %q", i, j, s, got, want)
 				}
@@ -197,7 +197,7 @@ func BenchmarkCodeUnitLengthAscii(b *testing.B) {
 func BenchmarkCodeUnitCharAtAsciiEnd(b *testing.B) {
 	s := strings.Repeat("hello world ", 1000)
 	for b.Loop() {
-		CharAt(int32(len(s)-1), s)
+		CharAt(int(len(s)-1), s)
 	}
 }
 

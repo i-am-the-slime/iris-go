@@ -18,7 +18,7 @@ func mustCompile(t *testing.T, source string, flags string) *Regex {
 }
 
 // searched is String.prototype.search's result: -1 when nothing matches.
-func searched(index int32, found bool) int32 {
+func searched(index int, found bool) int {
 	if !found {
 		return -1
 	}
@@ -120,7 +120,7 @@ func TestPatternsRE2CannotExpressBacktrackAsJavaScriptDoes(t *testing.T) {
 	cases := []struct {
 		source, flags, input, replacement, replaced string
 		split                                       []string
-		search                                      int32
+		search                                      int
 	}{
 		{"(\\w)\\1", "g", "aabbcd", "<$&|$1>", "<aa|a><bb|b>cd", []string{"", "a", "", "b", "cd"}, 0},
 		{"(?<c>\\w)\\k<c>", "g", "xxyz", "[$<c>]", "[x]yz", []string{"", "x", "yz"}, 0},

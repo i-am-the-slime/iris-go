@@ -42,7 +42,7 @@ func TestParseAndStringifyAgreeWithRecordedJavaScript(t *testing.T) {
 
 func TestPrettyStringifyAgreesWithRecordedJavaScript(t *testing.T) {
 	for _, recorded := range recordedPretty {
-		if got := UnsafePrettyStringify(recorded.spaces, ParseJSON(recorded.input)); got != recorded.want {
+		if got := UnsafePrettyStringify(int(recorded.spaces), ParseJSON(recorded.input)); got != recorded.want {
 			t.Errorf("%s with %d spaces = %q, want %q", recorded.input, recorded.spaces, got, recorded.want)
 		}
 	}

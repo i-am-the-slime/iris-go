@@ -19,7 +19,7 @@ type trie[K, V any] struct {
 	collision bool
 }
 
-func mask(hash int32, shift uint) uint32 {
+func mask(hash int, shift uint) uint32 {
 	return 1 << ((uint32(hash) >> shift) & 31)
 }
 
@@ -35,7 +35,7 @@ func (t *trie[K, V]) isSingleton() bool {
 	return !t.collision && t.nodemap == 0 && len(t.keys) == 1
 }
 
-func binaryNode[K, V any](k1 K, h1 int32, v1 V, k2 K, h2 int32, v2 V, shift uint) *trie[K, V] {
+func binaryNode[K, V any](k1 K, h1 int, v1 V, k2 K, h2 int, v2 V, shift uint) *trie[K, V] {
 	if shift >= 32 {
 		return &trie[K, V]{keys: []K{k1, k2}, values: []V{v1, v2}, collision: true}
 	}
@@ -54,7 +54,7 @@ func binaryNode[K, V any](k1 K, h1 int32, v1 V, k2 K, h2 int32, v2 V, shift uint
 	return &trie[K, V]{nodemap: 1 << b1, nodes: []*trie[K, V]{child}}
 }
 
-func (t *trie[K, V]) lookup(equal func(K, K) bool, key K, hash int32, shift uint) (V, bool) {
+func (t *trie[K, V]) lookup(equal func(K, K) bool, key K, hash int, shift uint) (V, bool) {
 	var zero V
 	if t.collision {
 		for i, k := range t.keys {
@@ -111,10 +111,10 @@ func extendedOrReplaced[T any](items []T, at int, item T) []T {
 // calls combine with the value in the trie first.
 func (t *trie[K, V]) insertWith(
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(V, V) V,
 	key K,
-	keyHash int32,
+	keyHash int,
 	value V,
 	shift uint,
 ) *trie[K, V] {
@@ -184,9 +184,9 @@ func (t *trie[K, V]) insertWith(
 // An equal key already in a bitmapped node stays, one in a collision node is replaced.
 func (t *trie[K, V]) insertInPlace(
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	key K,
-	keyHash int32,
+	keyHash int,
 	value V,
 	shift uint,
 ) {
@@ -225,7 +225,7 @@ func (t *trie[K, V]) insertInPlace(
 	}
 }
 
-func (t *trie[K, V]) delete(equal func(K, K) bool, key K, keyHash int32, shift uint) *trie[K, V] {
+func (t *trie[K, V]) delete(equal func(K, K) bool, key K, keyHash int, shift uint) *trie[K, V] {
 	if t.collision {
 		i := 0
 		for ; i < len(t.keys); i++ {
@@ -364,7 +364,7 @@ func (t *trie[K, V]) equal(
 
 // hash is the JavaScript's hash of a node, which a collision node leaves unwrapped: it sums its
 // values' hashes, and the node above wraps the sum into an Int.
-func (t *trie[K, V]) hash(hashValue func(V) int32) int64 {
+func (t *trie[K, V]) hash(hashValue func(V) int) int64 {
 	if t.collision {
 		var sum int64
 		for _, v := range t.values {
@@ -372,12 +372,12 @@ func (t *trie[K, V]) hash(hashValue func(V) int32) int64 {
 		}
 		return sum
 	}
-	h := int32(t.datamap)
+	h := int(t.datamap)
 	for _, v := range t.values {
 		h = h*31 + hashValue(v)
 	}
 	for _, child := range t.nodes {
-		h = int32(int64(h)*31 + child.hash(hashValue))
+		h = int(int64(h)*31 + child.hash(hashValue))
 	}
 	return int64(h)
 }
@@ -460,7 +460,7 @@ func (t *trie[K, V]) nodeAt(bit uint32) *trie[K, V] {
 // unionWith combines the values of a key in both tries with combine, left value first.
 func (t *trie[K, V]) unionWith(
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(V, V) V,
 	other *trie[K, V],
 	shift uint,
@@ -553,7 +553,7 @@ func collisionOf[K, V any](keys []K, values []V) *trie[K, V] {
 
 func intersectTries[K, A, B, C any](
 	equal func(K, K) bool,
-	hash func(K) int32,
+	hash func(K) int,
 	combine func(A, B) C,
 	left *trie[K, A],
 	right *trie[K, B],

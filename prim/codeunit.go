@@ -135,8 +135,8 @@ func allAscii(word uint64) bool {
 	return word&0x8080808080808080 == 0
 }
 
-func asciiThroughFirstOrSecond(s string, last int32) bool {
-	return uint32(last) < 2 && int(last) < len(s) && s[0]|s[last] < utf8.RuneSelf
+func asciiThroughFirstOrSecond(s string, last int) bool {
+	return uint(last) < 2 && last < len(s) && s[0]|s[last] < utf8.RuneSelf
 }
 
 func shortASCIIPrefix(s string, n int) bool {
@@ -160,7 +160,7 @@ func fourBytes(s string, at int) uint32 {
 	return uint32(s[0]) | uint32(s[1])<<8 | uint32(s[2])<<16 | uint32(s[3])<<24
 }
 
-func plainIndex(pattern string, s string) (index int32, decided bool) {
+func plainIndex(pattern string, s string) (index int, decided bool) {
 	if pattern == "" || !plainPattern(pattern) {
 		return 0, false
 	}
@@ -168,7 +168,7 @@ func plainIndex(pattern string, s string) (index int32, decided bool) {
 	if at < 0 {
 		return -1, true
 	}
-	return int32(codeUnitLength(s[:at])), true
+	return int(codeUnitLength(s[:at])), true
 }
 
 func plainPattern(pattern string) bool {

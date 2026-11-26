@@ -12,12 +12,12 @@ import (
 // testdata/generate.js.
 type cases struct {
 	Dates []struct {
-		Y, M, D       int32
+		Y, M, D       int
 		Canonical     []string
 		Weekday, Diff string
 	}
 	Instants []struct {
-		Y, M, D, H, Mi, S, Ms int32
+		Y, M, D, H, Mi, S, Ms int
 		Instant               string
 	}
 	Diffs []struct {
@@ -36,7 +36,7 @@ type cases struct {
 }
 
 type record struct {
-	Year, Month, Day, Hour, Minute, Second, Millisecond int32
+	Year, Month, Day, Hour, Minute, Second, Millisecond int
 }
 
 func load(t *testing.T) cases {
@@ -71,7 +71,7 @@ func sameNumber(t *testing.T, got float64, text string) bool {
 
 // sameInt compares an Int result. JavaScript passes NaN where the Date is
 // invalid; an Int cannot hold it, so Go passes zero.
-func sameInt(t *testing.T, got int32, text string) bool {
+func sameInt(t *testing.T, got int, text string) bool {
 	if text == "NaN" {
 		return got == 0
 	}
@@ -80,7 +80,7 @@ func sameInt(t *testing.T, got int32, text string) bool {
 
 func TestDatesMatchJavaScript(t *testing.T) {
 	for _, c := range load(t).Dates {
-		parts := CanonicalDateImpl(func(y, m, d int32) []int32 { return []int32{y, m, d} }, c.Y, c.M, c.D)
+		parts := CanonicalDateImpl(func(y, m, d int) []int { return []int{y, m, d} }, c.Y, c.M, c.D)
 		for index, part := range parts {
 			if !sameInt(t, part, c.Canonical[index]) {
 				t.Errorf("canonicalDate %d %d %d = %v, JavaScript %v", c.Y, c.M, c.D, parts, c.Canonical)
@@ -100,7 +100,7 @@ func TestInstantsMatchJavaScript(t *testing.T) {
 		}
 	}
 	for _, c := range load(t).ToDateTimes {
-		parts := ToDateTimeImpl(func(y, mo, d, h, mi, s, ms int32) []int32 { return []int32{y, mo, d, h, mi, s, ms} }, number(t, c.Instant))
+		parts := ToDateTimeImpl(func(y, mo, d, h, mi, s, ms int) []int { return []int{y, mo, d, h, mi, s, ms} }, number(t, c.Instant))
 		for index, part := range parts {
 			if !sameInt(t, part, c.Parts[index]) {
 				t.Errorf("toDateTime %s = %v, JavaScript %v", c.Instant, parts, c.Parts)

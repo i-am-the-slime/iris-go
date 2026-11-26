@@ -156,7 +156,7 @@ func TestSpliceAndUnshiftAllReuseSpareCapacity(t *testing.T) {
 
 func TestSpliceFollowsJavaScriptBounds(t *testing.T) {
 	for _, c := range []struct {
-		start, count  int32
+		start, count  int
 		inserted      []int
 		removed, rest []int
 	}{
@@ -183,7 +183,7 @@ func TestUnsafeAccess(t *testing.T) {
 }
 
 func TestIndicesTakeTheExtremeInts(t *testing.T) {
-	const top, bottom int32 = math.MaxInt32, math.MinInt32
+	const top, bottom int = math.MaxInt32, math.MinInt32
 	xs := []int{1, 2, 3}
 	if got := Slice(bottom, top, xs); !reflect.DeepEqual(got, xs) {
 		t.Errorf("Slice(bottom, top) = %v", got)
@@ -195,7 +195,7 @@ func TestIndicesTakeTheExtremeInts(t *testing.T) {
 		t.Errorf("Replicate(bottom) = %v", got)
 	}
 	arr := Thaw(xs)
-	for _, i := range []int32{bottom, -1, 3, top} {
+	for _, i := range []int{bottom, -1, 3, top} {
 		if got, found := Peek(i, arr); found {
 			t.Errorf("Peek(%d) = %v", i, got)
 		}

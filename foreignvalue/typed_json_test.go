@@ -6,7 +6,7 @@ import (
 )
 
 type point struct {
-	X    int32
+	X    int
 	Tags []string
 }
 

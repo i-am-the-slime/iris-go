@@ -13,7 +13,7 @@ func TestCodePointsViewAgreesWithTheWalkingOperations(t *testing.T) {
 		if got := view.Length(); got != length {
 			t.Errorf("Length(%q) = %d, want %d", s, got, length)
 		}
-		for index := int32(-2); index <= int32(length)+2; index++ {
+		for index := int(-2); index <= int(length)+2; index++ {
 			if got, want := foundPoint(view.CodePointAt(index)), foundPoint(CodePointAt(nil, nil, index, s)); got != want {
 				t.Errorf("CodePointAt(%d, %q) = %v, want %v", index, s, got, want)
 			}

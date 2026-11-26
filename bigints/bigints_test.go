@@ -16,7 +16,7 @@ import (
 // testdata/generate.js.
 type cases struct {
 	FromBase []struct {
-		Base         int32
+		Base         int
 		Text, Result string
 	}
 	FromNumber []struct{ Number, Result string }
@@ -30,7 +30,7 @@ type cases struct {
 		Left, Right string
 		Results     []string
 		Equals      bool
-		Compare     int32
+		Compare     int
 	}
 	Powers []struct{ Base, Exponent, Result string }
 	Primes []struct {
@@ -117,14 +117,14 @@ func TestFromNumberTruncates(t *testing.T) {
 	}
 }
 
-var bases = []int32{10, 2, 8, 16, 36, 1, 0, -1, -2, -10, 37, 100, 3, -16, 62, 5, 7}
+var bases = []int{10, 2, 8, 16, 36, 1, 0, -1, -2, -10, 37, 100, 3, -16, 62, 5, 7}
 
-var digitBases = []int32{2, 10, 16, 100, -3, 1, 0}
+var digitBases = []int{2, 10, 16, 100, -3, 1, 0}
 
 var shifts = []float64{0, 1, 7, 63, 64, 65, 200, -1, -7, -64, -200, 1.5, math.NaN(), math.Inf(1), 1e7, 10000001, -1e8}
 
 type digits struct {
-	Value      []int32 `json:"value"`
+	Value      []int `json:"value"`
 	IsNegative bool    `json:"isNegative"`
 }
 

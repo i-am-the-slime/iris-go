@@ -18,8 +18,8 @@ func UnsafeStringify(value any) string {
 
 // UnsafePrettyStringify implements Yoga.JSON._unsafePrettyStringify:
 // `JSON.stringify(value, null, spaces)` (at most ten spaces of indent).
-func UnsafePrettyStringify(spaces int32, value any) string {
-	return stringify(value, strings.Repeat(" ", int(max(0, min(spaces, 10)))))
+func UnsafePrettyStringify(spaces int, value any) string {
+	return stringify(value, strings.Repeat(" ", max(0, min(spaces, 10))))
 }
 
 // A jsonWriter appends JSON.stringify's text for the Foreign representations

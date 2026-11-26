@@ -19,7 +19,7 @@ func TestInsertAt(t *testing.T) {
 }
 
 func TestInsertAtBounds(t *testing.T) {
-	for _, index := range []int32{-1, 3} {
+	for _, index := range []int{-1, 3} {
 		if result, found := InsertAt(index, 9, []int{1, 2}); found {
 			t.Fatalf("InsertAt(%d) unexpectedly succeeded: %#v", index, result)
 		}
@@ -57,18 +57,18 @@ func TestRangeCountsInclusivelyInEitherDirection(t *testing.T) {
 }
 
 func TestSliceCountsNegativeIndicesFromTheEnd(t *testing.T) {
-	xs := []int32{3, 1, 2}
+	xs := []int{3, 1, 2}
 	cases := []struct {
-		start, end int32
-		want       []int32
+		start, end int
+		want       []int
 	}{
-		{-2, 1, []int32{}},
-		{0, -2, []int32{3}},
-		{-2, 7, []int32{1, 2}},
-		{1, -1, []int32{1}},
-		{-5, -1, []int32{3, 1}},
-		{-1, -2, []int32{}},
-		{1, 100, []int32{1, 2}},
+		{-2, 1, []int{}},
+		{0, -2, []int{3}},
+		{-2, 7, []int{1, 2}},
+		{1, -1, []int{1}},
+		{-5, -1, []int{3, 1}},
+		{-1, -2, []int{}},
+		{1, 100, []int{1, 2}},
 	}
 	for _, c := range cases {
 		if got := Slice(c.start, c.end, xs); !slices.Equal(got, c.want) {
@@ -78,9 +78,9 @@ func TestSliceCountsNegativeIndicesFromTheEnd(t *testing.T) {
 }
 
 func TestTailIsSliceFromOneAndAppendsWithoutWritingIntoTheArray(t *testing.T) {
-	for _, xs := range [][]int32{{7}, {7, 8}, {3, 1, 2}} {
+	for _, xs := range [][]int{{7}, {7, 8}, {3, 1, 2}} {
 		tail := Tail(xs)
-		if !slices.Equal(tail, Slice(1, int32(len(xs)), xs)) || cap(tail) != len(tail) {
+		if !slices.Equal(tail, Slice(1, int(len(xs)), xs)) || cap(tail) != len(tail) {
 			t.Errorf("Tail(%v) = %v with capacity %d", xs, tail, cap(tail))
 		}
 		_ = append(tail, 9)
@@ -91,7 +91,7 @@ func TestTailIsSliceFromOneAndAppendsWithoutWritingIntoTheArray(t *testing.T) {
 }
 
 func TestSliceSharesElementsInConstantTime(t *testing.T) {
-	xs := []int32{1, 2, 3, 4, 5}
+	xs := []int{1, 2, 3, 4, 5}
 	middle := Slice(1, 4, xs)
 	if &middle[0] != &xs[1] {
 		t.Fatal("Slice copied the elements")
@@ -102,36 +102,36 @@ func TestSliceSharesElementsInConstantTime(t *testing.T) {
 }
 
 func TestAppendingToASliceLeavesTheArrayItCameFrom(t *testing.T) {
-	xs := []int32{1, 2, 3, 4, 5}
+	xs := []int{1, 2, 3, 4, 5}
 	front := Slice(0, 2, xs)
 	grown := append(front, 9)
 	extended := Snoc(Slice(1, 3, xs), 8)
-	if !slices.Equal(xs, []int32{1, 2, 3, 4, 5}) {
+	if !slices.Equal(xs, []int{1, 2, 3, 4, 5}) {
 		t.Fatalf("xs=%v", xs)
 	}
-	if !slices.Equal(grown, []int32{1, 2, 9}) || !slices.Equal(extended, []int32{2, 3, 8}) {
+	if !slices.Equal(grown, []int{1, 2, 9}) || !slices.Equal(extended, []int{2, 3, 8}) {
 		t.Fatalf("grown=%v extended=%v", grown, extended)
 	}
 }
 
 func TestAppendingInPlaceToAnArrayLeavesItsSlices(t *testing.T) {
-	xs := make([]int32, 3, 8)
-	copy(xs, []int32{1, 2, 3})
+	xs := make([]int, 3, 8)
+	copy(xs, []int{1, 2, 3})
 	front, back := Slice(0, 3, xs), Slice(1, 3, xs)
 	xs = append(xs, 4)
 	front = append(front, 7)
-	if !slices.Equal(xs, []int32{1, 2, 3, 4}) || !slices.Equal(front, []int32{1, 2, 3, 7}) {
+	if !slices.Equal(xs, []int{1, 2, 3, 4}) || !slices.Equal(front, []int{1, 2, 3, 7}) {
 		t.Fatalf("xs=%v front=%v", xs, front)
 	}
-	if !slices.Equal(back, []int32{2, 3}) {
+	if !slices.Equal(back, []int{2, 3}) {
 		t.Fatalf("back=%v", back)
 	}
 }
 
 func TestUnconsSharesTheTailWithoutItsCapacity(t *testing.T) {
-	xs := make([]int32, 3, 8)
-	copy(xs, []int32{1, 2, 3})
-	tail := Uncons(nil, func(_ int32, rest []int32) []int32 { return rest }, xs)
+	xs := make([]int, 3, 8)
+	copy(xs, []int{1, 2, 3})
+	tail := Uncons(nil, func(_ int, rest []int) []int { return rest }, xs)
 	if &tail[0] != &xs[1] || cap(tail) != len(tail) {
 		t.Fatalf("tail=%v cap=%d", tail, cap(tail))
 	}
@@ -142,18 +142,18 @@ func TestUnconsSharesTheTailWithoutItsCapacity(t *testing.T) {
 }
 
 func TestSliceAtTheEdges(t *testing.T) {
-	empty := []int32{}
+	empty := []int{}
 	for _, c := range []struct {
-		start, end int32
-		xs, want   []int32
+		start, end int
+		xs, want   []int
 	}{
-		{0, 0, empty, []int32{}},
-		{0, 3, empty, []int32{}},
-		{-1, 1, empty, []int32{}},
-		{3, 3, []int32{1, 2, 3}, []int32{}},
-		{0, 3, []int32{1, 2, 3}, []int32{1, 2, 3}},
-		{2, 1, []int32{1, 2, 3}, []int32{}},
-		{-2147483648, 2147483647, []int32{1, 2, 3}, []int32{1, 2, 3}},
+		{0, 0, empty, []int{}},
+		{0, 3, empty, []int{}},
+		{-1, 1, empty, []int{}},
+		{3, 3, []int{1, 2, 3}, []int{}},
+		{0, 3, []int{1, 2, 3}, []int{1, 2, 3}},
+		{2, 1, []int{1, 2, 3}, []int{}},
+		{-2147483648, 2147483647, []int{1, 2, 3}, []int{1, 2, 3}},
 	} {
 		got := Slice(c.start, c.end, c.xs)
 		if got == nil || !slices.Equal(got, c.want) {
@@ -163,17 +163,17 @@ func TestSliceAtTheEdges(t *testing.T) {
 }
 
 func TestConcatMakesOneArrayOfEveryElement(t *testing.T) {
-	got := Concat([][]int32{{1, 2}, {}, {3}, {4, 5, 6}})
-	if !slices.Equal(got, []int32{1, 2, 3, 4, 5, 6}) || cap(got) != len(got) {
+	got := Concat([][]int{{1, 2}, {}, {3}, {4, 5, 6}})
+	if !slices.Equal(got, []int{1, 2, 3, 4, 5, 6}) || cap(got) != len(got) {
 		t.Fatalf("Concat = %v with capacity %d", got, cap(got))
 	}
-	if empty := Concat([][]int32{}); empty == nil || len(empty) != 0 {
+	if empty := Concat([][]int{}); empty == nil || len(empty) != 0 {
 		t.Fatalf("Concat of nothing = %#v", empty)
 	}
 }
 
 func TestNubComparableKeepsFirstOccurrencesInOrder(t *testing.T) {
-	if got := NubComparable([]int32{3, 1, 3, 2, 1, 4, 2}); !slices.Equal(got, []int32{3, 1, 2, 4}) {
+	if got := NubComparable([]int{3, 1, 3, 2, 1, 4, 2}); !slices.Equal(got, []int{3, 1, 2, 4}) {
 		t.Fatalf("NubComparable = %v", got)
 	}
 	if got := NubComparable([]string{"b", "a", "b", ""}); !slices.Equal(got, []string{"b", "a", ""}) {
@@ -185,10 +185,10 @@ func TestNubComparableKeepsFirstOccurrencesInOrder(t *testing.T) {
 }
 
 func TestGroupByComparesWithTheFirstOfEachRun(t *testing.T) {
-	xs := []int32{1, 2, 3, 7, 8, 1, 1}
-	within := func(first int32, x int32) bool { return x >= first && x-first < 3 }
+	xs := []int{1, 2, 3, 7, 8, 1, 1}
+	within := func(first int, x int) bool { return x >= first && x-first < 3 }
 	groups := GroupBy(within, xs)
-	want := [][]int32{{1, 2, 3}, {7, 8}, {1, 1}}
+	want := [][]int{{1, 2, 3}, {7, 8}, {1, 1}}
 	if !reflect.DeepEqual(groups, want) {
 		t.Fatalf("GroupBy = %v, want %v", groups, want)
 	}
@@ -197,10 +197,10 @@ func TestGroupByComparesWithTheFirstOfEachRun(t *testing.T) {
 			t.Fatalf("group %v keeps capacity %d", group, cap(group))
 		}
 	}
-	if grown := append(groups[0], 9); xs[3] != 7 || !slices.Equal(grown, []int32{1, 2, 3, 9}) {
+	if grown := append(groups[0], 9); xs[3] != 7 || !slices.Equal(grown, []int{1, 2, 3, 9}) {
 		t.Fatalf("an append to a group wrote into xs: %v", xs)
 	}
-	if empty := GroupBy(within, []int32{}); empty == nil || len(empty) != 0 {
+	if empty := GroupBy(within, []int{}); empty == nil || len(empty) != 0 {
 		t.Fatalf("GroupBy of nothing = %#v", empty)
 	}
 }

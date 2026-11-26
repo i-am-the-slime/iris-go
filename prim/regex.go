@@ -78,7 +78,7 @@ func RegexFlags(rx RegexValue) struct {
 	}
 }
 
-func RegexSearch(rx RegexValue, value string) (int32, bool) {
+func RegexSearch(rx RegexValue, value string) (int, bool) {
 	return regex.Search(compiled(rx), value)
 }
 

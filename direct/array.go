@@ -1,14 +1,10 @@
 // Package direct implements PureScript foreigns for the Iris Go backend, whose
-// representation differs from the rest of go-support: Int is int32, and a
+// representation differs from the rest of go-support: Int is Go's int, and a
 // function `a -> Effect b` is a Go `func(A) B` that performs its effects when
 // called, so effectful callbacks are invoked directly rather than as thunks.
 package direct
 
-import (
-	"slices"
-
-	"github.com/i-am-the-slime/iris-go/array"
-)
+import "slices"
 
 // All implements Data.Array.allImpl.
 func All[A any](predicate func(A) bool, xs []A) bool {
@@ -67,7 +63,7 @@ func mergeFromTo[A any](compare func(A, A) int, into []A, scratch []A, from int,
 }
 
 // DeleteAt implements Data.Array._deleteAt.
-func DeleteAt[A any](index int32, xs []A) ([]A, bool) {
+func DeleteAt[A any](index int, xs []A) ([]A, bool) {
 	if index < 0 || int(index) >= len(xs) {
 		return nil, false
 	}
@@ -75,10 +71,10 @@ func DeleteAt[A any](index int32, xs []A) ([]A, bool) {
 }
 
 // MapWithIndex implements Data.FunctorWithIndex.mapWithIndexArray.
-func MapWithIndex[A, B any](f func(int32, A) B, xs []A) []B {
+func MapWithIndex[A, B any](f func(int, A) B, xs []A) []B {
 	mapped := make([]B, len(xs))
 	for index, x := range xs {
-		mapped[index] = f(int32(index), x)
+		mapped[index] = f(int(index), x)
 	}
 	return mapped
 }
@@ -109,7 +105,7 @@ func SequenceArray[A any](effects []func() A) []A {
 
 // CompareArray implements Data.Ord.ordArrayImpl, whose deltas are inverted: a
 // longer array yields -1.
-func CompareArray[A any](compare func(A, A) int32, xs []A, ys []A) int32 {
+func CompareArray[A any](compare func(A, A) int, xs []A, ys []A) int {
 	for index := 0; index < len(xs) && index < len(ys); index++ {
 		if ordering := compare(xs[index], ys[index]); ordering != 0 {
 			return ordering
@@ -167,5 +163,5 @@ func FromFoldable[A, F any](
 	for list := foldr(cons)(nil)(xs); list != nil; list = list.Tail {
 		elements = append(elements, list.Head)
 	}
-	return array.Bounded(elements)
+	return elements
 }

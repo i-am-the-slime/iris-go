@@ -9,10 +9,10 @@ import (
 
 type maybeInt struct {
 	just  bool
-	value int32
+	value int
 }
 
-func justInt(i int32) maybeInt { return maybeInt{just: true, value: i} }
+func justInt(i int) maybeInt { return maybeInt{just: true, value: i} }
 
 var nothingInt = maybeInt{}
 
@@ -25,7 +25,7 @@ func justChar(c rune) maybeChar { return maybeChar{just: true, value: c} }
 
 var nothingChar = maybeChar{}
 
-func foundInt(i int32, found bool) maybeInt {
+func foundInt(i int, found bool) maybeInt {
 	if !found {
 		return nothingInt
 	}
@@ -41,7 +41,7 @@ func foundChar(c rune, found bool) maybeChar {
 
 // The operations below answer as the PureScript functions do, with a Maybe.
 
-func maybeCharAt(i int32, s string) maybeChar { return foundChar(CodeUnitCharAt(i, s)) }
+func maybeCharAt(i int, s string) maybeChar { return foundChar(CodeUnitCharAt(i, s)) }
 
 func maybeToChar(s string) maybeChar { return foundChar(CodeUnitToChar(s)) }
 
@@ -49,7 +49,7 @@ func maybeIndexOf(pattern string, s string) maybeInt {
 	return foundInt(CodeUnitIndexOf(pattern, s))
 }
 
-func maybeIndexOfStartingAt(pattern string, startAt int32, s string) maybeInt {
+func maybeIndexOfStartingAt(pattern string, startAt int, s string) maybeInt {
 	return foundInt(CodeUnitIndexOfStartingAt(pattern, startAt, s))
 }
 
@@ -57,19 +57,19 @@ func maybeLastIndexOf(pattern string, s string) maybeInt {
 	return foundInt(CodeUnitLastIndexOf(pattern, s))
 }
 
-func maybeLastIndexOfStartingAt(pattern string, startAt int32, s string) maybeInt {
+func maybeLastIndexOfStartingAt(pattern string, startAt int, s string) maybeInt {
 	return foundInt(CodeUnitLastIndexOfStartingAt(pattern, startAt, s))
 }
 
 func maybeSearch(rx RegexValue, s string) maybeInt { return foundInt(RegexSearch(rx, s)) }
 
-func maybeViewCharAt(view CodeUnitsView, i int32) maybeChar { return foundChar(view.CharAt(i)) }
+func maybeViewCharAt(view CodeUnitsView, i int) maybeChar { return foundChar(view.CharAt(i)) }
 
-func maybeViewIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int32) maybeInt {
+func maybeViewIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int) maybeInt {
 	return foundInt(view.IndexOfStartingAt(pattern, startAt))
 }
 
-func maybeViewLastIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int32) maybeInt {
+func maybeViewLastIndexOfStartingAt(view CodeUnitsView, pattern string, startAt int) maybeInt {
 	return foundInt(view.LastIndexOfStartingAt(pattern, startAt))
 }
 
@@ -236,11 +236,11 @@ func TestCodeUnitOperationsWalkingThePrefixMatchUTF16(t *testing.T) {
 	decode := func(units []uint16) string { return referenceString(units) }
 	for _, s := range []string{"", "plain ascii", "café → naïve", "a\U0001F600b\U0001F680", "\U0001F600", "é\U0001F600é"} {
 		units := referenceUnits(s)
-		length := int32(len(units))
+		length := int(len(units))
 		if got := CodeUnitLength(s); got != length {
 			t.Errorf("CodeUnitLength(%q) = %d, want %d", s, got, len(units))
 		}
-		for n := int32(-1); n <= length+1; n++ {
+		for n := int(-1); n <= length+1; n++ {
 			at := clampCodeUnit(int(n), len(units))
 			if got, want := CodeUnitTake(n, s), decode(units[:at]); got != want {
 				t.Errorf("CodeUnitTake(%d, %q) = %q, want %q", n, s, got, want)
@@ -269,7 +269,7 @@ func TestCodeUnitOperationsMeetingInvalidUTF8ConvertTheWholeString(t *testing.T)
 	if got, want := CodeUnitDrop(3, s), referenceString(units[3:]); got != want {
 		t.Errorf("CodeUnitDrop = %q, want %q", got, want)
 	}
-	if got := CodeUnitLength(s); got != int32(len(units)) {
+	if got := CodeUnitLength(s); got != int(len(units)) {
 		t.Errorf("CodeUnitLength = %d, want %d", got, len(units))
 	}
 	if got := CharAt(3, s); got != rune(units[3]) {
@@ -305,10 +305,10 @@ func TestCompareStringFollowsUtf16CodeUnits(t *testing.T) {
 }
 
 func TestCodeUnitOperationsTakeTheExtremeInts(t *testing.T) {
-	const top, bottom int32 = math.MaxInt32, math.MinInt32
+	const top, bottom int = math.MaxInt32, math.MinInt32
 	s := "a\U0001F600b"
 	view := UTF16(s)
-	for _, n := range []int32{bottom, bottom + 1, -1, top - 1, top} {
+	for _, n := range []int{bottom, bottom + 1, -1, top - 1, top} {
 		before, after := s, ""
 		if n <= 0 {
 			before, after = "", s

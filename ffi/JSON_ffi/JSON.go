@@ -9,7 +9,7 @@ var X_null any = nil
 
 func FromBoolean(value bool) any { return value }
 
-func FromInt(value int32) any { return float64(value) }
+func FromInt(value int) any { return float64(value) }
 
 func FromString(value string) any { return value }
 
