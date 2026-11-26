@@ -17,7 +17,7 @@ func Write(text string) {
 
 // Exit implements Test.Spec.Runner.exit, `process.exit(code)`.
 func Exit(code int) {
-	os.Exit(int(code))
+	os.Exit(code)
 }
 
 // StartsWith implements Test.Spec.Assertions.String._startsWith: whether
