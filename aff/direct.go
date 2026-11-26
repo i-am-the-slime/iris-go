@@ -192,6 +192,8 @@ func DelayDirect(_ any, milliseconds float64) {
 // GeneralBracketDirect implements Effect.Aff.generalBracket, with the
 // conditions record passed as its fields: acquisition and every release are
 // uninterruptible, and exactly one release runs for the way the use ended.
+// As in JavaScript, an error the release throws is dropped: the bracket ends
+// the way its use did.
 func GeneralBracketDirect[A, B any](
 	acquire func() A,
 	completed func(B) func(A),
@@ -202,20 +204,27 @@ func GeneralBracketDirect[A, B any](
 	f := running
 	resource := uninterruptibleDirect(f, acquire)
 	if f.interrupt != nil && f.masked == 0 {
-		uninterruptibleDirect(f, func() struct{} { killed(*f.interrupt)(resource); return struct{}{} })
+		releaseDirect(f, func() { killed(*f.interrupt)(resource) })
 		panic(killSignal{})
 	}
 	value, failure, isKilled := protectDirect(f, func() B { return use(resource) })
 	switch {
 	case isKilled:
-		uninterruptibleDirect(f, func() struct{} { killed(*f.interrupt)(resource); return struct{}{} })
+		releaseDirect(f, func() { killed(*f.interrupt)(resource) })
 		panic(killSignal{})
 	case failure != nil:
-		uninterruptibleDirect(f, func() struct{} { failed(*failure)(resource); return struct{}{} })
+		releaseDirect(f, func() { failed(*failure)(resource) })
 		panic(*failure)
 	}
-	uninterruptibleDirect(f, func() struct{} { completed(value)(resource); return struct{}{} })
+	releaseDirect(f, func() { completed(value)(resource) })
 	return value
+}
+
+func releaseDirect(f *fiber, release func()) {
+	uninterruptibleDirect(f, func() struct{} {
+		protectDirect(f, func() struct{} { release(); return struct{}{} })
+		return struct{}{}
+	})
 }
 
 func uninterruptibleDirect[A any](f *fiber, action func() A) A {

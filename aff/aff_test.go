@@ -61,6 +61,38 @@ func TestBracketReleasesOnFailure(t *testing.T) {
 	expect(t, log, "failed use,handled")
 }
 
+func TestABracketEndsTheWayItsUseDidWhenTheReleaseFails(t *testing.T) {
+	log := &trace{}
+	failingRelease := func(stage string) func(int) {
+		return func(int) { panic(exception.Error{Message: stage + " release"}) }
+	}
+	launch(func() struct{} {
+		direct.CatchError(func() struct{} {
+			return GeneralBracketDirect(
+				func() int { return 1 },
+				func(struct{}) func(int) { return failingRelease("completed") },
+				func(exception.Error) func(int) { return failingRelease("failed") },
+				func(exception.Error) func(int) { return failingRelease("killed") },
+				func(int) struct{} { panic(exception.Error{Message: "use"}) },
+			)
+		}, func(e exception.Error) struct{} {
+			log.add("caught " + e.Message)
+			return struct{}{}
+		})
+		value := GeneralBracketDirect(
+			func() int { return 1 },
+			func(string) func(int) { return failingRelease("completed") },
+			func(exception.Error) func(int) { return failingRelease("failed") },
+			func(exception.Error) func(int) { return failingRelease("killed") },
+			func(int) string { return "used" },
+		)
+		log.add(value)
+		return struct{}{}
+	})
+	eventloop.Await()
+	expect(t, log, "caught use,used")
+}
+
 func TestBracketReleasesWhenItsFiberIsKilled(t *testing.T) {
 	log := &trace{}
 	victim := launch(func() struct{} {
