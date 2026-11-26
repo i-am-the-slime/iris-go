@@ -333,9 +333,10 @@ func IntModPositive(x int, divisor int) int {
 }
 
 // PureScript Int is Go's int, so its Bounded instance is int's range: 64 bits on
-// 64-bit targets, where JavaScript has 32.
-const TopInt = math.MaxInt
-const BottomInt = math.MinInt
+// 64-bit targets, where JavaScript has 32. They are variables, not constants, so that
+// `top + 1` wraps as every Int sum does rather than failing to compile.
+var TopInt = math.MaxInt
+var BottomInt = math.MinInt
 
 var TopNumber = math.Inf(1)
 var BottomNumber = math.Inf(-1)
