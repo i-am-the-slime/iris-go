@@ -443,40 +443,19 @@ func exactDigits(n float64) (string, int) {
 // PureScript FFI; here they wrap at int's width, as Go's own arithmetic does.
 
 // IntFloor, IntCeil, IntTrunc and IntRound are Data.Int's floor, ceil,
-// trunc and round: the Number rounded, then `unsafeClamp`ed into an Int,
-// where NaN and ±Infinity become 0 and anything else outside the Int range
-// its nearest bound. integral - integral is 0 for every finite integral
-// and NaN for NaN and both infinities. On arm64 each compiles to the
-// rounding, the conversion and a conditional select, without a branch.
-func IntFloor(n float64) int {
-	integral := math.Floor(n)
-	return integralToInt(integral, integral-integral == 0)
-}
+// trunc and round, converted the way Go converts: NaN becomes 0 and
+// anything outside the Int range, ±Infinity included, its nearest bound.
+// IntRound rounds half away from zero, as math.Round does, so a negative
+// half rounds down where JavaScript's Math.round rounds it up. On arm64
+// each compiles to the rounding and one conversion.
 
-func IntCeil(n float64) int {
-	integral := math.Ceil(n)
-	return integralToInt(integral, integral-integral == 0)
-}
+func IntFloor(n float64) int { return integralToInt(math.Floor(n)) }
 
-func IntTrunc(n float64) int {
-	integral := math.Trunc(n)
-	return integralToInt(integral, integral-integral == 0)
-}
+func IntCeil(n float64) int { return integralToInt(math.Ceil(n)) }
 
-// IntRound rounds as NumberRound does, ties toward +Infinity: up from the
-// floor when the fraction is at least a half. The fraction n - floor is
-// exact for every finite n but tiny negative ones, where it rounds up to 1
-// and so still rounds them to 0. It is NaN exactly when n is not finite,
-// which then fails both tests.
-func IntRound(n float64) int {
-	floor := math.Floor(n)
-	fraction := n - floor
-	rounded := integralToInt(floor, fraction == fraction)
-	if fraction >= 0.5 {
-		rounded++
-	}
-	return rounded
-}
+func IntTrunc(n float64) int { return integralToInt(math.Trunc(n)) }
+
+func IntRound(n float64) int { return integralToInt(math.Round(n)) }
 
 // IntQuot is `x / y | 0`: truncating division, 0 for a zero divisor.
 // `bottom / -1` wraps to bottom, as `| 0` makes it in JS.

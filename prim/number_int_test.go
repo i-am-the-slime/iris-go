@@ -6,16 +6,17 @@ import (
 	"testing"
 )
 
-// jsRounded holds Math.round, Math.floor, Math.ceil and Math.trunc of one
-// Number as bun prints them, already clamped into Go's int the way
-// Data.Int's unsafeClamp does.
-type jsRounded struct{ round, floor, ceil, trunc int }
+// rounded holds round, floor, ceil and trunc of one Number as Int. They
+// follow bun's Math.floor, Math.ceil and Math.trunc, and Math.round except
+// at negative halves, which round away from zero; values outside the Int
+// range, ±Infinity included, saturate at its bounds.
+type rounded struct{ round, floor, ceil, trunc int }
 
-func TestIntRoundingFollowsJavaScriptThenClamps(t *testing.T) {
-	cases := map[float64]jsRounded{
-		-2.5:                    {-2, -3, -2, -2},
-		-1.5:                    {-1, -2, -1, -1},
-		-0.5:                    {0, -1, 0, 0},
+func TestIntRoundingConvertsAsGoDoes(t *testing.T) {
+	cases := map[float64]rounded{
+		-2.5:                    {-3, -3, -2, -2},
+		-1.5:                    {-2, -2, -1, -1},
+		-0.5:                    {-1, -1, 0, 0},
 		0.5:                     {1, 0, 1, 0},
 		1.5:                     {2, 1, 2, 1},
 		2.5:                     {3, 2, 3, 2},
@@ -27,7 +28,7 @@ func TestIntRoundingFollowsJavaScriptThenClamps(t *testing.T) {
 		1.7:                     {2, 1, 2, 1},
 		-1.7:                    {-2, -2, -1, -1},
 		4503599627370495.5:      {4503599627370496, 4503599627370495, 4503599627370496, 4503599627370495},
-		-4503599627370495.5:     {-4503599627370495, -4503599627370496, -4503599627370495, -4503599627370495},
+		-4503599627370495.5:     {-4503599627370496, -4503599627370496, -4503599627370495, -4503599627370495},
 		4503599627370497:        {4503599627370497, 4503599627370497, 4503599627370497, 4503599627370497},
 		-4503599627370497:       {-4503599627370497, -4503599627370497, -4503599627370497, -4503599627370497},
 		9223372036854774784:     {9223372036854774784, 9223372036854774784, 9223372036854774784, 9223372036854774784},
@@ -36,29 +37,29 @@ func TestIntRoundingFollowsJavaScriptThenClamps(t *testing.T) {
 		-9223372036854777856:    {math.MinInt, math.MinInt, math.MinInt, math.MinInt},
 		1e300:                   {math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt},
 		-1e300:                  {math.MinInt, math.MinInt, math.MinInt, math.MinInt},
-		math.Inf(1):             {0, 0, 0, 0},
-		math.Inf(-1):            {0, 0, 0, 0},
+		math.Inf(1):             {math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt},
+		math.Inf(-1):            {math.MinInt, math.MinInt, math.MinInt, math.MinInt},
 	}
 	for n, want := range cases {
-		got := jsRounded{IntRound(n), IntFloor(n), IntCeil(n), IntTrunc(n)}
+		got := rounded{IntRound(n), IntFloor(n), IntCeil(n), IntTrunc(n)}
 		if got != want {
 			t.Errorf("round, floor, ceil, trunc of %v = %v, want %v", n, got, want)
 		}
 	}
 	nan := math.NaN()
-	if got := (jsRounded{IntRound(nan), IntFloor(nan), IntCeil(nan), IntTrunc(nan)}); got != (jsRounded{}) {
+	if got := (rounded{IntRound(nan), IntFloor(nan), IntCeil(nan), IntTrunc(nan)}); got != (rounded{}) {
 		t.Errorf("round, floor, ceil, trunc of NaN = %v, want zeros", got)
 	}
 }
 
-func TestIntRoundIsFloorOfTheExactSumWithAHalf(t *testing.T) {
+func TestIntRoundRoundsTheExactHalfAwayFromZero(t *testing.T) {
 	state := uint64(7)
 	for index := range 2_000_000 {
 		state ^= state << 13
 		state ^= state >> 7
 		state ^= state << 17
 		n := sampleNumber(index, state)
-		if got, want := IntRound(n), exactRoundHalfUp(n); got != want {
+		if got, want := IntRound(n), exactRoundHalfAway(n); got != want {
 			t.Fatalf("IntRound(%v) = %d, want %d", n, got, want)
 		}
 	}
@@ -79,15 +80,23 @@ func sampleNumber(index int, bits uint64) float64 {
 	}
 }
 
-func exactRoundHalfUp(n float64) int {
-	if math.IsNaN(n) || math.IsInf(n, 0) {
+func exactRoundHalfAway(n float64) int {
+	switch {
+	case math.IsNaN(n):
 		return 0
+	case math.IsInf(n, 1):
+		return math.MaxInt
+	case math.IsInf(n, -1):
+		return math.MinInt
 	}
-	sum := new(big.Float).SetPrec(2000).SetFloat64(n)
+	sum := new(big.Float).SetPrec(2000).SetFloat64(math.Abs(n))
 	sum.Add(sum, big.NewFloat(0.5))
 	floor, accuracy := sum.Int(nil)
 	if accuracy == big.Above {
 		floor.Sub(floor, big.NewInt(1))
+	}
+	if n < 0 {
+		floor.Neg(floor)
 	}
 	switch {
 	case floor.Cmp(big.NewInt(math.MaxInt)) >= 0:
