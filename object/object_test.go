@@ -236,6 +236,64 @@ func BenchmarkInsertOwned(b *testing.B) {
 	}
 }
 
+func TestPokeAbsentAppendsWhatSlotDidNotFind(t *testing.T) {
+	m := NewWithCapacity[string](3)
+	for _, k := range []string{"b", "7", "a", "b", "7"} {
+		if slot, found := Slot(m, k); found {
+			m.Vals[slot] += "+"
+		} else {
+			PokeAbsent(k, k, m)
+		}
+	}
+	if got, want := entries(m), []string{"7=7+", "b=b+", "a=a"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("entries = %v, want %v", got, want)
+	}
+}
+
+func TestNewWithCapacityFillsWithoutGrowing(t *testing.T) {
+	keys := make([]string, 1000)
+	for i := range keys {
+		keys[i] = "key" + strconv.Itoa(i)
+	}
+	var m *struct {
+		Index map[string]int
+		Ints  int
+		Keys  []string
+		Vals  []int
+	}
+	allocations := testing.AllocsPerRun(10, func() {
+		m = NewWithCapacity[int](len(keys))
+		for i, k := range keys {
+			Poke(k, i, m)
+		}
+	})
+	if allocations > 12 {
+		t.Fatalf("%v allocations to fill a table made for %d keys", allocations, len(keys))
+	}
+	if value, _ := Lookup("key999", m); value != 999 {
+		t.Fatalf("key999 = %d", value)
+	}
+}
+
+func TestCopiesOfIndexedTablesKeepTheirOwnIndex(t *testing.T) {
+	m := New[int]()
+	for i := range 20 {
+		Poke(strconv.Itoa(100+i), i, m)
+	}
+	copied := CopyST(m)
+	Poke("new", 20, copied)
+	Delete("100", copied)
+	if _, found := Lookup("new", m); found {
+		t.Fatal("the source holds the copy's new key")
+	}
+	if value, _ := Lookup("119", copied); value != 19 {
+		t.Fatalf("copied 119 = %d", value)
+	}
+	if value, _ := Lookup("100", m); value != 0 || Size(m) != 20 {
+		t.Fatalf("source 100 = %d, size %d", value, Size(m))
+	}
+}
+
 func TestLendingTheEmptySlotOfAnotherConstructorKeepsItEmpty(t *testing.T) {
 	var absent *struct {
 		Index map[string]int

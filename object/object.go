@@ -20,6 +20,7 @@ package object
 import (
 	"cmp"
 	"iter"
+	"maps"
 	"math"
 	"slices"
 )
@@ -289,6 +290,17 @@ func New[A any]() *struct {
 	return out(fresh[A](0))
 }
 
+// NewWithCapacity is New with room for capacity entries, so that filling it
+// with that many keys never grows its keys, values or index.
+func NewWithCapacity[A any](capacity int) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	return out(fresh[A](capacity))
+}
+
 // PeekImpl implements Foreign.Object.ST.peekImpl.
 func PeekImpl[A any](k string, m *struct {
 	Index map[string]int
@@ -312,6 +324,23 @@ func Poke[A any](k string, v A, m *struct {
 	Vals  []A
 } {
 	of(m).set(k, v)
+	return m
+}
+
+// PokeAbsent is Poke of a key that m does not hold, which Slot has just
+// told: it appends the entry without looking k up again.
+func PokeAbsent[A any](k string, v A, m *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+}) *struct {
+	Index map[string]int
+	Ints  int
+	Keys  []string
+	Vals  []A
+} {
+	of(m).add(k, v)
 	return m
 }
 
@@ -502,18 +531,15 @@ func fresh[A any](capacity int) *table[A] {
 	return t
 }
 
+// clone copies t's index whole, which is several times faster than
+// inserting its keys one by one into a new map.
 func (t *table[A]) clone() *table[A] {
-	c := fresh[A](len(t.Keys))
-	if t.Index != nil && c.Index == nil {
-		c.Index = make(map[string]int, len(t.Keys))
+	return &table[A]{
+		Index: maps.Clone(t.Index),
+		Ints:  t.Ints &^ lent,
+		Keys:  slices.Clone(t.Keys),
+		Vals:  slices.Clone(t.Vals),
 	}
-	for k, i := range t.Index {
-		c.Index[k] = i
-	}
-	c.Ints = t.Ints &^ lent
-	c.Keys = append(c.Keys, t.Keys...)
-	c.Vals = append(c.Vals, t.Vals...)
-	return c
 }
 
 // lent is the bit of Ints that marks a table Lend made, whose entries still
@@ -544,6 +570,11 @@ func (t *table[A]) set(k string, v A) {
 		t.Vals[i] = v
 		return
 	}
+	t.add(k, v)
+}
+
+// add appends an entry for a key that t does not hold.
+func (t *table[A]) add(k string, v A) {
 	if isArrayIndex(k) {
 		t.Ints += oneArrayIndex
 	}
