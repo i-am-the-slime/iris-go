@@ -16,7 +16,9 @@ import (
 // after returns for the viewed string: the view reads the string as those
 // operations range over it, each invalid byte one U+FFFD.
 type CodePointsView struct {
-	text  string
+	text string
+	// The text when every code point is one byte of it, and "" otherwise.
+	ascii string
 	form  pointsForm
 	valid bool
 	// For wide text, the code points, and the byte offset at which each
@@ -38,11 +40,11 @@ const (
 
 // CodePoints views text by its code points.
 func CodePoints(text string) CodePointsView {
+	if prim.IsASCII(text) {
+		return CodePointsView{text: text, ascii: text, form: asciiPoints, valid: true}
+	}
 	if len(text) > math.MaxInt32 || prim.HasSurrogates(text) {
 		return CodePointsView{text: text, form: walkedPoints}
-	}
-	if prim.IsASCII(text) {
-		return CodePointsView{text: text, form: asciiPoints, valid: true}
 	}
 	count := utf8.RuneCountInString(text)
 	valid := utf8.ValidString(text)
@@ -69,6 +71,13 @@ func (view *CodePointsView) Length() int {
 
 // CodePointAt is CodePointAt.
 func (view *CodePointsView) CodePointAt(index int) (int, bool) {
+	if uint(index) < uint(len(view.ascii)) {
+		return int(view.ascii[index]), true
+	}
+	return view.codePointAt(index)
+}
+
+func (view *CodePointsView) codePointAt(index int) (int, bool) {
 	switch {
 	case view.form == walkedPoints:
 		return CodePointAt(nil, nil, index, view.text)

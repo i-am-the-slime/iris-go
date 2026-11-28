@@ -93,7 +93,25 @@ func codeUnitAt(s string, i int) (rune, bool) {
 
 // codeUnitLength is the number of UTF-16 code units in s.
 func codeUnitLength(s string) int {
-	length, _ := codeUnitLengthUpTo(s, len(s))
+	n := len(s)
+	switch {
+	case n > 16:
+	case n >= 8:
+		if allAscii(eightBytes(s, 0) | eightBytes(s, n-8)) {
+			return n
+		}
+	case n >= 4:
+		if allAscii(uint64(fourBytes(s, 0) | fourBytes(s, n-4))) {
+			return n
+		}
+	case n > 0:
+		if s[0]|s[n/2]|s[n-1] < utf8.RuneSelf {
+			return n
+		}
+	default:
+		return 0
+	}
+	length, _ := codeUnitLengthUpTo(s, n)
 	return length
 }
 

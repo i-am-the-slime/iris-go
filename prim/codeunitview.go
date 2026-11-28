@@ -47,10 +47,10 @@ const (
 func UTF16(text string) CodeUnitsView {
 	length, valid := codeUnitLengthUpTo(text, len(text))
 	switch {
+	case valid && length == len(text):
+		return CodeUnitsView{text: text, asciiLength: uint(length), form: asciiForm, length: length}
 	case !valid || len(text) > math.MaxInt32 || HasSurrogates(text):
-		return CodeUnitsView{text: text, form: walkedForm, length: int(length)}
-	case length == len(text):
-		return CodeUnitsView{text: text, asciiLength: uint(length), form: asciiForm, length: int(length)}
+		return CodeUnitsView{text: text, form: walkedForm, length: length}
 	}
 	units, starts := wideCodeUnits(text, length)
 	return CodeUnitsView{text: text, form: wideForm, length: int(length), units: units, starts: starts}
