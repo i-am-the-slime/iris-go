@@ -321,15 +321,19 @@ func IntMod(x int, y int) int {
 }
 
 // IntDivPositive and IntModPositive are IntDiv and IntMod for a divisor the
-// compiler knows to be a positive constant: Go divides by it with a multiply
-// and the Euclidean correction is one shift and add.
+// compiler knows to be a positive constant: Go divides by it with a multiply,
+// and the Euclidean correction of the remainder is a conditional add that Go
+// compiles to a select.
 func IntDivPositive(x int, divisor int) int {
 	return x/divisor + (x%divisor)>>signShift
 }
 
 func IntModPositive(x int, divisor int) int {
 	remainder := x % divisor
-	return remainder + remainder>>signShift&divisor
+	if remainder < 0 {
+		remainder += divisor
+	}
+	return remainder
 }
 
 // PureScript Int is Go's int, so its Bounded instance is int's range: 64 bits on
